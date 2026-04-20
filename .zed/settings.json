@@ -1,0 +1,12 @@
+{
+  "context_servers": {
+    "postgres-alpu": {
+      "command": "pnpm",
+      "args": [
+        "dlx",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres@localhost:5432/alpu",
+      ],
+    },
+  },
+}
