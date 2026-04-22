@@ -1,35 +1,20 @@
 using DataAccess.EntityFramework;
-using Domain.Interfaces.Public.Repositories;
+using Domain.Classes.Abstracts;
 using Domain.Models;
 
 namespace DataAccess.Repositories;
 
-public class BroadcasterRepository(DatabaseContext context) : IBroadcasterRepository
+public class BroadcasterRepository(DatabaseContext context) : RepositoryBase<Broadcaster>(context), IBroadcasterRepository
 {
-    public Task<User> Create(User entity)
-    {
-        throw new NotImplementedException();
-    }
+    public Broadcaster CreateBroadcaster(Broadcaster entity) => Create(entity);
 
-    public Task<User> Delete(User entity)
-    {
-        throw new NotImplementedException();
-    }
+    public IQueryable<Broadcaster> GetAllBroadcasters() => GetAll();
 
-    public IQueryable<User> GetAll()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<User?> GetByIdAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<Broadcaster?> GetBroadcasterByIdAsync(int id) => await Get(id);
 
     public async Task<BroadcasterCategory?> GetCategoryByIdAsync(int id) => await context.BroadcasterCategories.FindAsync(id);
 
-    public Task<User> Update(User entity)
-    {
-        throw new NotImplementedException();
-    }
+    public Broadcaster UpdateBroadcaster(Broadcaster entity) => Update(entity);
+
+    public Broadcaster DeleteBroadcaster(Broadcaster entity) => Delete(entity);
 }

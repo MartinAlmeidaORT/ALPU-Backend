@@ -46,9 +46,27 @@ public partial class DatabaseContext : DbContext
 
     public virtual DbSet<Service> Services { get; set; }
 
+    public virtual DbSet<ServiceDuration> ServiceDurations { get; set; }
+
+    public virtual DbSet<ServiceNarrative> ServiceNarratives { get; set; }
+
+    public virtual DbSet<ServiceSpecial> ServiceSpecials { get; set; }
+
+    public virtual DbSet<ServiceIVR> ServiceIVRs { get; set; }
+
     public virtual DbSet<ServicePrice> ServicePrices { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<Broadcaster> Broadcasters { get; set; }
+
+    public virtual DbSet<Client> Clients { get; set; }
+
+    public virtual DbSet<Administrator> Admins { get; set; }
+
+    public virtual DbSet<Supervisor> Supervisors { get; set; }
+
+    public virtual DbSet<Accountant> Accountants { get; set; }
 
     public virtual DbSet<VolumeDiscount> VolumeDiscounts { get; set; }
 

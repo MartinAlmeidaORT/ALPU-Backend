@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Models;
 
 [PrimaryKey("ServiceId", "MinWord")]
 [Table("range_ivr")]
-public partial class RangeIVR
+public partial class RangeIVR : Entity
 {
     [Key]
     [Column("service_id")]

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,7 @@ namespace Domain.Models;
 [Table("user")]
 [Index("Email", Name = "user_email_key", IsUnique = true)]
 [Index("RUT", Name = "user_rut_key", IsUnique = true)]
-public partial class User
+public partial class User : Entity
 {
     [Key]
     [Column("user_id")]

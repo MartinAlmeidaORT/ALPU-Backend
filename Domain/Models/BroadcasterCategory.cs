@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 
 namespace Domain.Models;
 
 [Table("broadcaster_category")]
-public partial class BroadcasterCategory
+public partial class BroadcasterCategory : Entity
 {
     [Key]
     [Column("broadcaster_category_id")]

@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 
 namespace Domain.Models;
 
 [Table("discount")]
-public partial class Discount
+public partial class Discount : Entity
 {
     [Key]
     [Column("discount_id")]

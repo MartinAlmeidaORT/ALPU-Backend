@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 
 namespace Domain.Models;
 
 [Table("duration")]
-public partial class Duration
+public partial class Duration : Entity
 {
     [Key]
     [Column("duration_id")]

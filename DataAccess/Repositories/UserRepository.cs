@@ -1,30 +1,15 @@
 using DataAccess.EntityFramework;
+using Domain.Classes.Abstracts;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Models;
 
 namespace DataAccess.Repositories;
 
-public class UserRepository(DatabaseContext context) : IUserRepository
+public class UserRepository(DatabaseContext context) : RepositoryBase<User>(context), IUserRepository
 {
-    public IQueryable<User> GetAll() => context.Users;
+    public IQueryable<User> GetAllUsers() => GetAll();
 
-    public async Task<User?> GetByIdAsync(int id) => await context.Users.FindAsync(id);
+    public async Task<User?> GetUserByIdAsync(int id) => await Get(id);
 
-    public async Task<User> Create(User entity)
-    {
-        await context.Users.AddAsync(entity);
-        return entity;
-    }
-
-    public async Task<User> Update(User entity)
-    {
-        context.Users.Update(entity);
-        return entity;
-    }
-
-    public async Task<User> Delete(User entity)
-    {
-        context.Users.Remove(entity);
-        return entity;
-    }
+    public User DeleteUser(User entity) => Delete(entity);
 }

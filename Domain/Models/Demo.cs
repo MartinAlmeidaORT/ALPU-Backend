@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Models;
 
 [PrimaryKey("BroadcasterId", "FileName")]
 [Table("demo")]
-public partial class Demo
+public partial class Demo : Entity
 {
     [Key]
     [Column("broadcaster_id")]

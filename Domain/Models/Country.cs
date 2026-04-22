@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 
 namespace Domain.Models;
 
 [Table("country")]
-public partial class Country
+public partial class Country : Entity
 {
     [Key]
     [Column("country_code")]

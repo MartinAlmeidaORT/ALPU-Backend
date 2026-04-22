@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 
 namespace Domain.Models;
 
 [Table("notification")]
-public partial class Notification
+public partial class Notification : Entity
 {
     [Key]
     [Column("notification_id")]

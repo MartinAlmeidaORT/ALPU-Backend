@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 using Domain.Enums;
 
 namespace Domain.Models;
 
 [Table("membership")]
-public partial class Membership
+public partial class Membership : Entity
 {
     [Key]
     [Column("membership_id")]

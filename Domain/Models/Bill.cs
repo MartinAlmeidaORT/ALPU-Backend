@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 using Domain.Enums;
 
 namespace Domain.Models;
 
 [Table("bill")]
-public partial class Bill
+public partial class Bill : Entity
 {
     [Key]
     [Column("bill_id")]

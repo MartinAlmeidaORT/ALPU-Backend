@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Classes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Models;
 
 [PrimaryKey("ServiceId", "MinQuantity")]
 [Table("volume_discount")]
-public partial class VolumeDiscount
+public partial class VolumeDiscount : Entity
 {
     [Key]
     [Column("service_id")]
