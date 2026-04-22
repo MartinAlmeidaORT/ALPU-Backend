@@ -1,5 +1,6 @@
 namespace Application.Mappers;
 
+using Application.DTOs.Auth;
 using Application.DTOs.Users;
 using Domain.Models;
 using Riok.Mapperly.Abstractions;
@@ -30,6 +31,18 @@ public static partial class BroadcasterMapper
         Address = new()
         {
             Country = country,
+            State = dto.State,
+            City = dto.City,
+            Street = dto.Street,
+        }
+    };
+
+    public static Broadcaster ToEntity(RegisterBroadcasterGoogleDTO dto) => new()
+    {
+        RUT = dto.RUT,
+        Address = new()
+        {
+            CountryCode = dto.CountryCode,
             State = dto.State,
             City = dto.City,
             Street = dto.Street,

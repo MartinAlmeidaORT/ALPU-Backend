@@ -7,6 +7,7 @@ using Application.DTOs.Users;
 using Application.Interfaces.Public.Services;
 using Application.Services;
 using GraphQL.Schema;
+using Application.DTOs.Auth;
 
 namespace GraphQL.Classes;
 
@@ -29,6 +30,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthService, AuthService>();
         return services;
     }
 
@@ -38,6 +40,10 @@ public static class ServiceCollectionExtensions
         .AddType<ResultUserDTO>()
         .AddType<ResultBroadcasterDTO>()
         .AddType<ResultClientDTO>()
+        // .AddInputObjectType<GoogleAuthInput>()
+        // .AddInputObjectType<RegisterClientGoogleDTO>()
+        // .AddInputObjectType<RegisterBroadcasterGoogleDTO>()
+        .AddType<AuthPayload>()
         .AddInterfaceType<IResultUserDTO>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()

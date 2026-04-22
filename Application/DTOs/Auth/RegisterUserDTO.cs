@@ -1,6 +1,6 @@
-namespace Application.DTOs.Users;
+namespace Application.DTOs.Auth;
 
-public record CreateUserDTO
+public abstract record CreateUserDTO
 {
     public required string Email { get; init; }
     public required string Password { get; init; }
@@ -18,7 +18,4 @@ public record CreateClientDTO : CreateUserDTO
     public required string AgencyName { get; init; }
 }
 
-public record CreateBroadcasterDTO : CreateUserDTO
-{
-
-}
+public record CreateBroadcasterDTO : CreateUserDTO;

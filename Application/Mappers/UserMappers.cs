@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using Application.DTOs.Address;
 using Application.DTOs.Country;
 using Domain.Enums;
+using Application.DTOs.Auth;
 
 namespace Application.Mappers;
 

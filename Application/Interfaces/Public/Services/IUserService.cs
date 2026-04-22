@@ -8,10 +8,6 @@ public interface IUserService
 
     Task<IResultUserDTO?> GetUserByIdAsync(int id);
 
-    Task<ResultClientDTO> CreateClientAsync(CreateClientDTO dto);
-
-    Task<ResultBroadcasterDTO> CreateBroadcasterAsync(CreateBroadcasterDTO dto);
-
     Task<IResultUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto);
 
     Task<IResultUserDTO> DeleteUserAsync(int id);

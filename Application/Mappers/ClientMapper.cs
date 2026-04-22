@@ -1,3 +1,4 @@
+using Application.DTOs.Auth;
 using Application.DTOs.Users;
 using Domain.Models;
 using Riok.Mapperly.Abstractions;

@@ -9,11 +9,14 @@ namespace Domain.Models;
 [Table("user")]
 [Index("Email", Name = "user_email_key", IsUnique = true)]
 [Index("RUT", Name = "user_rut_key", IsUnique = true)]
+[Index("GoogleId", Name = "user_google_id_key", IsUnique = true)]
 public partial class User : Entity
 {
     [Key]
     [Column("user_id")]
     public int UserId { get; set; }
+
+    public string GoogleId { get; set; } = null!;
 
     [Column("state", TypeName = "user_state_enum")]
     [EnumDataType(typeof(UserState))]
