@@ -11,6 +11,9 @@ public class Mutation
     public async Task<AuthPayload> RegisterClient([Service] IAuthService authService, CreateClientDTO input)
         => await authService.RegisterClientAsync(input);
 
+    public async Task<AuthPayload> LoginAsync([Service] IAuthService authService, LoginUserInput input)
+        => await authService.LoginAsync(input);
+
     public async Task<AuthPayload> LoginGoogleAuthAsync(
         GoogleAuthInput input,
         [Service] IAuthService authService)

@@ -39,7 +39,8 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
 
         Client client = ClientMapper.ToEntity(input);
 
-        Agency agency = unitOfWork.Clients.CreateAgency(new(input.AgencyName));
+        Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
+        agency ??= unitOfWork.Clients.CreateAgency(new(input.AgencyName));
 
         client.Agency = agency;
         client.Address.Country = country;
@@ -75,7 +76,10 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
         var user = await unitOfWork.Users.GetUserByEmailAsync(input.Email);
 
         if (user is null)
-            return AuthPayload.Fail("No existe una cuenta con este email. Por favor registrese.");
+            return AuthPayload.Fail("Email o contraseña incorrectos.");
+
+        if (!BCrypt.Net.BCrypt.Verify(input.Password, user.Password))
+            throw new UnauthorizedAccessException("Email o contraseña incorrectos.");
 
         ResultUserDTO userPayload = user switch
         {
@@ -126,17 +130,25 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
             _ => throw new ArgumentException("Tipo de registro inválido.")
         };
 
+        Country country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
+        newUser.Address.Country = country;
+        newUser.Address.CountryCode = country.CountryCode;
+
         // Campos comunes — vienen del token, no del input
         newUser.Email = payload.Email.Trim().ToLower();
         newUser.GoogleId = payload.Subject;
 
         switch (newUser)
         {
-            case Client client:
-                unitOfWork.Clients.CreateClient(client);
+            case Client newClient:
+                RegisterClientGoogleDTO clientInput = (RegisterClientGoogleDTO)input;
+                Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(clientInput.AgencyName);
+                agency ??= unitOfWork.Clients.CreateAgency(new(clientInput.AgencyName));
+                newClient.Agency = agency;
+                unitOfWork.Clients.CreateClient(newClient);
                 break;
-            case Broadcaster broadcaster:
-                unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
+            case Broadcaster newBroadcaster:
+                unitOfWork.Broadcasters.CreateBroadcaster(newBroadcaster);
                 break;
             default:
                 return AuthPayload.Fail("Tipo de registro inválido.");
