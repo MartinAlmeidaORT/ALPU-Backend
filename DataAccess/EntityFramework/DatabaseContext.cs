@@ -318,6 +318,8 @@ public partial class DatabaseContext : DbContext
         {
             entity.HasKey(e => e.UserId).HasName("user_pkey");
 
+            entity.Property(e => e.GoogleId).HasMaxLength(25).IsRequired(false);
+
             entity.Property(e => e.UserId).ValueGeneratedOnAdd();
 
             entity.HasOne(d => d.Address).WithOne()

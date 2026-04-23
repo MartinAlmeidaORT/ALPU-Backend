@@ -6,6 +6,7 @@ namespace Application.DTOs.Users;
 public interface IResultUserDTO
 {
     int UserId { get; }
+    string? GoogleId { get; }
     string Email { get; }
     string FirstName { get; }
     string LastName { get; }
@@ -16,6 +17,7 @@ public interface IResultUserDTO
 public record ResultUserDTO : IResultUserDTO
 {
     public required int UserId { get; init; }
+    public string? GoogleId { get; init; }
     public required string Email { get; init; }
     public required string FirstName { get; init; }
     public required string LastName { get; init; }

@@ -16,6 +16,7 @@ public partial class User : Entity
     [Column("user_id")]
     public int UserId { get; set; }
 
+    [Column("google_id")]
     public string GoogleId { get; set; } = null!;
 
     [Column("state", TypeName = "user_state_enum")]
