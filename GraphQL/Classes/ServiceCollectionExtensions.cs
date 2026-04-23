@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICountryService, CountryService>();
         return services;
     }
 
