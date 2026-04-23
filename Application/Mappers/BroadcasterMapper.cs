@@ -39,6 +39,8 @@ public static partial class BroadcasterMapper
 
     public static Broadcaster ToEntity(RegisterBroadcasterGoogleDTO dto) => new()
     {
+        FirstName = dto.FirstName,
+        LastName = dto.LastName,
         RUT = dto.RUT,
         Address = new()
         {

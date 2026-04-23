@@ -30,7 +30,7 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
         unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
         await unitOfWork.SaveChangesAsync();
 
-        return new AuthPayload("", BroadcasterMapper.ToDTO(broadcaster), null);
+        return new AuthPayload(GenerateJWT(broadcaster), BroadcasterMapper.ToDTO(broadcaster), null);
     }
 
     public async Task<AuthPayload> RegisterClientAsync(CreateClientDTO input)
@@ -47,7 +47,7 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
         unitOfWork.Clients.CreateClient(client);
         await unitOfWork.SaveChangesAsync();
 
-        return new AuthPayload("", ClientMapper.ToDTO(client), null);
+        return new AuthPayload(GenerateJWT(client), ClientMapper.ToDTO(client), null);
     }
 
     public async Task<AuthPayload> GoogleAuthAsync(GoogleAuthInput input)
@@ -70,9 +70,21 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
         };
     }
 
-    public Task<AuthPayload> LoginAsync(LoginUserInput input)
+    public async Task<AuthPayload> LoginAsync(LoginUserInput input)
     {
-        throw new NotImplementedException();
+        var user = await unitOfWork.Users.GetUserByEmailAsync(input.Email);
+
+        if (user is null)
+            return AuthPayload.Fail("No existe una cuenta con este email. Por favor registrese.");
+
+        ResultUserDTO userPayload = user switch
+        {
+            Broadcaster broadcaster => BroadcasterMapper.ToDTO(broadcaster),
+            Client client => ClientMapper.ToDTO(client),
+            _ => throw new ArgumentException("Tipo de usuario inválido.")
+        };
+
+        return new AuthPayload(GenerateJWT(user), userPayload, null);
     }
 
     private async Task<AuthPayload> HandleGoogleLoginAsync(User? user,
@@ -88,9 +100,6 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
             user.GoogleId = payload.Subject;
             await unitOfWork.SaveChangesAsync();
         }
-
-        // if (user.UserState == Domain.Enums.UserState.Pending)
-        //     return AuthPayload.Fail("Su cuenta está pendiente de aprobación.");
 
         ResultUserDTO userPayload = user switch
         {
@@ -112,39 +121,30 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
         // Campos que vienen del token de Google
         User newUser = input switch
         {
-            RegisterClientGoogleDTO i => new Client
-            {
-                Agency = new Agency(i.AgencyName)
-            },
+            RegisterClientGoogleDTO i => ClientMapper.ToEntity(i),
             RegisterBroadcasterGoogleDTO i => BroadcasterMapper.ToEntity(i),
             _ => throw new ArgumentException("Tipo de registro inválido.")
         };
 
         // Campos comunes — vienen del token, no del input
         newUser.Email = payload.Email.Trim().ToLower();
-        newUser.FirstName = payload.GivenName ?? string.Empty;
-        newUser.LastName = payload.FamilyName ?? string.Empty;
         newUser.GoogleId = payload.Subject;
-        newUser.UserState = Domain.Enums.UserState.Pending;
 
-        // Campos del dominio — vienen del input
-        // newUser.RUT = input.RUT;
-        // newUser.Address.CountryCode = input.CountryCode;
-        // newUser.Address.State = input.State;
-        // newUser.Address.City = input.City;
-        // newUser.Address.Street = input.Street;
-
-        // TODO
-        // newUser = input switch
-        // {
-        //     RegisterClientGoogleDTO newClient => unitOfWork.Clients.CreateClient(newClient),
-        //     RegisterBroadcasterGoogleDTO newBroadcaster => unitOfWork.Broadcasters.CreateBroadcaster(newBroadcaster),
-        //     _ => throw new ArgumentException("Tipo de registro inválido.")
-        // };
+        switch (newUser)
+        {
+            case Client client:
+                unitOfWork.Clients.CreateClient(client);
+                break;
+            case Broadcaster broadcaster:
+                unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
+                break;
+            default:
+                return AuthPayload.Fail("Tipo de registro inválido.");
+        }
 
         await unitOfWork.SaveChangesAsync();
 
-        return new AuthPayload(null, UserMapper.ToDTO(newUser), null);
+        return new AuthPayload(GenerateJWT(newUser), UserMapper.ToDTO(newUser), null);
     }
 
     private async Task<GoogleJsonWebSignature.Payload?> ValidateGoogleTokenAsync(string token)
@@ -165,7 +165,7 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
 
     private string GenerateJWT(User user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Secret"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Secret"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]

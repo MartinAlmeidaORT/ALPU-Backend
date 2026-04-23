@@ -7,6 +7,8 @@ public record GoogleAuthInput
 
 public abstract record RegisterUserGoogleDTO : GoogleAuthInput
 {
+    public required string FirstName { get; init; }
+    public required string LastName { get; init; }
     public required string RUT { get; init; }
     public required string CountryCode { get; init; }
     public required string State { get; init; }

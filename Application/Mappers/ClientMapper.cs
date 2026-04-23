@@ -34,4 +34,19 @@ public static partial class ClientMapper
             Street = dto.Street
         }
     };
+
+    public static Client ToEntity(RegisterClientGoogleDTO dto) => new()
+    {
+        FirstName = dto.FirstName,
+        LastName = dto.LastName,
+        RUT = dto.RUT,
+        Address = new()
+        {
+            CountryCode = dto.CountryCode,
+            State = dto.State,
+            City = dto.City,
+            Street = dto.Street,
+        },
+        Agency = new(dto.AgencyName)
+    };
 }
