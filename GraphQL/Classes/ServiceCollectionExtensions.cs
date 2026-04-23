@@ -54,4 +54,22 @@ public static class ServiceCollectionExtensions
         .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
         return services;
     }
+
+    public static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration configuration)
+    {
+        string[] allowedUrls = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+        ?? throw new ArgumentNullException("Cors allowed origins not found.");
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend", policy =>
+            {
+                policy.WithOrigins(allowedUrls)
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+        });
+
+        return services;
+    }
 }
