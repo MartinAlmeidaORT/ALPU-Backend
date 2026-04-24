@@ -12,5 +12,5 @@ public interface IUserRepository
 
     public Task<User?> GetUserByEmailAsync(string email);
 
-    public Task<User?> GetUserByGoogleIdOrEmailAsync(string googleId, string email);
+    public Task<User?> GetUserByGoogleIdAsync(string googleId);
 }

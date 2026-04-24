@@ -7,6 +7,10 @@ using Application.Interfaces.Public.Services;
 using Application.Services;
 using GraphQL.Schema;
 using GraphQL.Types.Objects;
+using Domain.Interfaces.Private;
+using DataAccess.Security;
+using GraphQL.Types.Inputs;
+using DataAccess.ExternalServices;
 
 namespace GraphQL.Common;
 
@@ -31,28 +35,25 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICountryService, CountryService>();
+        services.AddScoped<IHasher, Hasher>();
+        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         return services;
     }
 
     public static IServiceCollection AddServiceGraphQL(this IServiceCollection services)
     {
         services.AddGraphQLServer()
-        // .AddType<ResultUserDTO>()
-        // .AddType<ResultBroadcasterDTO>()
-        // .AddType<ResultClientDTO>()
-        // .AddInputObjectType<GoogleAuthInput>()
-        // .AddInputObjectType<RegisterClientGoogleDTO>()
-        // .AddInputObjectType<RegisterBroadcasterGoogleDTO>()
-        // .AddInterfaceType<IResultUserDTO>()
-        //
         .AddType<AuthPayloadType>()
+        .AddType<GoogleAuthType>()
         .AddType<UserInterfaceType>()
         .AddType<BroadcasterType>()
         .AddType<ClientType>()
         .AddType<AddressType>()
         .AddType<CountryType>()
         .AddType<AgencyType>()
-        //
+        .AddType<GoogleAuthInputType>()
+        .AddType<CompleteGoogleBroadcasterSignUpInputType>()
+        .AddType<CompleteGoogleClientSignUpInputType>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddProjections()             // Optimizes SQL queries
@@ -77,6 +78,16 @@ public static class ServiceCollectionExtensions
             });
         });
 
+        return services;
+    }
+
+    public static IServiceCollection AddExternalServices(this IServiceCollection services)
+    {
+        services.AddHttpClient<IGoogleAuthService, GoogleAuthService>(client =>
+        {
+            client.BaseAddress = new Uri("https://oauth2.googleapis.com/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
         return services;
     }
 }

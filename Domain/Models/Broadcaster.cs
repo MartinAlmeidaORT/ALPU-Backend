@@ -1,10 +1,27 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Common.Inputs.Auth;
 
 namespace Domain.Models;
 
 [Table("broadcaster")]
 public partial class Broadcaster : User
 {
+    public Broadcaster() { }
+
+    public Broadcaster(RegisterBroadcasterInput input, Country country, BroadcasterCategory category)
+        : base(input, country)
+    {
+        CategoryId = category.BroadcasterCategoryId;
+        Category = category;
+    }
+
+    public Broadcaster(CompleteGoogleSignUpBroadcasterInput input, Country country, BroadcasterCategory category)
+        : base(input, country)
+    {
+        CategoryId = category.BroadcasterCategoryId;
+        Category = category;
+    }
+
     [Column("category_id")]
     public int CategoryId { get; set; }
 

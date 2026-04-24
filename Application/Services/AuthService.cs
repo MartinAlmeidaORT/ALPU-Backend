@@ -1,33 +1,31 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Application.DTOs.Auth;
 using Application.Interfaces.Public.Services;
-using Application.Mappers;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Common;
 using Domain.Models;
-using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Domain.Interfaces.Private;
+using Domain.Common.Inputs.Auth;
+using Domain.Common.Payloads;
 
 namespace Application.Services;
 
-public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) : IAuthService
+public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration configuration, IGoogleAuthService googleAuthService) : IAuthService
 {
     private readonly IConfiguration _config = configuration;
 
-    public async Task<AuthPayload> RegisterBroadcasterAsync(CreateBroadcasterDTO input)
+    public async Task<AuthPayload> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
     {
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
         BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1) ?? throw new KeyNotFoundException($"Category with id {1} not found.");
 
-        Broadcaster broadcaster = BroadcasterMapper.ToEntity(input, country);
-
-        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(input.Password);
-        broadcaster.Password = hashedPassword;
-        broadcaster.Address.Country = country;
-        broadcaster.Category = category;
+        Broadcaster broadcaster = new(input, country, category)
+        {
+            Password = hasher.Hash(input.Password)
+        };
 
         unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
         await unitOfWork.SaveChangesAsync();
@@ -35,19 +33,16 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
         return new AuthPayload(GenerateJWT(broadcaster), broadcaster);
     }
 
-    public async Task<AuthPayload> RegisterClientAsync(CreateClientDTO input)
+    public async Task<AuthPayload> RegisterClientAsync(RegisterClientInput input)
     {
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
-
-        Client client = ClientMapper.ToEntity(input);
-
         Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
         agency ??= unitOfWork.Clients.CreateAgency(new Agency(input.AgencyName));
 
-        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(input.Password);
-        client.Password = hashedPassword;
-        client.Agency = agency;
-        client.Address.Country = country;
+        Client client = new(input, country, agency)
+        {
+            Password = hasher.Hash(input.Password)
+        };
 
         unitOfWork.Clients.CreateClient(client);
         await unitOfWork.SaveChangesAsync();
@@ -55,108 +50,70 @@ public class AuthService(IUnitOfWork unitOfWork, IConfiguration configuration) :
         return new AuthPayload(GenerateJWT(client), client);
     }
 
-    public async Task<AuthPayload> LoginAsync(LoginUserInput input)
+    public async Task<AuthPayload> LoginAsync(UserLoginInput input)
     {
-        var user = await unitOfWork.Users.GetUserByEmailAsync(input.Email) ?? throw new UnauthorizedAccessException("Email o contraseña incorrectos.");
+        User user = await unitOfWork.Users.GetUserByEmailAsync(input.Email) ?? throw new UnauthorizedAccessException("Email o contraseña incorrectos.");
 
-        if (!BCrypt.Net.BCrypt.Verify(input.Password, user.Password))
+        if (user.Password is null)
+            throw new ArgumentException("El usuario deberia ingresar con su cuenta de Google.");
+
+        if (!hasher.Verify(input.Password, user.Password))
             throw new UnauthorizedAccessException("Email o contraseña incorrectos.");
 
         return new AuthPayload(GenerateJWT(user), user);
     }
 
-    public async Task<AuthPayload> GoogleAuthAsync(GoogleAuthInput input)
+    public async Task<GoogleAuthPayload> GoogleAuthAsync(GoogleAuthInput input)
     {
         // Validar token con Google
-        var payload = await ValidateGoogleTokenAsync(input.Token) ?? throw new UnauthorizedAccessException("Token de Google inválido.");
-        var user = await unitOfWork.Users.GetUserByGoogleIdOrEmailAsync(payload.Subject, payload.Email);
+        GoogleUserInfo payload = await googleAuthService.ExchangeCodeAsync(input.Code)
+        ?? throw new UnauthorizedAccessException("Token de Google inválido.");
 
-        return input switch
-        {
-            // Registro - usuario nuevo
-            RegisterClientGoogleDTO i => await HandleGoogleRegisterAsync(user, payload, i),
-            RegisterBroadcasterGoogleDTO i => await HandleGoogleRegisterAsync(user, payload, i),
-            // Login - usuario existente
-            GoogleAuthInput => await HandleGoogleLoginAsync(user, payload),
-            _ => throw new ArgumentException("Tipo de operación inválido.")
-        };
-    }
-
-    private async Task<AuthPayload> HandleGoogleLoginAsync(User? user,
-        GoogleJsonWebSignature.Payload payload)
-    {
-        // Si manda GoogleAuthDTO pero no existe, le decimos que se registre
-        if (user is null)
-            throw new UnauthorizedAccessException("No existe una cuenta con este email. Por favor registrese.");
+        User? user = await unitOfWork.Users.GetUserByGoogleIdAsync(payload.Subject);
 
         // Vincula GoogleId si entró antes con email / password
-        if (user.GoogleId is null)
+        if (user is not null && user.GoogleId is null)
         {
             user.GoogleId = payload.Subject;
             await unitOfWork.SaveChangesAsync();
         }
 
-        return new AuthPayload(GenerateJWT(user), user);
+        return new GoogleAuthPayload
+        {
+            Token = user is not null ? GenerateJWT(user) : null,
+            RequiresRegistration = user is null,
+            Subject = payload.Subject,
+            Email = payload.Email,
+            FirstName = payload.GivenName,
+            LastName = payload.FamilyName,
+        };
     }
 
-    private async Task<AuthPayload> HandleGoogleRegisterAsync(User? user,
-        GoogleJsonWebSignature.Payload payload,
-        RegisterUserGoogleDTO input)
+    public async Task<AuthPayload> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input)
     {
-        if (user is not null)
-            throw new UnauthorizedAccessException("Ya existe una cuenta con este email.");
+        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
+        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1) ?? throw new KeyNotFoundException($"Category with id {1} not found.");
 
-        // Campos que vienen del token de Google
-        User newUser = input switch
-        {
-            RegisterClientGoogleDTO i => ClientMapper.ToEntity(i),
-            RegisterBroadcasterGoogleDTO i => BroadcasterMapper.ToEntity(i),
-            _ => throw new ArgumentException("Tipo de registro inválido.")
-        };
+        Broadcaster broadcaster = new(input, country, category);
 
-        Country country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
-        newUser.Address.Country = country;
-        newUser.Address.CountryCode = country.CountryCode;
-
-        // Campos comunes — vienen del token, no del input
-        newUser.Email = payload.Email.Trim().ToLower();
-        newUser.GoogleId = payload.Subject;
-
-        switch (newUser)
-        {
-            case Client newClient:
-                RegisterClientGoogleDTO clientInput = (RegisterClientGoogleDTO)input;
-                Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(clientInput.AgencyName);
-                agency ??= unitOfWork.Clients.CreateAgency(new(clientInput.AgencyName));
-                newClient.Agency = agency;
-                unitOfWork.Clients.CreateClient(newClient);
-                break;
-            case Broadcaster newBroadcaster:
-                unitOfWork.Broadcasters.CreateBroadcaster(newBroadcaster);
-                break;
-            default:
-                throw new ArgumentException("Tipo de registro inválido.");
-        }
-
+        unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
         await unitOfWork.SaveChangesAsync();
 
-        return new AuthPayload(GenerateJWT(newUser), newUser);
+        return new AuthPayload(GenerateJWT(broadcaster), broadcaster);
     }
 
-    private async Task<GoogleJsonWebSignature.Payload?> ValidateGoogleTokenAsync(string token)
+    public async Task<AuthPayload> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
     {
-        try
-        {
-            var settings = new GoogleJsonWebSignature.ValidationSettings
-            {
-                Audience = [_config["Google:ClientId"]]
-            };
-            return await GoogleJsonWebSignature.ValidateAsync(token, settings);
-        }
-        catch (InvalidJwtException)
-        {
-            return null;
-        }
+        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
+        Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
+        agency ??= unitOfWork.Clients.CreateAgency(new Agency(input.AgencyName));
+
+        Client client = new(input, country, agency);
+
+        unitOfWork.Clients.CreateClient(client);
+        await unitOfWork.SaveChangesAsync();
+
+        return new AuthPayload(GenerateJWT(client), client);
     }
 
     private string GenerateJWT(User user)

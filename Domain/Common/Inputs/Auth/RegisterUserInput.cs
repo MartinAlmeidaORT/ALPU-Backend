@@ -1,12 +1,9 @@
-namespace Application.DTOs.Auth;
+namespace Domain.Common.Inputs.Auth;
 
-public record GoogleAuthInput
+public abstract record RegisterUserInput
 {
-    public required string Token { get; set; }
-}
-
-public abstract record RegisterUserGoogleDTO : GoogleAuthInput
-{
+    public required string Email { get; init; }
+    public required string Password { get; init; }
     public required string FirstName { get; init; }
     public required string LastName { get; init; }
     public required string RUT { get; init; }
@@ -16,9 +13,9 @@ public abstract record RegisterUserGoogleDTO : GoogleAuthInput
     public string? Street { get; init; }
 }
 
-public record RegisterBroadcasterGoogleDTO : RegisterUserGoogleDTO;
+public record RegisterBroadcasterInput : RegisterUserInput;
 
-public record RegisterClientGoogleDTO : RegisterUserGoogleDTO
+public record RegisterClientInput : RegisterUserInput
 {
     public required string AgencyName { get; init; }
 }

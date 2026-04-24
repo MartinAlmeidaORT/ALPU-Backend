@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Common;
+using Domain.Common.Inputs;
+using Domain.Common.Inputs.Auth;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +14,37 @@ namespace Domain.Models;
 [Index("GoogleId", Name = "user_google_id_key", IsUnique = true)]
 public partial class User : Entity
 {
+    public User() { }
+
+    public User(RegisterUserInput input, Country country)
+    {
+        Email = input.Email;
+        FirstName = input.FirstName;
+        LastName = input.LastName;
+        RUT = input.RUT;
+        Address = new Address(country, input.State, input.City, input.Street);
+    }
+
+    public User(CompleteGoogleSignUpUserInput input, Country country)
+    {
+        GoogleId = input.Subject;
+        Email = input.Email;
+        Password = null;
+        FirstName = input.FirstName;
+        LastName = input.LastName;
+        RUT = input.RUT;
+        Address = new Address(country, input.State, input.City, input.Street);
+    }
+
+    public void Update(UpdateUserInput input, Country? country)
+    {
+        Email = input.Email ?? Email;
+        FirstName = input.FirstName ?? FirstName;
+        LastName = input.LastName ?? LastName;
+        RUT = input.RUT ?? RUT;
+        Address.Update(country, input.Address);
+    }
+
     [Key]
     [Column("user_id")]
     public int UserId { get; set; }
@@ -29,7 +62,7 @@ public partial class User : Entity
 
     [Column("password")]
     [StringLength(50)]
-    public string Password { get; set; } = null!;
+    public string? Password { get; set; }
 
     [Column("first_name")]
     [StringLength(50)]

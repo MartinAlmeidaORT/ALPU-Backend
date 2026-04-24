@@ -16,5 +16,5 @@ public class UserRepository(DatabaseContext context) : RepositoryBase<User>(cont
 
     public Task<User?> GetUserByEmailAsync(string email) => context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-    public Task<User?> GetUserByGoogleIdOrEmailAsync(string googleId, string email) => context.Users.FirstOrDefaultAsync(user => user.GoogleId == googleId || user.Email == email);
+    public Task<User?> GetUserByGoogleIdAsync(string googleId) => context.Users.FirstOrDefaultAsync(user => user.GoogleId == googleId);
 }

@@ -1,8 +1,7 @@
 using Domain.Models;
 using Application.Interfaces.Public.Services;
-using Application.DTOs.Users;
-using Application.Mappers;
 using Domain.Interfaces.Public.Repositories;
+using Domain.Common.Inputs;
 
 namespace Application.Services;
 
@@ -12,17 +11,17 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
 
     public async Task<User?> GetUserByIdAsync(int id) => await unitOfWork.Users.GetUserByIdAsync(id);
 
-    public async Task<User> UpdateUserAsync(int id, UpdateUserDTO dto)
+    public async Task<User> UpdateUserAsync(int id, UpdateUserInput dto)
     {
         User? user = await unitOfWork.Users.GetUserByIdAsync(id) ?? throw new KeyNotFoundException($"User with id {id} not found.");
 
         Country? country = null;
-        if (dto.CountryCode != null)
+        if (dto.Address?.CountryCode != null)
         {
-            country = await unitOfWork.Countries.GetByCodeAsync(dto.CountryCode) ?? throw new KeyNotFoundException($"Country with code {dto.CountryCode} not found.");
+            country = await unitOfWork.Countries.GetByCodeAsync(dto.Address.CountryCode) ?? throw new KeyNotFoundException($"Country with code {dto.Address.CountryCode} not found.");
         }
 
-        UserMapper.ApplyUpdate(user, dto, country);
+        user.Update(dto, country);
         await unitOfWork.SaveChangesAsync();
 
         return user;

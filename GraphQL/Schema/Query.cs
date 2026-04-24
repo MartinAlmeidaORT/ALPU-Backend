@@ -1,8 +1,5 @@
 using Application.Interfaces.Public.Services;
 using Domain.Models;
-using Application.DTOs.Users;
-using Application.DTOs.Country;
-using GraphQL.Types.Objects;
 
 namespace GraphQL.Schema;
 

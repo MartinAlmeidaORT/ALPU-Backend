@@ -1,4 +1,4 @@
-using Application.DTOs.Users;
+using Domain.Common.Inputs;
 using Domain.Models;
 
 namespace Application.Interfaces.Public.Services;
@@ -9,7 +9,7 @@ public interface IUserService
 
     Task<User?> GetUserByIdAsync(int id);
 
-    Task<User> UpdateUserAsync(int id, UpdateUserDTO dto);
+    Task<User> UpdateUserAsync(int id, UpdateUserInput dto);
 
     Task<User> DeleteUserAsync(int id);
 }

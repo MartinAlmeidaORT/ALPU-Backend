@@ -8,6 +8,8 @@ builder.Services.AddDatabase(builder.Configuration);
 
 builder.Services.AddServiceGraphQL();
 
+builder.Services.AddExternalServices();
+
 builder.Services.AddCorsPolicy(builder.Configuration);
 
 var app = builder.Build();

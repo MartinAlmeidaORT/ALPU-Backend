@@ -1,15 +1,19 @@
-using Application.DTOs.Auth;
-using Domain.Common;
+using Domain.Common.Inputs.Auth;
+using Domain.Common.Payloads;
 
 namespace Application.Interfaces.Public.Services;
 
 public interface IAuthService
 {
-    Task<AuthPayload> RegisterBroadcasterAsync(CreateBroadcasterDTO input);
+    Task<AuthPayload> RegisterBroadcasterAsync(RegisterBroadcasterInput input);
 
-    Task<AuthPayload> RegisterClientAsync(CreateClientDTO input);
+    Task<AuthPayload> RegisterClientAsync(RegisterClientInput input);
 
-    Task<AuthPayload> LoginAsync(LoginUserInput input);
+    Task<AuthPayload> LoginAsync(UserLoginInput input);
 
-    Task<AuthPayload> GoogleAuthAsync(GoogleAuthInput input);
+    Task<GoogleAuthPayload> GoogleAuthAsync(GoogleAuthInput input);
+
+    Task<AuthPayload> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input);
+
+    Task<AuthPayload> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input);
 }

@@ -1,5 +1,4 @@
 using Application.Interfaces.Public.Services;
-using Application.Mappers;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Models;
 
