@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Domain.Interfaces.Private;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
+using Application.Common;
 
 namespace Application.Services;
 
@@ -17,10 +18,13 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 {
     private readonly IConfiguration _config = configuration;
 
-    public async Task<AuthPayload> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
+    public async Task<ResultAPI<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
     {
-        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
-        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1) ?? throw new KeyNotFoundException($"Category with id {1} not found.");
+        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
+        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1);
+
+        if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
+        if (category is null) return ResultAPI<AuthPayload>.NotFound($"Category with id {1} not found.");
 
         Broadcaster broadcaster = new(input, country, category)
         {
@@ -30,14 +34,16 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
         await unitOfWork.SaveChangesAsync();
 
-        return new AuthPayload(GenerateJWT(broadcaster), broadcaster);
+        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(broadcaster), broadcaster));
     }
 
-    public async Task<AuthPayload> RegisterClientAsync(RegisterClientInput input)
+    public async Task<ResultAPI<AuthPayload>> RegisterClientAsync(RegisterClientInput input)
     {
-        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
+        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
-        agency ??= unitOfWork.Clients.CreateAgency(new Agency(input.AgencyName));
+        agency ??= new Agency(input.AgencyName);
+
+        if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
 
         Client client = new(input, country, agency)
         {
@@ -47,27 +53,25 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         unitOfWork.Clients.CreateClient(client);
         await unitOfWork.SaveChangesAsync();
 
-        return new AuthPayload(GenerateJWT(client), client);
+        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(client), client));
     }
 
-    public async Task<AuthPayload> LoginAsync(UserLoginInput input)
+    public async Task<ResultAPI<AuthPayload>> LoginAsync(UserLoginInput input)
     {
         User user = await unitOfWork.Users.GetUserByEmailAsync(input.Email) ?? throw new UnauthorizedAccessException("Email o contraseña incorrectos.");
 
-        if (user.Password is null)
-            throw new ArgumentException("El usuario deberia ingresar con su cuenta de Google.");
+        if (user.Password is null) return ResultAPI<AuthPayload>.NotFound("El usuario deberia ingresar con su cuenta de Google.");
+        if (!hasher.Verify(input.Password, user.Password)) return ResultAPI<AuthPayload>.NotFound("Email o contraseña incorrectos.");
 
-        if (!hasher.Verify(input.Password, user.Password))
-            throw new UnauthorizedAccessException("Email o contraseña incorrectos.");
-
-        return new AuthPayload(GenerateJWT(user), user);
+        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(user), user));
     }
 
-    public async Task<GoogleAuthPayload> GoogleAuthAsync(GoogleAuthInput input)
+    public async Task<ResultAPI<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input)
     {
         // Validar token con Google
-        GoogleUserInfo payload = await googleAuthService.ExchangeCodeAsync(input.Code)
-        ?? throw new UnauthorizedAccessException("Token de Google inválido.");
+        GoogleUserInfo? payload = await googleAuthService.ExchangeCodeAsync(input.Code);
+
+        if (payload is null) return ResultAPI<GoogleAuthPayload>.NotFound("Token de Google inválido.");
 
         User? user = await unitOfWork.Users.GetUserByGoogleIdAsync(payload.Subject);
 
@@ -78,7 +82,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
             await unitOfWork.SaveChangesAsync();
         }
 
-        return new GoogleAuthPayload
+        return ResultAPI<GoogleAuthPayload>.Success(new GoogleAuthPayload
         {
             Token = user is not null ? GenerateJWT(user) : null,
             RequiresRegistration = user is null,
@@ -86,34 +90,39 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
             Email = payload.Email,
             FirstName = payload.GivenName,
             LastName = payload.FamilyName,
-        };
+        });
     }
 
-    public async Task<AuthPayload> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input)
+    public async Task<ResultAPI<AuthPayload>> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input)
     {
-        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
-        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1) ?? throw new KeyNotFoundException($"Category with id {1} not found.");
+        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
+        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1);
+
+        if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
+        if (category is null) return ResultAPI<AuthPayload>.NotFound($"Category with id {1} not found.");
 
         Broadcaster broadcaster = new(input, country, category);
 
         unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
         await unitOfWork.SaveChangesAsync();
 
-        return new AuthPayload(GenerateJWT(broadcaster), broadcaster);
+        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(broadcaster), broadcaster));
     }
 
-    public async Task<AuthPayload> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
+    public async Task<ResultAPI<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
     {
-        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode) ?? throw new KeyNotFoundException($"Country with code {input.CountryCode} not found.");
+        Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
-        agency ??= unitOfWork.Clients.CreateAgency(new Agency(input.AgencyName));
+        agency ??= new Agency(input.AgencyName);
+
+        if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
 
         Client client = new(input, country, agency);
 
         unitOfWork.Clients.CreateClient(client);
         await unitOfWork.SaveChangesAsync();
 
-        return new AuthPayload(GenerateJWT(client), client);
+        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(client), client));
     }
 
     private string GenerateJWT(User user)
