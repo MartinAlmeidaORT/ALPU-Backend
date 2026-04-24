@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Classes.Abstracts;
+namespace Domain.Common.Abstracts;
 
 public abstract class RepositoryBase<TEntity>(DbContext context)
     where TEntity : Entity

@@ -1,14 +1,15 @@
 using Application.DTOs.Users;
+using Domain.Models;
 
 namespace Application.Interfaces.Public.Services;
 
 public interface IUserService
 {
-    IQueryable<IResultUserDTO> GetAllUsers();
+    IQueryable<User> GetAllUsers();
 
-    Task<IResultUserDTO?> GetUserByIdAsync(int id);
+    Task<User?> GetUserByIdAsync(int id);
 
-    Task<IResultUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto);
+    Task<User> UpdateUserAsync(int id, UpdateUserDTO dto);
 
-    Task<IResultUserDTO> DeleteUserAsync(int id);
+    Task<User> DeleteUserAsync(int id);
 }

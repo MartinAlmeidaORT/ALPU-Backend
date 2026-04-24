@@ -2,6 +2,7 @@ using Application.Interfaces.Public.Services;
 using Domain.Models;
 using Application.DTOs.Users;
 using Application.DTOs.Country;
+using GraphQL.Types.Objects;
 
 namespace GraphQL.Schema;
 
@@ -11,10 +12,8 @@ public class Query
     public string Ping() => "Pong";
 
     [UseProjection]
-    public IQueryable<IResultUserDTO> GetUsers([Service] IUserService userService)
-        => userService.GetAllUsers();
+    public IQueryable<User> GetUsers([Service] IUserService userService) => userService.GetAllUsers();
 
     [UseProjection]
-    public IQueryable<ResultCountryDTO> GetCountries([Service] ICountryService countryService)
-        => countryService.GetAllCountries();
+    public IQueryable<Country> GetCountries([Service] ICountryService countryService) => countryService.GetAllCountries();
 }

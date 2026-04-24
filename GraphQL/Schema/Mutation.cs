@@ -1,5 +1,6 @@
 using Application.DTOs.Auth;
 using Application.Interfaces.Public.Services;
+using Domain.Common;
 
 namespace GraphQL.Schema;
 

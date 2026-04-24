@@ -47,6 +47,6 @@ public static partial class ClientMapper
             City = dto.City,
             Street = dto.Street,
         },
-        Agency = new(dto.AgencyName)
+        Agency = new Agency(dto.AgencyName)
     };
 }

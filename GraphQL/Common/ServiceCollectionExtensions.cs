@@ -3,13 +3,12 @@ using Domain.Interfaces.Public.Repositories;
 using Domain.Enums;
 using DataAccess.EntityFramework;
 using DataAccess.Repositories;
-using Application.DTOs.Users;
 using Application.Interfaces.Public.Services;
 using Application.Services;
 using GraphQL.Schema;
-using Application.DTOs.Auth;
+using GraphQL.Types.Objects;
 
-namespace GraphQL.Classes;
+namespace GraphQL.Common;
 
 public static class ServiceCollectionExtensions
 {
@@ -38,14 +37,22 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServiceGraphQL(this IServiceCollection services)
     {
         services.AddGraphQLServer()
-        .AddType<ResultUserDTO>()
-        .AddType<ResultBroadcasterDTO>()
-        .AddType<ResultClientDTO>()
+        // .AddType<ResultUserDTO>()
+        // .AddType<ResultBroadcasterDTO>()
+        // .AddType<ResultClientDTO>()
         // .AddInputObjectType<GoogleAuthInput>()
         // .AddInputObjectType<RegisterClientGoogleDTO>()
         // .AddInputObjectType<RegisterBroadcasterGoogleDTO>()
-        .AddType<AuthPayload>()
-        .AddInterfaceType<IResultUserDTO>()
+        // .AddInterfaceType<IResultUserDTO>()
+        //
+        .AddType<AuthPayloadType>()
+        .AddType<UserInterfaceType>()
+        .AddType<BroadcasterType>()
+        .AddType<ClientType>()
+        .AddType<AddressType>()
+        .AddType<CountryType>()
+        .AddType<AgencyType>()
+        //
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddProjections()             // Optimizes SQL queries

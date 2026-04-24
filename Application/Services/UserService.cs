@@ -8,11 +8,11 @@ namespace Application.Services;
 
 public class UserService(IUnitOfWork unitOfWork) : IUserService
 {
-    public IQueryable<IResultUserDTO> GetAllUsers() => unitOfWork.Users.GetAllUsers().Select(UserMapper.ToDTOExpression());
+    public IQueryable<User> GetAllUsers() => unitOfWork.Users.GetAllUsers();
 
-    public async Task<IResultUserDTO?> GetUserByIdAsync(int id) => await unitOfWork.Users.GetUserByIdAsync(id) is User user ? UserMapper.ToDTO(user) : null;
+    public async Task<User?> GetUserByIdAsync(int id) => await unitOfWork.Users.GetUserByIdAsync(id);
 
-    public async Task<IResultUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto)
+    public async Task<User> UpdateUserAsync(int id, UpdateUserDTO dto)
     {
         User? user = await unitOfWork.Users.GetUserByIdAsync(id) ?? throw new KeyNotFoundException($"User with id {id} not found.");
 
@@ -23,16 +23,16 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
         }
 
         UserMapper.ApplyUpdate(user, dto, country);
-
         await unitOfWork.SaveChangesAsync();
-        return UserMapper.ToDTO(user);
+
+        return user;
     }
 
-    public async Task<IResultUserDTO> DeleteUserAsync(int id)
+    public async Task<User> DeleteUserAsync(int id)
     {
         User? user = await unitOfWork.Users.GetUserByIdAsync(id) ?? throw new KeyNotFoundException($"User with id {id} not found.");
         unitOfWork.Users.DeleteUser(user);
         await unitOfWork.SaveChangesAsync();
-        return UserMapper.ToDTO(user);
+        return user;
     }
 }

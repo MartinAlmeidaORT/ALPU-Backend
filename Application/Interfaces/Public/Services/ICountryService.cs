@@ -1,8 +1,8 @@
-using Application.DTOs.Country;
+using Domain.Models;
 
 namespace Application.Interfaces.Public.Services;
 
 public interface ICountryService
 {
-    IQueryable<ResultCountryDTO> GetAllCountries();
+    IQueryable<Country> GetAllCountries();
 }

@@ -1,4 +1,5 @@
 using Application.DTOs.Auth;
+using Domain.Common;
 
 namespace Application.Interfaces.Public.Services;
 

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Classes;
+using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Models;

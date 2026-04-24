@@ -1,4 +1,4 @@
-using GraphQL.Classes;
+using GraphQL.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
