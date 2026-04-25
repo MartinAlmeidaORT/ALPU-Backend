@@ -10,11 +10,12 @@ public static class ResultAPIExtensions
             return result.Value!;
 
         throw new GraphQLException(
-            ErrorBuilder.New()
-                .SetMessage(result.Error!)
-                .SetCode(result.ErrorCode!)
-                .SetExtension("statusCode", (int)result.StatusCode)
-                .Build()
+            result.Errors.Select(error =>
+                ErrorBuilder.New()
+                    .SetMessage(error.Message)
+                    .SetCode(result.ErrorCode)
+                    .Build()
+            ).ToList()
         );
     }
 }

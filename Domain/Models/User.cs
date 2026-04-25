@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Common;
+using Domain.Common.Errors;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;
 using Domain.Enums;
@@ -12,20 +13,21 @@ namespace Domain.Models;
 [Index("Email", Name = "user_email_key", IsUnique = true)]
 [Index("RUT", Name = "user_rut_key", IsUnique = true)]
 [Index("GoogleId", Name = "user_google_id_key", IsUnique = true)]
-public partial class User : Entity
+public abstract class User : Entity
 {
-    public User() { }
+    protected User() { }
 
-    public User(RegisterUserInput input, Country country)
+    protected User(RegisterUserInput input, Country country)
     {
         Email = input.Email;
+        Password = input.Password;
         FirstName = input.FirstName;
         LastName = input.LastName;
         RUT = input.RUT;
         Address = new Address(country, input.State, input.City, input.Street);
     }
 
-    public User(CompleteGoogleSignUpUserInput input, Country country)
+    protected User(CompleteGoogleSignUpUserInput input, Country country)
     {
         GoogleId = input.Subject;
         Email = input.Email;
@@ -43,6 +45,36 @@ public partial class User : Entity
         LastName = input.LastName ?? LastName;
         RUT = input.RUT ?? RUT;
         Address.Update(country, input.Address);
+    }
+
+    public virtual Result<AppError> ValidateSignUp()
+    {
+        return Result<AppError>.Combine(ValidateEmail(), ValidatePassword());
+    }
+
+    public virtual Result<AppError> ValidateGoogleSignUp()
+    {
+        if (GoogleId == null) return Result<AppError>.Failure(AppError.Validation("GoogleId is required"));
+
+        return Result<AppError>.Success();
+    }
+
+    public Result<AppError> ValidateEmail()
+    {
+        if (Email == null) return Result<AppError>.Failure(AppError.Validation("Email is required"));
+
+        return Result<AppError>.Combine(
+            Require(Email.Contains('@'), "Email is missing '@' character"),
+            Require(Email.Length >= 10, "Email is too short"),
+            Require(Email.Length <= 254, "Email is too long")
+        );
+    }
+
+    public Result<AppError> ValidatePassword()
+    {
+        if (Password == null) return Result<AppError>.Failure(AppError.Validation("Password is required"));
+
+        return Result<AppError>.Success();
     }
 
     [Key]

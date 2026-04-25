@@ -11,6 +11,7 @@ using Domain.Interfaces.Private;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
 using Application.Common;
+using Domain.Common.Errors;
 
 namespace Application.Services;
 
@@ -26,10 +27,12 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
         if (category is null) return ResultAPI<AuthPayload>.NotFound($"Category with id {1} not found.");
 
-        Broadcaster broadcaster = new(input, country, category)
-        {
-            Password = hasher.Hash(input.Password)
-        };
+        Result<Broadcaster, AppError> result = Broadcaster.SignUp(input, country, category, hasher.Hash(input.Password));
+
+        if (result.IsFailure) return ResultAPI<AuthPayload>.BadRequest(result);
+
+        if (result.Value is not Broadcaster broadcaster)
+            return ResultAPI<AuthPayload>.Internal("User is not a broadcaster");
 
         unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
         await unitOfWork.SaveChangesAsync();
@@ -45,10 +48,12 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
 
-        Client client = new(input, country, agency)
-        {
-            Password = hasher.Hash(input.Password)
-        };
+        Result<Client, AppError> result = Client.SignUp(input, country, agency, hasher.Hash(input.Password));
+
+        if (result.IsFailure) return ResultAPI<AuthPayload>.BadRequest(result);
+
+        if (result.Value is not Client client)
+            return ResultAPI<AuthPayload>.Internal("User is not a client");
 
         unitOfWork.Clients.CreateClient(client);
         await unitOfWork.SaveChangesAsync();
@@ -101,7 +106,11 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
         if (category is null) return ResultAPI<AuthPayload>.NotFound($"Category with id {1} not found.");
 
-        Broadcaster broadcaster = new(input, country, category);
+        Result<Broadcaster, AppError> result = Broadcaster.SignUpFromGoogle(input, country, category);
+        if (result.IsFailure) return ResultAPI<AuthPayload>.BadRequest(result);
+
+        if (result.Value is not Broadcaster broadcaster)
+            return ResultAPI<AuthPayload>.Internal("User is not a broadcaster");
 
         unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
         await unitOfWork.SaveChangesAsync();
@@ -117,7 +126,11 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
 
-        Client client = new(input, country, agency);
+        Result<Client, AppError> result = Client.SignUpFromGoogle(input, country, agency);
+        if (result.IsFailure) return ResultAPI<AuthPayload>.BadRequest(result);
+
+        if (result.Value is not Client client)
+            return ResultAPI<AuthPayload>.Internal("User is not a client");
 
         unitOfWork.Clients.CreateClient(client);
         await unitOfWork.SaveChangesAsync();
