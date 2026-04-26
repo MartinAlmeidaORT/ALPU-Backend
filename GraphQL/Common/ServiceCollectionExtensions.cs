@@ -90,4 +90,10 @@ public static class ServiceCollectionExtensions
         });
         return services;
     }
+
+    public static IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services)
+    {
+        services.AddErrorFilter<GlobalExceptionFilter>();
+        return services;
+    }
 }

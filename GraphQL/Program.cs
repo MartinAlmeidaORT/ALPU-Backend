@@ -10,6 +10,8 @@ builder.Services.AddServiceGraphQL();
 
 builder.Services.AddExternalServices();
 
+builder.Services.AddGlobalExceptionHandler();
+
 builder.Services.AddCorsPolicy(builder.Configuration);
 
 var app = builder.Build();
