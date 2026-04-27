@@ -10,7 +10,7 @@ public abstract record CompleteGoogleSignUpUserInput
     public required string CountryCode { get; init; }
     public required string State { get; init; }
     public required string City { get; init; }
-    public required string Street { get; init; }
+    public string? Street { get; init; }
 }
 
 public record CompleteGoogleSignUpBroadcasterInput : CompleteGoogleSignUpUserInput;
