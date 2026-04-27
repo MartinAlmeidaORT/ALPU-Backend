@@ -100,9 +100,11 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
     public async Task<ResultAPI<AuthPayload>> LoginAsync(UserLoginInput input)
     {
-        User user = await unitOfWork.Users.GetUserByEmailAsync(input.Email) ?? throw new UnauthorizedAccessException("Email o contraseña incorrectos.");
+        User? user = await unitOfWork.Users.GetUserByEmailAsync(input.Email);
 
-        if (user.Password is null) return ResultAPI<AuthPayload>.NotFound("El usuario deberia ingresar con su cuenta de Google.");
+        if (user is null) return ResultAPI<AuthPayload>.NotFound("Email o contraseña incorrectos.");
+
+        if (user.Password is null) return ResultAPI<AuthPayload>.BadRequest("El usuario deberia ingresar con su cuenta de Google.");
         if (!hasher.Verify(input.Password, user.Password)) return ResultAPI<AuthPayload>.NotFound("Email o contraseña incorrectos.");
 
         return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(user), user));
@@ -110,6 +112,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
     public async Task<ResultAPI<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input)
     {
+        
         // Validar token con Google
         GoogleUserInfo? payload = await googleAuthService.ExchangeCodeAsync(input.Code);
 

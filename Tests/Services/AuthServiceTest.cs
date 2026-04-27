@@ -1458,7 +1458,7 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task LoginAsync_WhenUserRegisteredWithGoogle_ReturnsNotFound()
+    public async Task LoginAsync_WhenUserRegisteredWithGoogle_ReturnsBadRequest()
     {
         // Password is null → registered via Google, should not login with email
         var input = new UserLoginInput { Email = "google@alpu.uy", Password = "any" };
@@ -1470,20 +1470,20 @@ public class AuthServiceTests
         var result = await _sut.LoginAsync(input);
 
         result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task LoginAsync_WhenUserNotFound_ThrowsUnauthorized()
+    public async Task LoginAsync_WhenUserNotFound_ReturnsNotFound()
     {
         var input = new UserLoginInput { Email = "noexiste@alpu.uy", Password = "pass" };
         _unitOfWork.Users.GetUserByEmailAsync(input.Email).Returns((User?)null);
 
         // El servicio hace ?? throw new UnauthorizedAccessException(...)
-        var act = () => _sut.LoginAsync(input);
+        var result = await _sut.LoginAsync(input);
 
-        await act.Should().ThrowAsync<UnauthorizedAccessException>()
-            .WithMessage("*incorrectos*");
+        result.IsSuccess.Should().BeFalse();
+        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     // ---------------------------------------------------------------
@@ -1568,5 +1568,23 @@ public class AuthServiceTests
         // GoogleId must be linked
         userWithoutGoogleId.GoogleId.Should().Be(googleInfo.Subject);
         await _unitOfWork.Received(1).SaveChangesAsync();
+    }
+
+        [Fact]
+    public async Task GoogleAuthAsync_WhenGoogleCodeIsNull_ReturnsNotFound()
+    {
+        // Usuario que se registró con email/password primero, luego entra con Google
+        var input = new GoogleAuthInput { Code = "" };
+        var googleInfo = new GoogleUserInfo { Subject = "google-sub-456", Email = "old@alpu.uy" };
+        var userWithoutGoogleId = DomainBuilders.Client();
+        userWithoutGoogleId.GoogleId = null;
+        userWithoutGoogleId.Email = googleInfo.Email;
+
+        _googleAuthService.ExchangeCodeAsync(input.Code).Returns((GoogleUserInfo?)null);
+
+        var result = await _sut.GoogleAuthAsync(input);
+
+        result.IsSuccess.Should().BeFalse();
+        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
