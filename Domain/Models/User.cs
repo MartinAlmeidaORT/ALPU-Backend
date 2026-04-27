@@ -126,7 +126,7 @@ public abstract class User : Entity
     public int UserId { get; set; }
 
     [Column("google_id")]
-    public string GoogleId { get; set; } = null!;
+    public string? GoogleId { get; set; } = null!;
 
     [Column("state", TypeName = "user_state_enum")]
     [EnumDataType(typeof(UserState))]
