@@ -1,5 +1,5 @@
 using DataAccess.EntityFramework;
-using Domain.Classes.Abstracts;
+using Domain.Common.Abstracts;
 using Domain.Models;
 
 namespace DataAccess.Repositories;

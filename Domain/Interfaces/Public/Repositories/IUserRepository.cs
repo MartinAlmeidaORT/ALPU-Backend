@@ -9,4 +9,11 @@ public interface IUserRepository
     public Task<User?> GetUserByIdAsync(int id);
 
     public User DeleteUser(User user);
+
+    public Task<User?> GetUserByEmailAsync(string email);
+
+    public Task<User?> GetUserByRutAsync(string rut);
+
+
+    public Task<User?> GetUserByGoogleIdAsync(string googleId);
 }

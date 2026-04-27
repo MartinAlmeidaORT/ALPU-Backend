@@ -1,18 +1,15 @@
-using Application.DTOs.Users;
+using Domain.Common.Inputs;
+using Domain.Models;
 
 namespace Application.Interfaces.Public.Services;
 
 public interface IUserService
 {
-    IQueryable<IResultUserDTO> GetAllUsers();
+    IQueryable<User> GetAllUsers();
 
-    Task<IResultUserDTO?> GetUserByIdAsync(int id);
+    Task<User?> GetUserByIdAsync(int id);
 
-    Task<ResultClientDTO> CreateClientAsync(CreateClientDTO dto);
+    Task<User> UpdateUserAsync(int id, UpdateUserInput dto);
 
-    Task<ResultBroadcasterDTO> CreateBroadcasterAsync(CreateBroadcasterDTO dto);
-
-    Task<IResultUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto);
-
-    Task<IResultUserDTO> DeleteUserAsync(int id);
+    Task<User> DeleteUserAsync(int id);
 }

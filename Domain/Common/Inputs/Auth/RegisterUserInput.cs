@@ -1,0 +1,21 @@
+namespace Domain.Common.Inputs.Auth;
+
+public abstract record RegisterUserInput
+{
+    public required string Email { get; init; }
+    public required string Password { get; init; }
+    public required string FirstName { get; init; }
+    public required string LastName { get; init; }
+    public required string RUT { get; init; }
+    public required string CountryCode { get; init; }
+    public required string State { get; init; }
+    public required string City { get; init; }
+    public string? Street { get; init; }
+}
+
+public record RegisterBroadcasterInput : RegisterUserInput;
+
+public record RegisterClientInput : RegisterUserInput
+{
+    public required string AgencyName { get; init; }
+}

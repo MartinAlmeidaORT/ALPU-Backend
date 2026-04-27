@@ -3,4 +3,5 @@
   <Project Path="Domain/Domain.csproj" />
   <Project Path="DataAccess/DataAccess.csproj" />
   <Project Path="GraphQL/GraphQL.csproj" />
+  <Project Path="Tests/Tests.csproj" />
 </Solution>

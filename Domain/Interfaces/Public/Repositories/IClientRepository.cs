@@ -14,5 +14,7 @@ public interface IClientRepository
 
     public Task<Agency?> GetAgencyByIdAsync(int id);
 
+    public Task<Agency?> GetAgencyByNameAsync(string name);
+
     public Client DeleteClient(Client client);
 }

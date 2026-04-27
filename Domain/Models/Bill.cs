@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Classes;
+using Domain.Common;
 using Domain.Enums;
 
 namespace Domain.Models;
