@@ -1569,27 +1569,4 @@ public class AuthServiceTests
         userWithoutGoogleId.GoogleId.Should().Be(googleInfo.Subject);
         await _unitOfWork.Received(1).SaveChangesAsync();
     }
-
-    // ---------------------------------------------------------------
-    // Helpers
-    // ---------------------------------------------------------------
-
-    // private static RegisterBroadcasterInput BuildBroadcasterInput() => new()
-    // {
-    //     FirstName = "Tadeo",
-    //     LastName = "Mieres",
-    //     Email = "tadeo@alpu.uy",
-    //     Password = "Password123!",
-    //     CountryCode = "UY",
-    // };
-
-    // private static RegisterClientInput BuildClientInput() => new()
-    // {
-    //     FirstName = "Martin",
-    //     LastName = "Almeida",
-    //     Email = "martin@agency.uy",
-    //     Password = "Password123!",
-    //     CountryCode = "UY",
-    //     AgencyName = "Test Agency",
-    // };
 }
