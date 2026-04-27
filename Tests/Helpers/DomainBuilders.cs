@@ -16,10 +16,9 @@ public static class DomainBuilders
         Password = "Password123!",
         CountryCode = "UY",
         RUT = "12345678910A",
-        State = "TyT",
-        City = "TyT",
+        State = "Estado",
+        City = "Ciudad",
     };
-
     public static RegisterClientInput ClientInput() => new()
     {
         FirstName = "Martin",
@@ -29,8 +28,8 @@ public static class DomainBuilders
         CountryCode = "UY",
         AgencyName = "Test Agency",
         RUT = "12345678910A",
-        State = "TyT",
-        City = "TyT",
+        State = "Estado",
+        City = "Ciudad",
     };
 
     public static CompleteGoogleSignUpClientInput GoogleClientInput(string googleId = "google-sub-123") => new()
@@ -42,8 +41,8 @@ public static class DomainBuilders
         AgencyName = "Test Agency",
         Subject = googleId,
         RUT = "12345678910A",
-        State = "TyT",
-        City = "TyT",
+        State = "Estado",
+        City = "Ciudad",
     };
 
     public static CompleteGoogleSignUpBroadcasterInput GoogleBroadcasterInput(string googleId = "google-sub-456") => new()
@@ -54,8 +53,8 @@ public static class DomainBuilders
         CountryCode = "UY",
         Subject = googleId,
         RUT = "12345678910A",
-        State = "TyT",
-        City = "TyT",
+        State = "Estado",
+        City = "Ciudad",
     };
 
     // --- Domain objects ---

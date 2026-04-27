@@ -21,11 +21,26 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
     public async Task<ResultAPI<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
     {
+        // Validar datos básicos antes de consultar BD
+        var validationResult = ValidateRegisterInput(input);
+        if (validationResult.IsFailure) return ResultAPI<AuthPayload>.BadRequest(validationResult);
+
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1);
 
+        if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
+        {
+            return ResultAPI<AuthPayload>.Conflict("El RUT ya está registrado.");
+        }
+
+        if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
+        {
+            return ResultAPI<AuthPayload>.Conflict("El email ya está registrado.");
+        }
+
         if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
         if (category is null) return ResultAPI<AuthPayload>.NotFound($"Category with id {1} not found.");
+
 
         Result<Broadcaster, AppError> result = Broadcaster.SignUp(input, country, category, hasher.Hash(input.Password));
 
@@ -42,11 +57,33 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
     public async Task<ResultAPI<AuthPayload>> RegisterClientAsync(RegisterClientInput input)
     {
+        // Validar datos básicos antes de consultar BD
+        var validationResult = ValidateRegisterInput(input);
+        if (validationResult.IsFailure) return ResultAPI<AuthPayload>.BadRequest(validationResult);
+
+        // Validar agencia
+        if (string.IsNullOrEmpty(input.AgencyName) || input.AgencyName.Length < 3)
+            return ResultAPI<AuthPayload>.BadRequest("AgencyName must be at least 3 characters long");
+        if (input.AgencyName.Length > 100)
+            return ResultAPI<AuthPayload>.BadRequest("AgencyName must be at most 100 characters long");
+        if (!input.AgencyName.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+            return ResultAPI<AuthPayload>.BadRequest("AgencyName must contain only letters");
+
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
         agency ??= new Agency(input.AgencyName);
 
         if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
+
+        if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
+        {
+            return ResultAPI<AuthPayload>.Conflict("El RUT ya está registrado.");
+        }
+
+        if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
+        {
+            return ResultAPI<AuthPayload>.Conflict("El email ya está registrado.");
+        }
 
         Result<Client, AppError> result = Client.SignUp(input, country, agency, hasher.Hash(input.Password));
 
@@ -159,5 +196,87 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private Result<AppError> ValidateRegisterInput(RegisterUserInput input)
+    {
+        return Result<AppError>.Combine(
+            ValidateEmail(input.Email),
+            ValidatePassword(input.Password),
+            ValidateFirstName(input.FirstName),
+            ValidateLastName(input.LastName),
+            ValidateRUT(input.RUT),
+            ValidateCity(input.City),
+            ValidateState(input.State),
+            ValidateStreet(input.Street)
+        );
+    }
+
+    private Result<AppError> ValidateEmail(string? email)
+    {
+        if (email == null) return Result<AppError>.Failure(AppError.Validation("Email is required"));
+        if (!email.Contains('@')) return Result<AppError>.Failure(AppError.Validation("Email is missing '@' character"));
+        if (email.Length < 10) return Result<AppError>.Failure(AppError.Validation("Email must be at least 10 characters long"));
+        if (email.Length > 100) return Result<AppError>.Failure(AppError.Validation("Email must be at most 100 characters long"));
+        return Result<AppError>.Success();
+    }
+
+    private Result<AppError> ValidatePassword(string? password)
+    {
+        if (password == null) return Result<AppError>.Failure(AppError.Validation("Password is required"));
+        if (password.Length < 10) return Result<AppError>.Failure(AppError.Validation("Password must be at least 10 characters long"));
+        if (password.Length > 60) return Result<AppError>.Failure(AppError.Validation("Password must be at most 60 characters long"));
+        return Result<AppError>.Success();
+    }
+
+    private Result<AppError> ValidateFirstName(string? firstName)
+    {
+        if (firstName == null) return Result<AppError>.Failure(AppError.Validation("FirstName is required"));
+        if (firstName.Length < 3) return Result<AppError>.Failure(AppError.Validation("FirstName must be at least 3 characters long"));
+        if (firstName.Length > 50) return Result<AppError>.Failure(AppError.Validation("FirstName must be at most 50 characters long"));
+        if (!firstName.All(char.IsLetter)) return Result<AppError>.Failure(AppError.Validation("FirstName must contain only letters"));
+        return Result<AppError>.Success();
+    }
+
+    private Result<AppError> ValidateLastName(string? lastName)
+    {
+        if (lastName == null) return Result<AppError>.Failure(AppError.Validation("LastName is required"));
+        if (lastName.Length < 3) return Result<AppError>.Failure(AppError.Validation("LastName must be at least 3 characters long"));
+        if (lastName.Length > 50) return Result<AppError>.Failure(AppError.Validation("LastName must be at most 50 characters long"));
+        if (!lastName.All(char.IsLetter)) return Result<AppError>.Failure(AppError.Validation("LastName must contain only letters"));
+        return Result<AppError>.Success();
+    }
+
+    private Result<AppError> ValidateRUT(string? rut)
+    {
+        if (rut == null) return Result<AppError>.Failure(AppError.Validation("RUT is required"));
+        if (rut.Length != 12) return Result<AppError>.Failure(AppError.Validation("RUT must be exactly 12 characters long"));
+        return Result<AppError>.Success();
+    }
+
+    private Result<AppError> ValidateCity(string? city)
+    {
+        if (city == null) return Result<AppError>.Failure(AppError.Validation("City is required"));
+        if (city.Length < 4) return Result<AppError>.Failure(AppError.Validation("City must be at least 4 characters long"));
+        if (city.Length > 100) return Result<AppError>.Failure(AppError.Validation("City must be at most 100 characters long"));
+        if (!city.All(char.IsLetter)) return Result<AppError>.Failure(AppError.Validation("City must contain only letters"));
+        return Result<AppError>.Success();
+    }
+
+    private Result<AppError> ValidateState(string? state)
+    {
+        if (state == null) return Result<AppError>.Failure(AppError.Validation("State is required"));
+        if (state.Length < 4) return Result<AppError>.Failure(AppError.Validation("State must be at least 4 characters long"));
+        if (state.Length > 100) return Result<AppError>.Failure(AppError.Validation("State must be at most 100 characters long"));
+        if (!state.All(char.IsLetter)) return Result<AppError>.Failure(AppError.Validation("State must contain only letters"));
+        return Result<AppError>.Success();
+    }
+
+    private Result<AppError> ValidateStreet(string? street)
+    {
+        if (street == null) return Result<AppError>.Success();
+        if (street.Length < 4) return Result<AppError>.Failure(AppError.Validation("Street must be at least 4 characters long"));
+        if (street.Length > 100) return Result<AppError>.Failure(AppError.Validation("Street must be at most 100 characters long"));
+        return Result<AppError>.Success();
     }
 }

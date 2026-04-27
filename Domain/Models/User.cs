@@ -49,14 +49,26 @@ public abstract class User : Entity
 
     public virtual Result<AppError> ValidateSignUp()
     {
-        return Result<AppError>.Combine(ValidateEmail(), ValidatePassword());
+        return Result<AppError>.Combine(
+            ValidateEmail(),
+            ValidatePassword(),
+            ValidateFirstName(),
+            ValidateLastName(),
+            ValidateRUT(),
+            Address.ValidateAddress()
+        );
     }
 
     public virtual Result<AppError> ValidateGoogleSignUp()
     {
         if (GoogleId == null) return Result<AppError>.Failure(AppError.Validation("GoogleId is required"));
 
-        return Result<AppError>.Success();
+        return Result<AppError>.Combine(
+            ValidateFirstName(),
+            ValidateLastName(),
+            ValidateRUT(),
+            Address.ValidateAddress()
+        );
     }
 
     public Result<AppError> ValidateEmail()
@@ -65,8 +77,8 @@ public abstract class User : Entity
 
         return Result<AppError>.Combine(
             Require(Email.Contains('@'), "Email is missing '@' character"),
-            Require(Email.Length >= 10, "Email is too short"),
-            Require(Email.Length <= 254, "Email is too long")
+            Require(Email.Length >= 10, "Email must be at least 10 characters long"),
+            Require(Email.Length <= 100, "Email must be at most 100 characters long")
         );
     }
 
@@ -74,7 +86,39 @@ public abstract class User : Entity
     {
         if (Password == null) return Result<AppError>.Failure(AppError.Validation("Password is required"));
 
-        return Result<AppError>.Success();
+        return Result<AppError>.Combine(
+            Require(Password.Length >= 10, "Password must be at least 10 characters long"),
+            Require(Password.Length <= 60, "Password must be at most 60 characters long")
+        );
+    }
+
+    public Result<AppError> ValidateFirstName()
+    {
+        if (FirstName == null) return Result<AppError>.Failure(AppError.Validation("FirstName is required"));
+
+        return Result<AppError>.Combine(
+            Require(FirstName.Length >= 3, "FirstName must be at least 3 characters long"),
+            Require(FirstName.Length <= 50, "FirstName must be at most 50 characters long"),
+            Require(FirstName.All(char.IsLetter), "FirstName must contain only letters")
+        );
+    }
+
+    public Result<AppError> ValidateLastName()
+    {
+        if (LastName == null) return Result<AppError>.Failure(AppError.Validation("LastName is required"));
+
+        return Result<AppError>.Combine(
+            Require(LastName.Length >= 3, "LastName must be at least 3 characters long"),
+            Require(LastName.Length <= 50, "LastName must be at most 50 characters long"),
+            Require(LastName.All(char.IsLetter), "LastName must contain only letters")
+        );
+    }
+
+    public Result<AppError> ValidateRUT()
+    {
+        if (RUT == null) return Result<AppError>.Failure(AppError.Validation("RUT is required"));
+
+        return Require(RUT.Length == 12, "RUT must be exactly 12 characters long");
     }
 
     [Key]
