@@ -7,5 +7,7 @@ public interface IUnitOfWork
     IClientRepository Clients { get; }
     ICountryRepository Countries { get; }
 
+    IAlpuServiceRepository Services { get; }
+
     Task SaveChangesAsync();
 }
