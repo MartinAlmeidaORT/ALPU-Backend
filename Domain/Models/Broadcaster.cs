@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Common;
+﻿using Domain.Common;
 using Domain.Common.Errors;
 using Domain.Common.Inputs.Auth;
 
 namespace Domain.Models;
 
-[Table("broadcaster")]
 public partial class Broadcaster : User
 {
     protected Broadcaster() { }
@@ -41,19 +39,13 @@ public partial class Broadcaster : User
         return Result<Broadcaster, AppError>.Success(newBroadcaster);
     }
 
-    [Column("category_id")]
     public int CategoryId { get; set; }
 
-    [ForeignKey("CategoryId")]
-    [InverseProperty("Broadcasters")]
     public virtual BroadcasterCategory Category { get; set; } = null!;
 
-    [InverseProperty("Broadcaster")]
     public virtual ICollection<Contract> Contracts { get; set; } = [];
 
-    [InverseProperty("Broadcaster")]
     public virtual ICollection<Demo> Demos { get; set; } = [];
 
-    [InverseProperty("Broadcaster")]
     public virtual ICollection<Membership> Memberships { get; set; } = [];
 }

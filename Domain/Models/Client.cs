@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Common;
+﻿using Domain.Common;
 using Domain.Common.Errors;
 using Domain.Common.Inputs.Auth;
 
 namespace Domain.Models;
 
-[Table("client")]
 public partial class Client : User
 {
     protected Client() { }
@@ -41,13 +39,9 @@ public partial class Client : User
         return Result<Client, AppError>.Success(newClient);
     }
 
-    [Column("agency_id")]
     public int AgencyId { get; set; }
 
-    [ForeignKey("AgencyId")]
-    [InverseProperty("Clients")]
     public virtual Agency Agency { get; set; } = null!;
 
-    [InverseProperty("Client")]
     public virtual ICollection<Contract> Contracts { get; set; } = [];
 }
