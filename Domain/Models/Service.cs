@@ -1,8 +1,10 @@
 ﻿using Domain.Common;
+using Domain.Common.Errors;
+using Domain.Common.Inputs;
 
 namespace Domain.Models;
 
-public partial class Service : Entity
+public abstract class Service : Entity
 {
     public int ServiceId { get; set; }
 
@@ -11,4 +13,6 @@ public partial class Service : Entity
     public virtual ICollection<Piece> Pieces { get; set; } = [];
 
     public virtual ICollection<VolumeDiscount> VolumeDiscounts { get; set; } = [];
+
+    public abstract Result<decimal, AppError> GetTotalPrice(CalculateContractServiceInput input);
 }

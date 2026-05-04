@@ -1,5 +1,6 @@
 ﻿using Domain.Common;
 using Domain.Common.Errors;
+using Domain.Common.Inputs;
 
 namespace Domain.Models;
 
@@ -7,10 +8,9 @@ public partial class ServiceDuration : Service
 {
     public virtual ICollection<ServicePrice> ServicePrices { get; set; } = [];
 
-
-    private Result<decimal, AppError> GetTotalPrice(bool discInterior, int pieces, int serviceId, int durationId)
+    public override Result<decimal, AppError> GetTotalPrice(CalculateContractServiceInput input)
     {
-        ServicePrice? servicePrice = ServicePrices.FirstOrDefault(sp => sp.ServiceId == serviceId && sp.DurationId == durationId);
+        ServicePrice? servicePrice = ServicePrices.FirstOrDefault(sp => sp.ServiceId == input.ServiceId && sp.DurationId == input.Options.DurationId);
 
         if (servicePrice == null)
         {
@@ -21,13 +21,13 @@ public partial class ServiceDuration : Service
         decimal discountAmmount = 0m;
         foreach (var discount in VolumeDiscounts)
         {
-            if (pieces >= discount.MinQuantity)
+            if (input.Options.Pieces >= discount.MinQuantity)
             {
                 discountAmmount = discount.Discount * totalPrice;
             }
         }
         totalPrice -= discountAmmount;
-        if (discInterior)
+        if (input.Options.IsInterior == true)
         {
             totalPrice -= totalPrice * 0.7m;
         }

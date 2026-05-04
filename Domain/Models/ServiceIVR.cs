@@ -1,5 +1,6 @@
 ﻿using Domain.Common;
 using Domain.Common.Errors;
+using Domain.Common.Inputs;
 
 namespace Domain.Models;
 
@@ -13,10 +14,13 @@ public partial class ServiceIVR : Service
 
     public virtual ICollection<RangeIVR> RangeIVR { get; set; } = [];
 
-    private Result<decimal, AppError> GetTotalPrice(bool discInterior, int additionalMessages, string message)
+    public override Result<decimal, AppError> GetTotalPrice(CalculateContractServiceInput input)
     {
         decimal totalPrice = InitialMessagePrice;
-        
+
+        string message = input.Options.MessageIVR ?? "";
+        int additionalMessages = input.Options.AdditionalMessageIVR ?? 0;
+
         if (additionalMessages > 0)
         {
             totalPrice += additionalMessages * AdditionalMessagePrice;
@@ -26,14 +30,17 @@ public partial class ServiceIVR : Service
         if (wordCount <= 100)
         {
             totalPrice += 21m * wordCount;
-        } else if (wordCount <= 200)
+        }
+        else if (wordCount <= 200)
         {
             totalPrice += 19m * wordCount;
-        } else {
+        }
+        else
+        {
             totalPrice += 17m * wordCount;
         }
 
-        if (discInterior)
+        if (input.Options.IsInterior == true)
         {
             totalPrice -= totalPrice * 0.7m;
         }
@@ -48,6 +55,6 @@ public partial class ServiceIVR : Service
             return 0;
         }
 
-        return text.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
+        return text.Split([' ', '\t', '\n', '\r'], StringSplitOptions.RemoveEmptyEntries).Length;
     }
 }

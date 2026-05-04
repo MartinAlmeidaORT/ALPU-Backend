@@ -1,5 +1,6 @@
 ﻿using Domain.Common;
 using Domain.Common.Errors;
+using Domain.Common.Inputs;
 
 namespace Domain.Models;
 
@@ -7,14 +8,14 @@ public partial class ServiceSpecial : Service
 {
     public decimal Price { get; set; }
 
-    private Result<decimal, AppError> GetTotalPrice(bool discInterior, bool? rechargeMassMedia)
+    public override Result<decimal, AppError> GetTotalPrice(CalculateContractServiceInput input)
     {
         decimal totalPrice = Price;
-        if (discInterior)
+        if (input.Options.IsInterior == true)
         {
             totalPrice -= totalPrice * 0.7m;
         }
-        if (rechargeMassMedia == true)
+        if (input.Options.HasMassMediaBroadcast == true)
         {
             totalPrice += totalPrice * 0.3m;
         }

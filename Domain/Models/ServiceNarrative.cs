@@ -1,5 +1,6 @@
 ﻿using Domain.Common;
 using Domain.Common.Errors;
+using Domain.Common.Inputs;
 
 namespace Domain.Models;
 
@@ -11,26 +12,27 @@ public partial class ServiceNarrative : Service
 
     public decimal RolPrice { get; set; }
 
-    private Result<decimal, AppError> GetTotalPrice(bool discInterior, int minutes, int roles, bool nonComercial, bool internet, bool lypSync)
+    public override Result<decimal, AppError> GetTotalPrice(CalculateContractServiceInput input)
     {
         decimal totalPrice = BasePrice;
-        if (minutes > 3) 
+        int minutes = input.Options.NarrativeMinutes ?? 0;
+        if (minutes > 3)
         {
             totalPrice += minutes * ExtraPrice;
         }
-        if (discInterior)
+        if (input.Options.IsInterior == true)
         {
             totalPrice -= totalPrice * 0.7m;
         }
-        if (nonComercial)
+        if (input.Options.IsNonComercial == true)
         {
             totalPrice -= totalPrice * 0.2m;
         }
-        if (internet)
+        if (input.Options.HasInternetPromo == true)
         {
             totalPrice += totalPrice * 2m;
         }
-        if (lypSync)
+        if (input.Options.HasLipSync == true)
         {
             totalPrice += totalPrice * 0.2m;
         }
