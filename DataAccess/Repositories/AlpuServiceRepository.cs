@@ -2,6 +2,7 @@ using DataAccess.EntityFramework;
 using Domain.Common.Abstracts;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -9,5 +10,8 @@ public class AlpuServiceRepository(DatabaseContext context) : RepositoryBase<Ser
 {
     public IQueryable<Service> GetAllServices() => GetAll();
 
-    public async Task<Service?> GetServiceByIdAsync(int id) => await Get(id);
+    public async Task<Service?> GetServiceByIdAsync(int id) => await context.Services
+        .Where(s => s.ServiceId == id)
+        .Include(s => ((ServiceDuration)s).ServicePrices)
+        .FirstOrDefaultAsync();
 }
