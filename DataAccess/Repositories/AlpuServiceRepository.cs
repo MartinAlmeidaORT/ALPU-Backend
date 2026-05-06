@@ -13,5 +13,6 @@ public class AlpuServiceRepository(DatabaseContext context) : RepositoryBase<Ser
     public async Task<Service?> GetServiceByIdAsync(int id) => await context.Services
         .Where(s => s.ServiceId == id)
         .Include(s => ((ServiceDuration)s).ServicePrices)
+        .OrderBy(s => ((ServiceDuration)s).ServicePrices.OrderBy(sp => sp.DurationId))
         .FirstOrDefaultAsync();
 }
