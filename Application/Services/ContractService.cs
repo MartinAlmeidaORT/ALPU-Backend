@@ -21,15 +21,19 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
         }
 
         // Checkear descuentos TV+radio
+        ServicePricePayload[] pricesPayload = new ServicePricePayload[services.Count];
         decimal totalPrice = 0;
         for (int i = 0; i < services.Count; i++)
         {
-            totalPrice += services[i].GetTotalPrice(input.Services[i]).Value;
+            pricesPayload[i] = services[i].GetTotalPrice(input.Services[i]).Value;
+            totalPrice += pricesPayload[i].TotalPriceWithDiscount;
         }
 
         CalculateContractPayload payload = new()
         {
-            TotalPrice = totalPrice
+            TotalPrice = totalPrice,
+            // ServicePriceWithDiscount = prices
+            ServicePrice = pricesPayload,
         };
         return ResultAPI<CalculateContractPayload>.Success(payload);
     }

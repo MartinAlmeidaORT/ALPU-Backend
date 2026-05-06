@@ -1,6 +1,7 @@
 ﻿using Domain.Common;
 using Domain.Common.Errors;
 using Domain.Common.Inputs;
+using Domain.Common.Payloads;
 
 namespace Domain.Models;
 
@@ -14,5 +15,5 @@ public abstract class Service : Entity
 
     public virtual ICollection<VolumeDiscount> VolumeDiscounts { get; set; } = [];
 
-    public abstract Result<decimal, AppError> GetTotalPrice(CalculateContractServiceInput input);
+    public abstract Result<ServicePricePayload, AppError> GetTotalPrice(CalculateContractServiceInput input);
 }
