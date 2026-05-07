@@ -15,7 +15,6 @@ public class Query
     public IQueryable<Country> GetCountries([Service] ICountryService countryService) => countryService.GetAllCountries();
 
     [UseProjection]
-
-    public IQueryable<Service> GetServices([Service] IAlpuService serviceRepository) => serviceRepository.GetAllServices();
-
+    [UseSorting]
+    public IQueryable<Service> GetServices([Service] IAlpuService alpuService) => alpuService.GetAllServices();
 }

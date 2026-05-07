@@ -15,6 +15,10 @@ public class ServiceDurationType : ObjectType<ServiceDuration>
     protected override void Configure(IObjectTypeDescriptor<ServiceDuration> descriptor)
     {
         descriptor.Name("ServiceDuration");
+
+        descriptor
+             .Field(s => s.ServicePrices)
+             .UseSorting();
     }
 }
 
