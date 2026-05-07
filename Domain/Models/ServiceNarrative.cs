@@ -45,7 +45,9 @@ public partial class ServiceNarrative : Service
 
         return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
         {
-            Service = this,
+            PieceName = input.PieceName,
+            Variants = null,
+            Service = Name,
             Price = basePrice,
             Discount = discountAmount,
             TotalPriceWithDiscount = totalPrice - discountAmount,

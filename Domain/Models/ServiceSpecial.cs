@@ -24,7 +24,9 @@ public partial class ServiceSpecial : Service
 
         return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
         {
-            Service = this,
+            PieceName = input.PieceName,
+            Variants = null,
+            Service = Name,
             Price = Price,
             Discount = discountAmount,
             TotalPriceWithDiscount = totalPrice - discountAmount,

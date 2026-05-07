@@ -13,6 +13,8 @@ public record CalculateContractServiceInput
 {
     public int ServiceId { get; set; }
 
+    public string PieceName { get; set; } = null!;
+
     public ServiceFlagsInput Options { get; set; } = null!;
 }
 
@@ -41,4 +43,6 @@ public record ServiceFlagsInput
     public int? Pieces { get; set; }
 
     public int? DurationId { get; set; }
+
+    public bool MultipleBroadcaster { get; set; }
 }

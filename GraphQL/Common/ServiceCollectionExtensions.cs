@@ -58,6 +58,7 @@ public static class ServiceCollectionExtensions
         .AddType<ServiceIVRType>()
         .AddType<ServiceNarrativeType>()
         .AddType<ServiceSpecialType>()
+        .AddType<PieceType>()
         .AddType<GoogleAuthInputType>()
         .AddType<CompleteGoogleBroadcasterSignUpInputType>()
         .AddType<CompleteGoogleClientSignUpInputType>()

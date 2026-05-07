@@ -35,7 +35,9 @@ public partial class ServiceDuration : Service
 
         return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
         {
-            Service = this,
+            PieceName = input.PieceName,
+            Variants = input.Options.Pieces ?? 0,
+            Service = Name,
             Price = servicePrice.Price,
             Discount = discountAmount,
             TotalPriceWithDiscount = totalPrice,

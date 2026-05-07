@@ -6,7 +6,7 @@ public partial class Piece : Entity
 {
     public int PieceId { get; set; }
 
-    public int ContractId { get; set; }
+    public int? ContractId { get; set; }
 
     public string Name { get; set; } = null!;
 
