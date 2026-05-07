@@ -44,5 +44,5 @@ public record ServiceFlagsInput
 
     public int? DurationId { get; set; }
 
-    public bool MultipleBroadcaster { get; set; }
+    public bool? MultipleBroadcaster { get; set; }
 }
