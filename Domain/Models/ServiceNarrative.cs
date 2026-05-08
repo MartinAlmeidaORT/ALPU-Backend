@@ -15,32 +15,42 @@ public partial class ServiceNarrative : Service
 
     public override Result<ServicePricePayload, AppError> GetTotalPrice(CalculateContractServiceInput input)
     {
-        decimal totalPrice = BasePrice;
-        decimal discountAmount = totalPrice;
+        decimal basePrice;
 
-        int minutes = input.Options.NarrativeMinutes ?? 0;
-        if (minutes > 3)
+        if (input.Options.OverridePrice != null && input.Options.OverridePrice.Value > 0)
         {
-            totalPrice += minutes * ExtraPrice;
+            basePrice = input.Options.OverridePrice.Value;
+        }
+        else
+        {
+            basePrice = BasePrice;
+            int minutes = input.Options.NarrativeMinutes ?? 0;
+            if (minutes > 3)
+            {
+                basePrice += minutes * ExtraPrice;
+            }
+            if (input.Options.RoleQuantity > 0)
+            {
+                basePrice += RolPrice * (decimal)input.Options.RoleQuantity;
+            }
+            if (input.Options.HasInternetPromo == true)
+            {
+                basePrice += basePrice * 2m;
+            }
         }
 
-        decimal basePrice = totalPrice;
-
+        decimal discountAmount = 0;
         if (input.Options.IsInterior == true)
         {
-            discountAmount += totalPrice * 0.7m;
+            discountAmount += basePrice * 0.3m;
         }
         if (input.Options.IsNonComercial == true)
         {
-            discountAmount += totalPrice * 0.2m;
-        }
-        if (input.Options.HasInternetPromo == true)
-        {
-            discountAmount += totalPrice * 2m;
+            discountAmount += basePrice * 0.2m;
         }
         if (input.Options.HasLipSync == true)
         {
-            discountAmount += totalPrice * 0.2m;
+            discountAmount += basePrice * 0.2m;
         }
 
         return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
@@ -50,7 +60,7 @@ public partial class ServiceNarrative : Service
             Service = Name,
             Price = basePrice,
             Discount = discountAmount,
-            TotalPriceWithDiscount = totalPrice - discountAmount,
+            TotalPriceWithDiscount = basePrice - discountAmount,
             ServiceFlags = input.Options
         });
     }

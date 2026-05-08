@@ -11,15 +11,15 @@ public partial class ServiceSpecial : Service
 
     public override Result<ServicePricePayload, AppError> GetTotalPrice(CalculateContractServiceInput input)
     {
-        decimal totalPrice = Price;
+        decimal basePrice = Price;
+        if (input.Options.HasMassMediaBroadcast == true)
+        {
+            basePrice += basePrice * 1.3m;
+        }
         decimal discountAmount = 0;
         if (input.Options.IsInterior == true)
         {
-            discountAmount += totalPrice * 0.7m;
-        }
-        if (input.Options.HasMassMediaBroadcast == true)
-        {
-            discountAmount += totalPrice * 0.3m;
+            discountAmount += basePrice * 0.3m;
         }
 
         return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
@@ -27,9 +27,9 @@ public partial class ServiceSpecial : Service
             PieceName = input.PieceName,
             Variants = null,
             Service = Name,
-            Price = Price,
+            Price = basePrice,
             Discount = discountAmount,
-            TotalPriceWithDiscount = totalPrice - discountAmount,
+            TotalPriceWithDiscount = basePrice - discountAmount,
             ServiceFlags = input.Options
         });
     }

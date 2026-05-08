@@ -18,29 +18,35 @@ public partial class ServiceDuration : Service
             return Result<ServicePricePayload, AppError>.Failure(AppError.NotFound("Service price not found"));
         }
 
-        decimal totalPrice = servicePrice.Price;
+        decimal basePrice = servicePrice.Price;
+
+        if (input.Options.Pieces > 0 && servicePrice.VariantPrice != null)
+        {
+            basePrice += (decimal)(servicePrice.VariantPrice * input.Options.Pieces);
+        }
+
         decimal discountAmount = 0m;
         foreach (var discount in VolumeDiscounts)
         {
             if (input.Options.Pieces >= discount.MinQuantity)
             {
-                discountAmount = discount.Discount * totalPrice;
+                discountAmount = discount.Discount * basePrice;
             }
         }
-        totalPrice -= discountAmount;
         if (input.Options.IsInterior == true)
         {
-            totalPrice -= totalPrice * 0.7m;
+            discountAmount += basePrice * 0.3m;
         }
 
         return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
         {
+            Service = Name,
             PieceName = input.PieceName,
             Variants = input.Options.Pieces ?? 0,
-            Service = Name,
-            Price = servicePrice.Price,
+            Price = basePrice,
             Discount = discountAmount,
-            TotalPriceWithDiscount = totalPrice,
+            DurationId = input.Options.DurationId,
+            TotalPriceWithDiscount = basePrice - discountAmount,
             ServiceFlags = input.Options
         });
     }

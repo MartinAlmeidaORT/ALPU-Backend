@@ -16,6 +16,7 @@ public record ServicePricePayload
     public string Service { get; init; } = null!;
     public decimal Price { get; init; }
     public decimal Discount { get; init; }
+    public int? DurationId { get; init; }
     public int? Variants { get; init; }
     public decimal TotalPriceWithDiscount { get; init; }
     public ServiceFlagsInput ServiceFlags { get; init; } = null!;
