@@ -1,3 +1,4 @@
+using Domain.Common.Inputs;
 using Domain.Models;
 
 namespace Domain.Common.Payloads;
@@ -17,4 +18,5 @@ public record ServicePricePayload
     public decimal Discount { get; init; }
     public int? Variants { get; init; }
     public decimal TotalPriceWithDiscount { get; init; }
+    public ServiceFlagsInput ServiceFlags { get; init; } = null!;
 }

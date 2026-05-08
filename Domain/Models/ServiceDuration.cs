@@ -41,6 +41,7 @@ public partial class ServiceDuration : Service
             Price = servicePrice.Price,
             Discount = discountAmount,
             TotalPriceWithDiscount = totalPrice,
+            ServiceFlags = input.Options
         });
     }
 }

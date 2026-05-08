@@ -30,6 +30,7 @@ public partial class ServiceSpecial : Service
             Price = Price,
             Discount = discountAmount,
             TotalPriceWithDiscount = totalPrice - discountAmount,
+            ServiceFlags = input.Options
         });
     }
 }

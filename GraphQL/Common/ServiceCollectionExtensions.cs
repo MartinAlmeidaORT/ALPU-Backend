@@ -65,6 +65,7 @@ public static class ServiceCollectionExtensions
         .AddType<CalculateContractInputType>()
         .AddType<CalculateContractServiceInputType>()
         .AddType<ServiceFlagsInputType>()
+        .AddType<ServiceFlagsType>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddProjections()             // Optimizes SQL queries

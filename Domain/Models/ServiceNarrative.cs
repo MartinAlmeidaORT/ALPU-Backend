@@ -51,6 +51,7 @@ public partial class ServiceNarrative : Service
             Price = basePrice,
             Discount = discountAmount,
             TotalPriceWithDiscount = totalPrice - discountAmount,
+            ServiceFlags = input.Options
         });
     }
 }
