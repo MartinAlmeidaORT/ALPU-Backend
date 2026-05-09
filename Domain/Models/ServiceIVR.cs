@@ -63,7 +63,10 @@ public partial class ServiceIVR : Service
             Price = basePrice,
             Discount = discountAmount,
             TotalPriceWithDiscount = basePrice - discountAmount,
-            ServiceFlags = input.Options
+            ServiceFlags = [
+                new (input.Options.OverridePrice != null && input.Options.OverridePrice > 0, "Precio negociado"),
+                new (input.Options.IsInterior ?? false, "En interior")
+            ]
         });
     }
 

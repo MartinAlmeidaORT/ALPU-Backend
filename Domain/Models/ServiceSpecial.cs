@@ -30,7 +30,10 @@ public partial class ServiceSpecial : Service
             Price = basePrice,
             Discount = discountAmount,
             TotalPriceWithDiscount = basePrice - discountAmount,
-            ServiceFlags = input.Options
+            ServiceFlags = [
+                new (input.Options.IsInterior ?? false, "En interior"),
+                new (input.Options.HasMassMediaBroadcast ?? false, "Difusion en medios masivos"),
+            ]
         });
     }
 }

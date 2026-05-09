@@ -61,7 +61,13 @@ public partial class ServiceNarrative : Service
             Price = basePrice,
             Discount = discountAmount,
             TotalPriceWithDiscount = basePrice - discountAmount,
-            ServiceFlags = input.Options
+            ServiceFlags = [
+                new (input.Options.OverridePrice != null && input.Options.OverridePrice > 0, "Precio negociado"),
+                new (input.Options.NarrativeMinutes != null && input.Options.NarrativeMinutes > 0, $"Minutos extras: {input.Options.NarrativeMinutes}"),
+                new (input.Options.IsInterior ?? false, "En interior"),
+                new (input.Options.IsNonComercial ?? false, "No comercial"),
+                new (input.Options.HasLipSync ?? false, "Sincro labial")
+            ]
         });
     }
 }

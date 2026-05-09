@@ -45,9 +45,11 @@ public partial class ServiceDuration : Service
             Variants = input.Options.Pieces ?? 0,
             Price = basePrice,
             Discount = discountAmount,
-            DurationId = input.Options.DurationId,
             TotalPriceWithDiscount = basePrice - discountAmount,
-            ServiceFlags = input.Options
+            ServiceFlags = [
+                new (input.Options.OverridePrice != null && input.Options.OverridePrice > 0, "Precio negociado"),
+                new (input.Options.IsInterior ?? false, "En interior")
+            ]
         });
     }
 }

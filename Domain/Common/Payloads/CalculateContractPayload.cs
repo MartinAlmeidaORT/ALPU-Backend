@@ -1,13 +1,9 @@
-using Domain.Common.Inputs;
-using Domain.Models;
-
 namespace Domain.Common.Payloads;
 
 public record CalculateContractPayload
 {
     public decimal TotalPrice { get; init; }
     public ServicePricePayload[] ServicePrice { get; init; } = [];
-    // public (decimal, decimal)[] ServicePriceWithDiscount { get; init; }
 }
 
 public record ServicePricePayload
@@ -19,5 +15,7 @@ public record ServicePricePayload
     public int? DurationId { get; init; }
     public int? Variants { get; init; }
     public decimal TotalPriceWithDiscount { get; init; }
-    public ServiceFlagsInput ServiceFlags { get; init; } = null!;
+    public ServiceFlagPayload[] ServiceFlags { get; init; } = null!;
 }
+
+public record ServiceFlagPayload(bool IsOn, string Label);
