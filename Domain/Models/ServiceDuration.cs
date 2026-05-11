@@ -1,7 +1,7 @@
-﻿using Domain.Common;
-using Domain.Common.Errors;
+﻿using Domain.Common.Errors;
 using Domain.Common.Inputs;
 using Domain.Common.Payloads;
+using FluentResults;
 
 namespace Domain.Models;
 
@@ -9,13 +9,13 @@ public partial class ServiceDuration : Service
 {
     public virtual ICollection<ServicePrice> ServicePrices { get; set; } = [];
 
-    public override Result<ServicePricePayload, AppError> GetTotalPrice(CalculateContractServiceInput input)
+    public override Result<ServicePricePayload> GetTotalPrice(CalculateContractServiceInput input)
     {
         ServicePrice? servicePrice = ServicePrices.FirstOrDefault(sp => sp.ServiceId == input.ServiceId && sp.DurationId == input.Options.DurationId);
 
         if (servicePrice == null)
         {
-            return Result<ServicePricePayload, AppError>.Failure(AppError.NotFound("Service price not found"));
+            return new NotFoundError("Service price not found");
         }
 
         decimal basePrice = servicePrice.Price;
@@ -38,7 +38,7 @@ public partial class ServiceDuration : Service
             discountAmount += basePrice * 0.3m;
         }
 
-        return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
+        return new ServicePricePayload
         {
             Service = Name,
             PieceName = input.PieceName,
@@ -50,6 +50,6 @@ public partial class ServiceDuration : Service
                 new (input.Options.OverridePrice != null && input.Options.OverridePrice > 0, "Precio negociado"),
                 new (input.Options.IsInterior ?? false, "En interior")
             ]
-        });
+        };
     }
 }

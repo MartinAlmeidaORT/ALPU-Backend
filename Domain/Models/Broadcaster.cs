@@ -1,6 +1,5 @@
-﻿using Domain.Common;
-using Domain.Common.Errors;
 using Domain.Common.Inputs.Auth;
+using FluentResults;
 
 namespace Domain.Models;
 
@@ -22,21 +21,21 @@ public partial class Broadcaster : User
         Category = category;
     }
 
-    public static Result<Broadcaster, AppError> SignUp(RegisterBroadcasterInput input, Country country, BroadcasterCategory category, string passwordHashed)
+    public static Result<Broadcaster> SignUp(RegisterBroadcasterInput input, Country country, BroadcasterCategory category, string passwordHashed)
     {
         Broadcaster newBroadcaster = new(input, country, category);
-        Result<AppError> result = newBroadcaster.ValidateSignUp();
-        if (result.IsFailure) return Result<Broadcaster, AppError>.Failure(result.Errors);
+        Result errors = newBroadcaster.ValidateSignUp();
+        if (errors.IsFailed) return errors;
         newBroadcaster.Password = passwordHashed;
-        return Result<Broadcaster, AppError>.Success(newBroadcaster);
+        return newBroadcaster;
     }
 
-    public static Result<Broadcaster, AppError> SignUpFromGoogle(CompleteGoogleSignUpBroadcasterInput input, Country country, BroadcasterCategory category)
+    public static Result<Broadcaster> SignUpFromGoogle(CompleteGoogleSignUpBroadcasterInput input, Country country, BroadcasterCategory category)
     {
         Broadcaster newBroadcaster = new(input, country, category);
-        Result<AppError> result = newBroadcaster.ValidateGoogleSignUp();
-        if (result.IsFailure) return Result<Broadcaster, AppError>.Failure(result.Errors);
-        return Result<Broadcaster, AppError>.Success(newBroadcaster);
+        Result errors = newBroadcaster.ValidateGoogleSignUp();
+        if (errors.IsFailed) return errors;
+        return newBroadcaster;
     }
 
     public int CategoryId { get; set; }

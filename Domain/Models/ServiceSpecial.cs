@@ -1,7 +1,6 @@
-﻿using Domain.Common;
-using Domain.Common.Errors;
-using Domain.Common.Inputs;
+﻿using Domain.Common.Inputs;
 using Domain.Common.Payloads;
+using FluentResults;
 
 namespace Domain.Models;
 
@@ -9,7 +8,7 @@ public partial class ServiceSpecial : Service
 {
     public decimal Price { get; set; }
 
-    public override Result<ServicePricePayload, AppError> GetTotalPrice(CalculateContractServiceInput input)
+    public override Result<ServicePricePayload> GetTotalPrice(CalculateContractServiceInput input)
     {
         decimal basePrice = Price;
         if (input.Options.HasMassMediaBroadcast == true)
@@ -22,7 +21,7 @@ public partial class ServiceSpecial : Service
             discountAmount += basePrice * 0.3m;
         }
 
-        return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
+        return new ServicePricePayload
         {
             PieceName = input.PieceName,
             Variants = null,
@@ -34,6 +33,6 @@ public partial class ServiceSpecial : Service
                 new (input.Options.IsInterior ?? false, "En interior"),
                 new (input.Options.HasMassMediaBroadcast ?? false, "Difusion en medios masivos"),
             ]
-        });
+        };
     }
 }

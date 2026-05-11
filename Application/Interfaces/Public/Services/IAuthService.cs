@@ -1,20 +1,20 @@
-using Application.Common;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
+using FluentResults;
 
 namespace Application.Interfaces.Public.Services;
 
 public interface IAuthService
 {
-    Task<ResultAPI<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input);
+    Task<Result<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input);
 
-    Task<ResultAPI<AuthPayload>> RegisterClientAsync(RegisterClientInput input);
+    Task<Result<AuthPayload>> RegisterClientAsync(RegisterClientInput input);
 
-    Task<ResultAPI<AuthPayload>> LoginAsync(UserLoginInput input);
+    Task<Result<AuthPayload>> LoginAsync(UserLoginInput input);
 
-    Task<ResultAPI<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input);
+    Task<Result<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input);
 
-    Task<ResultAPI<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input);
+    Task<Result<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input);
 
-    Task<ResultAPI<AuthPayload>> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input);
+    Task<Result<AuthPayload>> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input);
 }

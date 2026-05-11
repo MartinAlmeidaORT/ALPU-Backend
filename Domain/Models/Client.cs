@@ -1,6 +1,6 @@
-﻿using Domain.Common;
 using Domain.Common.Errors;
 using Domain.Common.Inputs.Auth;
+using FluentResults;
 
 namespace Domain.Models;
 
@@ -22,21 +22,49 @@ public partial class Client : User
         Agency = agency;
     }
 
-    public static Result<Client, AppError> SignUp(RegisterClientInput input, Country country, Agency agency, string passwordHashed)
+    public static Result<Client> SignUp(RegisterClientInput input, Country country, Agency agency, string passwordHashed)
     {
         Client newClient = new(input, country, agency);
-        Result<AppError> result = newClient.ValidateSignUp();
-        if (!result.IsSuccess) return Result<Client, AppError>.Failure(result.Errors);
+        Result errors = newClient.ValidateSignUp();
+        if (errors.IsFailed) return errors;
         newClient.Password = passwordHashed;
-        return Result<Client, AppError>.Success(newClient);
+        return newClient;
     }
 
-    public static Result<Client, AppError> SignUpFromGoogle(CompleteGoogleSignUpClientInput input, Country country, Agency agency)
+    public static Result<Client> SignUpFromGoogle(CompleteGoogleSignUpClientInput input, Country country, Agency agency)
     {
         Client newClient = new(input, country, agency);
-        Result<AppError> result = newClient.ValidateGoogleSignUp();
-        if (!result.IsSuccess) return Result<Client, AppError>.Failure(result.Errors);
-        return Result<Client, AppError>.Success(newClient);
+        Result errors = newClient.ValidateGoogleSignUp();
+        if (errors.IsFailed) return errors;
+        return newClient;
+    }
+
+    public override Result ValidateSignUp()
+    {
+        return Result.Merge(
+            base.ValidateSignUp(),
+            ValidateAgency()
+        );
+    }
+
+    public override Result ValidateGoogleSignUp()
+    {
+        return Result.Merge(
+            base.ValidateGoogleSignUp(),
+            ValidateAgency()
+        );
+    }
+
+    public Result ValidateAgency()
+    {
+        if (Agency == null)
+        {
+            return ClientErrors.AgencyIsRequired();
+        }
+        else
+        {
+            return Result.Ok();
+        }
     }
 
     public int AgencyId { get; set; }
@@ -44,4 +72,11 @@ public partial class Client : User
     public virtual Agency Agency { get; set; } = null!;
 
     public virtual ICollection<Contract> Contracts { get; set; } = [];
+}
+
+public class ClientErrors
+{
+    public class AgencyIsRequiredError(string msg) : ValidationError(msg);
+
+    public static AgencyIsRequiredError AgencyIsRequired() => new($"Debe registrar una agencia.");
 }

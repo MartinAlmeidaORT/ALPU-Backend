@@ -2,6 +2,7 @@
 using Domain.Common.Errors;
 using Domain.Common.Inputs;
 using Domain.Common.Payloads;
+using FluentResults;
 
 namespace Domain.Models;
 
@@ -13,7 +14,7 @@ public partial class ServiceNarrative : Service
 
     public decimal RolPrice { get; set; }
 
-    public override Result<ServicePricePayload, AppError> GetTotalPrice(CalculateContractServiceInput input)
+    public override Result<ServicePricePayload> GetTotalPrice(CalculateContractServiceInput input)
     {
         decimal basePrice;
 
@@ -53,7 +54,7 @@ public partial class ServiceNarrative : Service
             discountAmount += basePrice * 0.2m;
         }
 
-        return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
+        return new ServicePricePayload
         {
             PieceName = input.PieceName,
             Variants = null,
@@ -68,6 +69,6 @@ public partial class ServiceNarrative : Service
                 new (input.Options.IsNonComercial ?? false, "No comercial"),
                 new (input.Options.HasLipSync ?? false, "Sincro labial")
             ]
-        });
+        };
     }
 }
