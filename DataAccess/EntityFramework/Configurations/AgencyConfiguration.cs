@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations;
+
 public class AgencyConfiguration : IEntityTypeConfiguration<Agency>
 {
     public void Configure(EntityTypeBuilder<Agency> builder)

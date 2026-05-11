@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations.Contracts;
+
 public class VolumeDiscountConfiguration : IEntityTypeConfiguration<VolumeDiscount>
 {
     public void Configure(EntityTypeBuilder<VolumeDiscount> builder)

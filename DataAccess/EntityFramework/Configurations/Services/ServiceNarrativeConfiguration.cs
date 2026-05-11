@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations.Services;
+
 public class ServiceNarrativeConfiguration : IEntityTypeConfiguration<ServiceNarrative>
 {
     public void Configure(EntityTypeBuilder<ServiceNarrative> builder)

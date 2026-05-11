@@ -7,7 +7,7 @@ namespace Application.Interfaces.Public.Services;
 
 public interface IContractService
 {
-    Task<Result<CalculateContractPayload>> CalculateContract(CalculateContractInput payload);
+    Task<ResultAPI<CalculateContractPayload>> CalculateContract(CalculateContractInput input);
     IQueryable<Contract> GetAllContracts();
     Task<Contract?> GetContractByIdAsync(int id);
     Task<Contract> CreateContractAsync(Contract contract);

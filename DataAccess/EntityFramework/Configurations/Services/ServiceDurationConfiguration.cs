@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations.Services;
+
 public class ServiceDurationConfiguration : IEntityTypeConfiguration<ServiceDuration>
 {
     public void Configure(EntityTypeBuilder<ServiceDuration> builder)
