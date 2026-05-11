@@ -10,8 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Domain.Interfaces.Private;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
-using Application.Common;
-using Domain.Common.Errors;
+using FluentResults;
 
 namespace Application.Services;
 
@@ -19,104 +18,85 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 {
     private readonly IConfiguration _config = configuration;
 
-    public async Task<ResultAPI<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
+    public async Task<Result<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
     {
-        // Validar datos básicos antes de consultar BD
-        var validationResult = ValidateRegisterInput(input);
-        if (validationResult.IsFailure) return ResultAPI<AuthPayload>.BadRequest(validationResult);
-
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
-        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1);
+
+        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1)
+        ?? throw new ArgumentNullException($"La categoria de locutor {1} no existe en la base de datos.");
 
         if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
         {
-            return ResultAPI<AuthPayload>.Conflict("El RUT ya está registrado.");
+            return UserErrors.DuplicatedRUT(input.RUT);
         }
 
         if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
         {
-            return ResultAPI<AuthPayload>.Conflict("El email ya está registrado.");
+            return UserErrors.DuplicatedEmail(input.Email);
         }
 
-        if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
-        if (category is null) return ResultAPI<AuthPayload>.NotFound($"Category with id {1} not found.");
+        if (country is null)
+        {
+            return CountryErrors.CountryNotFound(input.CountryCode);
+        }
 
+        Result<Broadcaster> result = Broadcaster.SignUp(input, country, category, hasher.Hash(input.Password));
 
-        Result<Broadcaster, AppError> result = Broadcaster.SignUp(input, country, category, hasher.Hash(input.Password));
+        if (result.IsFailed) return result.ToResult<AuthPayload>();
 
-        if (result.IsFailure) return ResultAPI<AuthPayload>.BadRequest(result);
-
-        if (result.Value is not Broadcaster broadcaster)
-            return ResultAPI<AuthPayload>.Internal("User is not a broadcaster");
-
-        unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
+        unitOfWork.Broadcasters.CreateBroadcaster(result.Value);
         await unitOfWork.SaveChangesAsync();
 
-        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(broadcaster), broadcaster));
+        return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
     }
 
-    public async Task<ResultAPI<AuthPayload>> RegisterClientAsync(RegisterClientInput input)
+    public async Task<Result<AuthPayload>> RegisterClientAsync(RegisterClientInput input)
     {
-        // Validar datos básicos antes de consultar BD
-        var validationResult = ValidateRegisterInput(input);
-        if (validationResult.IsFailure) return ResultAPI<AuthPayload>.BadRequest(validationResult);
-
-        // Validar agencia
-        if (string.IsNullOrEmpty(input.AgencyName) || input.AgencyName.Length < 3)
-            return ResultAPI<AuthPayload>.BadRequest("AgencyName must be at least 3 characters long");
-        if (input.AgencyName.Length > 100)
-            return ResultAPI<AuthPayload>.BadRequest("AgencyName must be at most 100 characters long");
-        if (!input.AgencyName.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
-            return ResultAPI<AuthPayload>.BadRequest("AgencyName must contain only letters");
-
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
         agency ??= new Agency(input.AgencyName);
 
-        if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
-
         if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
         {
-            return ResultAPI<AuthPayload>.Conflict("El RUT ya está registrado.");
+            return UserErrors.DuplicatedRUT(input.RUT);
         }
 
         if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
         {
-            return ResultAPI<AuthPayload>.Conflict("El email ya está registrado.");
+            return UserErrors.DuplicatedEmail(input.Email);
         }
 
-        Result<Client, AppError> result = Client.SignUp(input, country, agency, hasher.Hash(input.Password));
+        if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
 
-        if (result.IsFailure) return ResultAPI<AuthPayload>.BadRequest(result);
+        Result<Client> result = Client.SignUp(input, country, agency, hasher.Hash(input.Password));
 
-        if (result.Value is not Client client)
-            return ResultAPI<AuthPayload>.Internal("User is not a client");
+        if (result.IsFailed) return result.ToResult<AuthPayload>();
 
-        unitOfWork.Clients.CreateClient(client);
+        unitOfWork.Clients.CreateClient(result.Value);
         await unitOfWork.SaveChangesAsync();
 
-        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(client), client));
+        return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
     }
 
-    public async Task<ResultAPI<AuthPayload>> LoginAsync(UserLoginInput input)
+    public async Task<Result<AuthPayload>> LoginAsync(UserLoginInput input)
     {
         User? user = await unitOfWork.Users.GetUserByEmailAsync(input.Email);
 
-        if (user is null) return ResultAPI<AuthPayload>.NotFound("Email o contraseña incorrectos.");
+        if (user is null) return UserErrors.LoginFailed();
 
-        if (user.Password is null) return ResultAPI<AuthPayload>.BadRequest("El usuario deberia ingresar con su cuenta de Google.");
-        if (!hasher.Verify(input.Password, user.Password)) return ResultAPI<AuthPayload>.NotFound("Email o contraseña incorrectos.");
+        if (user.Password is null) return UserErrors.GoogleUserTryNormalLogin();
 
-        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(user), user));
+        if (!hasher.Verify(input.Password, user.Password)) return UserErrors.LoginFailed();
+
+        return Result.Ok(new AuthPayload(GenerateJWT(user), user));
     }
 
-    public async Task<ResultAPI<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input)
+    public async Task<Result<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input)
     {
-        
         // Validar token con Google
         GoogleUserInfo? payload = await googleAuthService.ExchangeCodeAsync(input.Code);
 
-        if (payload is null) return ResultAPI<GoogleAuthPayload>.NotFound("Token de Google inválido.");
+        if (payload is null) return UserErrors.GoogleTokenIsInvalid();
 
         User? user = await unitOfWork.Users.GetUserByGoogleIdAsync(payload.Subject);
 
@@ -127,7 +107,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
             await unitOfWork.SaveChangesAsync();
         }
 
-        return ResultAPI<GoogleAuthPayload>.Success(new GoogleAuthPayload
+        return Result.Ok(new GoogleAuthPayload
         {
             Token = user is not null ? GenerateJWT(user) : null,
             RequiresRegistration = user is null,
@@ -138,44 +118,39 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         });
     }
 
-    public async Task<ResultAPI<AuthPayload>> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input)
+    public async Task<Result<AuthPayload>> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input)
     {
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
-        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1);
 
-        if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
-        if (category is null) return ResultAPI<AuthPayload>.NotFound($"Category with id {1} not found.");
+        BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1)
+        ?? throw new ArgumentNullException($"La categoria de locutor {1} no existe en la base de datos.");
 
-        Result<Broadcaster, AppError> result = Broadcaster.SignUpFromGoogle(input, country, category);
-        if (result.IsFailure) return ResultAPI<AuthPayload>.BadRequest(result);
+        if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
 
-        if (result.Value is not Broadcaster broadcaster)
-            return ResultAPI<AuthPayload>.Internal("User is not a broadcaster");
+        Result<Broadcaster> result = Broadcaster.SignUpFromGoogle(input, country, category);
+        if (result.IsFailed) return result.ToResult<AuthPayload>();
 
-        unitOfWork.Broadcasters.CreateBroadcaster(broadcaster);
+        unitOfWork.Broadcasters.CreateBroadcaster(result.Value);
         await unitOfWork.SaveChangesAsync();
 
-        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(broadcaster), broadcaster));
+        return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
     }
 
-    public async Task<ResultAPI<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
+    public async Task<Result<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
     {
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
         agency ??= new Agency(input.AgencyName);
 
-        if (country is null) return ResultAPI<AuthPayload>.NotFound($"Country with code {input.CountryCode} not found.");
+        if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
 
-        Result<Client, AppError> result = Client.SignUpFromGoogle(input, country, agency);
-        if (result.IsFailure) return ResultAPI<AuthPayload>.BadRequest(result);
+        Result<Client> result = Client.SignUpFromGoogle(input, country, agency);
+        if (result.IsFailed) return result.ToResult<AuthPayload>();
 
-        if (result.Value is not Client client)
-            return ResultAPI<AuthPayload>.Internal("User is not a client");
-
-        unitOfWork.Clients.CreateClient(client);
+        unitOfWork.Clients.CreateClient(result.Value);
         await unitOfWork.SaveChangesAsync();
 
-        return ResultAPI<AuthPayload>.Success(new AuthPayload(GenerateJWT(client), client));
+        return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
     }
 
     private string GenerateJWT(User user)
@@ -199,87 +174,5 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    private Result<AppError> ValidateRegisterInput(RegisterUserInput input)
-    {
-        return Result<AppError>.Combine(
-            ValidateEmail(input.Email),
-            ValidatePassword(input.Password),
-            ValidateFirstName(input.FirstName),
-            ValidateLastName(input.LastName),
-            ValidateRUT(input.RUT),
-            ValidateCity(input.City),
-            ValidateState(input.State),
-            ValidateStreet(input.Street)
-        );
-    }
-
-    private Result<AppError> ValidateEmail(string? email)
-    {
-        if (email == null) return Result<AppError>.Failure(AppError.Validation("Email is required"));
-        if (!email.Contains('@')) return Result<AppError>.Failure(AppError.Validation("Email is missing '@' character"));
-        if (email.Length < 10) return Result<AppError>.Failure(AppError.Validation("Email must be at least 10 characters long"));
-        if (email.Length > 100) return Result<AppError>.Failure(AppError.Validation("Email must be at most 100 characters long"));
-        return Result<AppError>.Success();
-    }
-
-    private Result<AppError> ValidatePassword(string? password)
-    {
-        if (password == null) return Result<AppError>.Failure(AppError.Validation("Password is required"));
-        if (password.Length < 10) return Result<AppError>.Failure(AppError.Validation("Password must be at least 10 characters long"));
-        if (password.Length > 60) return Result<AppError>.Failure(AppError.Validation("Password must be at most 60 characters long"));
-        return Result<AppError>.Success();
-    }
-
-    private Result<AppError> ValidateFirstName(string? firstName)
-    {
-        if (firstName == null) return Result<AppError>.Failure(AppError.Validation("FirstName is required"));
-        if (firstName.Length < 3) return Result<AppError>.Failure(AppError.Validation("FirstName must be at least 3 characters long"));
-        if (firstName.Length > 50) return Result<AppError>.Failure(AppError.Validation("FirstName must be at most 50 characters long"));
-        if (!firstName.All(char.IsLetter)) return Result<AppError>.Failure(AppError.Validation("FirstName must contain only letters"));
-        return Result<AppError>.Success();
-    }
-
-    private Result<AppError> ValidateLastName(string? lastName)
-    {
-        if (lastName == null) return Result<AppError>.Failure(AppError.Validation("LastName is required"));
-        if (lastName.Length < 3) return Result<AppError>.Failure(AppError.Validation("LastName must be at least 3 characters long"));
-        if (lastName.Length > 50) return Result<AppError>.Failure(AppError.Validation("LastName must be at most 50 characters long"));
-        if (!lastName.All(char.IsLetter)) return Result<AppError>.Failure(AppError.Validation("LastName must contain only letters"));
-        return Result<AppError>.Success();
-    }
-
-    private Result<AppError> ValidateRUT(string? rut)
-    {
-        if (rut == null) return Result<AppError>.Failure(AppError.Validation("RUT is required"));
-        if (rut.Length != 12) return Result<AppError>.Failure(AppError.Validation("RUT must be exactly 12 characters long"));
-        return Result<AppError>.Success();
-    }
-
-    private Result<AppError> ValidateCity(string? city)
-    {
-        if (city == null) return Result<AppError>.Failure(AppError.Validation("City is required"));
-        if (city.Length < 4) return Result<AppError>.Failure(AppError.Validation("City must be at least 4 characters long"));
-        if (city.Length > 100) return Result<AppError>.Failure(AppError.Validation("City must be at most 100 characters long"));
-        if (!city.All(char.IsLetter)) return Result<AppError>.Failure(AppError.Validation("City must contain only letters"));
-        return Result<AppError>.Success();
-    }
-
-    private Result<AppError> ValidateState(string? state)
-    {
-        if (state == null) return Result<AppError>.Failure(AppError.Validation("State is required"));
-        if (state.Length < 4) return Result<AppError>.Failure(AppError.Validation("State must be at least 4 characters long"));
-        if (state.Length > 100) return Result<AppError>.Failure(AppError.Validation("State must be at most 100 characters long"));
-        if (!state.All(char.IsLetter)) return Result<AppError>.Failure(AppError.Validation("State must contain only letters"));
-        return Result<AppError>.Success();
-    }
-
-    private Result<AppError> ValidateStreet(string? street)
-    {
-        if (street == null) return Result<AppError>.Success();
-        if (street.Length < 4) return Result<AppError>.Failure(AppError.Validation("Street must be at least 4 characters long"));
-        if (street.Length > 100) return Result<AppError>.Failure(AppError.Validation("Street must be at most 100 characters long"));
-        return Result<AppError>.Success();
     }
 }

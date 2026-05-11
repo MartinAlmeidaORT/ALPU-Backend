@@ -7,5 +7,8 @@ public class CountryType : ObjectType<Country>
     protected override void Configure(IObjectTypeDescriptor<Country> descriptor)
     {
         descriptor.Name("Country");
+        descriptor.BindFieldsExplicitly();
+        descriptor.Field(x => x.CountryCode);
+        descriptor.Field(x => x.Name);
     }
 }

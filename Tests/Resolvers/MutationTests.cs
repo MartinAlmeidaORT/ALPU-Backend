@@ -1,8 +1,8 @@
 // Resolvers/MutationTests.cs
-using Application.Common;
 using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
+using Domain.Models;
 using FluentAssertions;
 using GraphQL.Schema;
 using HotChocolate;
@@ -23,11 +23,10 @@ public class MutationTests
     [Fact]
     public async Task RegisterBroadcaster_WhenServiceSucceeds_ReturnsPayload()
     {
-        var input = DomainBuilders.BroadcasterInput();
-        var payload = new AuthPayload("jwt-token", DomainBuilders.Broadcaster());
+        var input = InputBuilders.ValidBroadcasterInput();
+        var payload = new AuthPayload("jwt-token", DomainBuilders.ValidBroadcaster());
 
-        _authService.RegisterBroadcasterAsync(input)
-            .Returns(ResultAPI<AuthPayload>.Success(payload));
+        _authService.RegisterBroadcasterAsync(input).Returns(payload);
 
         var result = await _sut.RegisterBroadcaster(_authService, input);
 
@@ -37,14 +36,12 @@ public class MutationTests
     [Fact]
     public async Task RegisterBroadcaster_WhenServiceFails_ThrowsException()
     {
-        var input = DomainBuilders.BroadcasterInput();
+        var input = InputBuilders.ValidBroadcasterInput();
 
-        _authService.RegisterBroadcasterAsync(input)
-            .Returns(ResultAPI<AuthPayload>.NotFound("Country not found."));
+        _authService.RegisterBroadcasterAsync(input).Returns(CountryErrors.CountryNotFound(input.CountryCode));
 
         var act = () => _sut.RegisterBroadcaster(_authService, input);
 
-        // UnwrapOrThrow() debe lanzar cuando IsSuccess = false
         await act.Should().ThrowAsync<GraphQLException>();
     }
 
@@ -55,11 +52,10 @@ public class MutationTests
     [Fact]
     public async Task RegisterClient_WhenServiceSucceeds_ReturnsPayload()
     {
-        var input = DomainBuilders.ClientInput();
-        var payload = new AuthPayload("jwt-token", DomainBuilders.Client());
+        var input = InputBuilders.ValidClientInput();
+        var payload = new AuthPayload("jwt-token", DomainBuilders.ValidClient());
 
-        _authService.RegisterClientAsync(input)
-            .Returns(ResultAPI<AuthPayload>.Success(payload));
+        _authService.RegisterClientAsync(input).Returns(payload);
 
         var result = await _sut.RegisterClient(_authService, input);
 
@@ -69,10 +65,9 @@ public class MutationTests
     [Fact]
     public async Task RegisterClient_WhenServiceFails_ThrowsException()
     {
-        var input = DomainBuilders.ClientInput();
+        var input = InputBuilders.ValidClientInput();
 
-        _authService.RegisterClientAsync(input)
-            .Returns(ResultAPI<AuthPayload>.BadRequest("Validation error."));
+        _authService.RegisterClientAsync(input).Returns(UserErrors.DuplicatedEmail(input.Email));
 
         var act = () => _sut.RegisterClient(_authService, input);
 
@@ -87,10 +82,9 @@ public class MutationTests
     public async Task LoginAsync_WhenServiceSucceeds_ReturnsPayload()
     {
         var input = new UserLoginInput { Email = "test@alpu.uy", Password = "pass" };
-        var payload = new AuthPayload("jwt-token", DomainBuilders.Client());
+        var payload = new AuthPayload("jwt-token", DomainBuilders.ValidClient());
 
-        _authService.LoginAsync(input)
-            .Returns(ResultAPI<AuthPayload>.Success(payload));
+        _authService.LoginAsync(input).Returns(payload);
 
         var result = await _sut.LoginAsync(_authService, input);
 
@@ -102,8 +96,7 @@ public class MutationTests
     {
         var input = new UserLoginInput { Email = "bad@alpu.uy", Password = "wrong" };
 
-        _authService.LoginAsync(input)
-            .Returns(ResultAPI<AuthPayload>.NotFound("Email o contraseña incorrectos."));
+        _authService.LoginAsync(input).Returns(UserErrors.LoginFailed());
 
         var act = () => _sut.LoginAsync(_authService, input);
 
@@ -120,8 +113,7 @@ public class MutationTests
         var input = new GoogleAuthInput { Code = "valid-code" };
         var payload = new GoogleAuthPayload { RequiresRegistration = false, Token = "jwt" };
 
-        _authService.GoogleAuthAsync(input)
-            .Returns(ResultAPI<GoogleAuthPayload>.Success(payload));
+        _authService.GoogleAuthAsync(input).Returns(payload);
 
         var result = await _sut.GoogleAuthAsync(input, _authService);
 
@@ -134,8 +126,7 @@ public class MutationTests
     {
         var input = new GoogleAuthInput { Code = "bad-code" };
 
-        _authService.GoogleAuthAsync(input)
-            .Returns(ResultAPI<GoogleAuthPayload>.NotFound("Token de Google inválido."));
+        _authService.GoogleAuthAsync(input).Returns(UserErrors.GoogleTokenIsInvalid());
 
         var act = () => _sut.GoogleAuthAsync(input, _authService);
 
@@ -149,11 +140,10 @@ public class MutationTests
     [Fact]
     public async Task CompleteGoogleSignUpBroadcaster_WhenServiceSucceeds_ReturnsPayload()
     {
-        var input = DomainBuilders.GoogleBroadcasterInput();
-        var payload = new AuthPayload("jwt-token", DomainBuilders.BroadcasterFromGoogle());
+        var input = InputBuilders.ValidGoogleBroadcasterInput();
+        var payload = new AuthPayload("jwt-token", DomainBuilders.ValidBroadcasterFromGoogle());
 
-        _authService.CompleteGoogleSignUpBroadcasterAsync(input)
-            .Returns(ResultAPI<AuthPayload>.Success(payload));
+        _authService.CompleteGoogleSignUpBroadcasterAsync(input).Returns(payload);
 
         var result = await _sut.CompleteGoogleSignUpBroadcasterAsync(input, _authService);
 
@@ -163,11 +153,10 @@ public class MutationTests
     [Fact]
     public async Task CompleteGoogleSignUpClient_WhenServiceSucceeds_ReturnsPayload()
     {
-        var input = DomainBuilders.GoogleClientInput();
-        var payload = new AuthPayload("jwt-token", DomainBuilders.ClientFromGoogle());
+        var input = InputBuilders.ValidGoogleClientInput();
+        var payload = new AuthPayload("jwt-token", DomainBuilders.ValidClientFromGoogle());
 
-        _authService.CompleteGoogleSignUpClientAsync(input)
-            .Returns(ResultAPI<AuthPayload>.Success(payload));
+        _authService.CompleteGoogleSignUpClientAsync(input).Returns(payload);
 
         var result = await _sut.CompleteGoogleSignUpClientAsync(input, _authService);
 
@@ -177,10 +166,9 @@ public class MutationTests
     [Fact]
     public async Task CompleteGoogleSignUpBroadcaster_WhenCountryNotFound_ThrowsException()
     {
-        var input = DomainBuilders.GoogleBroadcasterInput();
+        var input = InputBuilders.ValidGoogleBroadcasterInput();
 
-        _authService.CompleteGoogleSignUpBroadcasterAsync(input)
-            .Returns(ResultAPI<AuthPayload>.NotFound("Country not found."));
+        _authService.CompleteGoogleSignUpBroadcasterAsync(input).Returns(CountryErrors.CountryNotFound(input.CountryCode));
 
         var act = () => _sut.CompleteGoogleSignUpBroadcasterAsync(input, _authService);
 

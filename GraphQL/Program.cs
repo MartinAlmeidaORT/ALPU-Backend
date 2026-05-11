@@ -22,4 +22,4 @@ app.UseCors("AllowFrontend");
 
 app.MapGraphQL(); // Default endpoint is /graphql
 
-app.Run();
+await app.RunAsync();

@@ -1,9 +1,9 @@
-using Application.Common;
 using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs;
 using Domain.Common.Payloads;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Models;
+using FluentResults;
 
 namespace Application.Services;
 
@@ -11,7 +11,7 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<ResultAPI<CalculateContractPayload>> CalculateContract(CalculateContractInput input)
+    public async Task<Result<CalculateContractPayload>> CalculateContract(CalculateContractInput input)
     {
         List<Service> services = [];
         foreach (var service in input.Services)
@@ -35,7 +35,7 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
             // ServicePriceWithDiscount = prices
             ServicePrice = pricesPayload,
         };
-        return ResultAPI<CalculateContractPayload>.Success(payload);
+        return payload;
     }
 
     public Task<Contract> CreateContractAsync(Contract contract)

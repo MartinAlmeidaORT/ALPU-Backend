@@ -1,7 +1,6 @@
-﻿using Domain.Common;
-using Domain.Common.Errors;
-using Domain.Common.Inputs;
+﻿using Domain.Common.Inputs;
 using Domain.Common.Payloads;
+using FluentResults;
 
 namespace Domain.Models;
 
@@ -15,7 +14,7 @@ public partial class ServiceIVR : Service
 
     public virtual ICollection<RangeIVR> RangeIVR { get; set; } = [];
 
-    public override Result<ServicePricePayload, AppError> GetTotalPrice(CalculateContractServiceInput input)
+    public override Result<ServicePricePayload> GetTotalPrice(CalculateContractServiceInput input)
     {
         decimal basePrice;
 
@@ -55,7 +54,7 @@ public partial class ServiceIVR : Service
             discountAmount += basePrice * 0.3m;
         }
 
-        return Result<ServicePricePayload, AppError>.Success(new ServicePricePayload
+        return new ServicePricePayload
         {
             PieceName = input.PieceName,
             Variants = null,
@@ -67,7 +66,7 @@ public partial class ServiceIVR : Service
                 new (input.Options.OverridePrice != null && input.Options.OverridePrice > 0, "Precio negociado"),
                 new (input.Options.IsInterior ?? false, "En interior")
             ]
-        });
+        };
     }
 
     private int CountWords(string text)
