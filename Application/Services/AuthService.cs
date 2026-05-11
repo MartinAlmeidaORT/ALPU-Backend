@@ -127,6 +127,16 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
 
+        if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
+        {
+            return UserErrors.DuplicatedRUT(input.RUT);
+        }
+
+        if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
+        {
+            return UserErrors.DuplicatedEmail(input.Email);
+        }
+
         Result<Broadcaster> result = Broadcaster.SignUpFromGoogle(input, country, category);
         if (result.IsFailed) return result.ToResult<AuthPayload>();
 
@@ -143,6 +153,16 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         agency ??= new Agency(input.AgencyName);
 
         if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
+
+        if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
+        {
+            return UserErrors.DuplicatedRUT(input.RUT);
+        }
+
+        if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
+        {
+            return UserErrors.DuplicatedEmail(input.Email);
+        }
 
         Result<Client> result = Client.SignUpFromGoogle(input, country, agency);
         if (result.IsFailed) return result.ToResult<AuthPayload>();
