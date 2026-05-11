@@ -6,16 +6,23 @@ public class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IErr
 
     public IError OnError(IError error)
     {
-        // Si ya es un GraphQLException que nosotros lanzamos, la dejamos pasar
-        if (error.Exception is null) return error;
+        if (error.Code != null && error.Exception == null)
+        {
+            return error;
+        }
 
-        // Cualquier excepción no controlada → log + mensaje genérico
-        _logger.LogError(error.Exception, "Unhandled exception: {Message}", error.Exception.Message);
+        // Si ya es un GraphQLException que nosotros lanzamos, la dejamos pasar
+        if (error.Exception is GraphQLException)
+        {
+            return error;
+        }
+
+        _logger.LogError(error.Exception, "Unhandled exception: {Message}", error.Exception?.Message);
 
         return ErrorBuilder.New()
-            .SetMessage("An unexpected error occurred")
-            .SetExtension("code", "INTERNAL_SERVER_ERROR")
-            .SetException(error.Exception)
+            .SetMessage("Fallo en el servidor.")
+            .SetCode("INTERNAL_SERVER_ERROR")
+            .SetExtension("message", "Fallo en el servidor.")
             .Build();
     }
 }

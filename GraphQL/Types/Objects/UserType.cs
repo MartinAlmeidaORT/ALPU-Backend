@@ -7,8 +7,14 @@ public class UserInterfaceType : InterfaceType<User>
     protected override void Configure(IInterfaceTypeDescriptor<User> descriptor)
     {
         descriptor.Name("User");
-        descriptor.Field(x => x.Password).Ignore();
-        descriptor.Field(x => x.GoogleId).Ignore();
+        descriptor.BindFieldsExplicitly();
+        descriptor.Field(x => x.UserId);
+        descriptor.Field(x => x.Email);
+        descriptor.Field(x => x.FirstName);
+        descriptor.Field(x => x.LastName);
+        descriptor.Field(x => x.RUT);
+        descriptor.Field(x => x.UserState);
+        descriptor.Field(x => x.Address).Type<AddressType>();
     }
 }
 
@@ -17,8 +23,15 @@ public class BroadcasterType : ObjectType<Broadcaster>
     protected override void Configure(IObjectTypeDescriptor<Broadcaster> descriptor)
     {
         descriptor.Name("Broadcaster");
+        descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
-        descriptor.IgnoreSensitiveFields();
+        descriptor.Field(x => x.UserId);
+        descriptor.Field(x => x.Email);
+        descriptor.Field(x => x.FirstName);
+        descriptor.Field(x => x.LastName);
+        descriptor.Field(x => x.RUT);
+        descriptor.Field(x => x.UserState);
+        descriptor.Field(x => x.Category);
     }
 }
 
@@ -27,8 +40,15 @@ public class ClientType : ObjectType<Client>
     protected override void Configure(IObjectTypeDescriptor<Client> descriptor)
     {
         descriptor.Name("Client");
+        descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
-        descriptor.IgnoreSensitiveFields();
+        descriptor.Field(x => x.UserId);
+        descriptor.Field(x => x.Email);
+        descriptor.Field(x => x.FirstName);
+        descriptor.Field(x => x.LastName);
+        descriptor.Field(x => x.RUT);
+        descriptor.Field(x => x.UserState);
+        descriptor.Field(x => x.Agency).Type<AgencyType>();
     }
 }
 
@@ -47,8 +67,8 @@ public class SupervisorType : ObjectType<Supervisor>
     protected override void Configure(IObjectTypeDescriptor<Supervisor> descriptor)
     {
         descriptor.Name("Supervisor");
+        descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
-        descriptor.IgnoreSensitiveFields();
     }
 }
 
@@ -57,8 +77,8 @@ public class AccountantType : ObjectType<Accountant>
     protected override void Configure(IObjectTypeDescriptor<Accountant> descriptor)
     {
         descriptor.Name("Accountant");
+        descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
-        descriptor.IgnoreSensitiveFields();
     }
 }
 
