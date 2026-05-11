@@ -26,6 +26,8 @@ public partial class DatabaseContext : DbContext
 
     public virtual DbSet<Country> Countries { get; set; }
 
+    public virtual DbSet<Department> Departments { get; set; }
+
     public virtual DbSet<Demo> Demos { get; set; }
 
     public virtual DbSet<Discount> Discounts { get; set; }
