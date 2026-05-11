@@ -10,5 +10,7 @@ public class CountryType : ObjectType<Country>
         descriptor.BindFieldsExplicitly();
         descriptor.Field(x => x.CountryCode);
         descriptor.Field(x => x.Name);
+        descriptor.Field(x => x.Departments);
+        descriptor.Field(x => x.Region);
     }
 }
