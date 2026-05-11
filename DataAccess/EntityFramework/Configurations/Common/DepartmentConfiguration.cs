@@ -21,6 +21,11 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .HasMaxLength(50)
             .IsRequired();
 
+        builder.Property(d => d.CountryCode)
+            .HasColumnName("country_code")
+            .HasMaxLength(3)
+            .IsFixedLength();
+
         builder.HasOne(d => d.Country)
             .WithMany(c => c.Departments)
             .HasForeignKey(d => d.CountryCode)

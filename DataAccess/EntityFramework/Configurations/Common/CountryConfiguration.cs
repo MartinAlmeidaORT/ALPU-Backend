@@ -26,6 +26,10 @@ public class CountryConfiguration : IEntityTypeConfiguration<Country>
             .HasMaxLength(50)
             .IsRequired();
 
+        builder.HasMany(c => c.Departments)
+            .WithOne(c => c.Country)
+            .HasForeignKey(c => c.CountryCode);
+
         builder.HasOne(c => c.Region)
             .WithMany(r => r.Countries)
             .HasForeignKey(c => c.RegionId)
