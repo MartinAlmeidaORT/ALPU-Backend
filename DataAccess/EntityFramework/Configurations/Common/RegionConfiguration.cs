@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations.Common;
+
 public class RegionConfiguration : IEntityTypeConfiguration<Region>
 {
     public void Configure(EntityTypeBuilder<Region> builder)

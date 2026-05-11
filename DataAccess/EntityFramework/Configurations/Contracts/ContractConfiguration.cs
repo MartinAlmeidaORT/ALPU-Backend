@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations.Contracts;
+
 public class ContractConfiguration : IEntityTypeConfiguration<Contract>
 {
     public void Configure(EntityTypeBuilder<Contract> builder)

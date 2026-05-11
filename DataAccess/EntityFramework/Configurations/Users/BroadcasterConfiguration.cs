@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations.Users;
+
 public class BroadcasterConfiguration : IEntityTypeConfiguration<Broadcaster>
 {
     public void Configure(EntityTypeBuilder<Broadcaster> builder)

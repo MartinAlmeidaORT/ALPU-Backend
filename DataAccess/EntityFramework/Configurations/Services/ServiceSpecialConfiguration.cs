@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations.Services;
+
 public class ServiceSpecialConfiguration : IEntityTypeConfiguration<ServiceSpecial>
 {
     public void Configure(EntityTypeBuilder<ServiceSpecial> builder)

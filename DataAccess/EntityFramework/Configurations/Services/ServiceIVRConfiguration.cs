@@ -2,6 +2,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccess.EntityFramework.Configurations.Services;
+
 public class ServiceIVRConfiguration : IEntityTypeConfiguration<ServiceIVR>
 {
     public void Configure(EntityTypeBuilder<ServiceIVR> builder)
