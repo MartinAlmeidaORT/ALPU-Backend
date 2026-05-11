@@ -21,6 +21,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
     public async Task<Result<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
     {
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
+        Department? department = await unitOfWork.Departments.GetByIdAsync(input.DepartmentId);
 
         BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1)
         ?? throw new ArgumentNullException($"La categoria de locutor {1} no existe en la base de datos.");
@@ -35,12 +36,10 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
             return UserErrors.DuplicatedEmail(input.Email);
         }
 
-        if (country is null)
-        {
-            return CountryErrors.CountryNotFound(input.CountryCode);
-        }
+        if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
+        if (department is null) return DepartmentErrors.DepartmentNotFound(input.DepartmentId);
 
-        Result<Broadcaster> result = Broadcaster.SignUp(input, country, category, hasher.Hash(input.Password));
+        Result<Broadcaster> result = Broadcaster.SignUp(input, country, department, category, hasher.Hash(input.Password));
 
         if (result.IsFailed) return result.ToResult<AuthPayload>();
 
@@ -53,6 +52,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
     public async Task<Result<AuthPayload>> RegisterClientAsync(RegisterClientInput input)
     {
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
+        Department? department = await unitOfWork.Departments.GetByIdAsync(input.DepartmentId);
         Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
         agency ??= new Agency(input.AgencyName);
 
@@ -67,8 +67,9 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
         }
 
         if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
+        if (department is null) return DepartmentErrors.DepartmentNotFound(input.DepartmentId);
 
-        Result<Client> result = Client.SignUp(input, country, agency, hasher.Hash(input.Password));
+        Result<Client> result = Client.SignUp(input, country, department, agency, hasher.Hash(input.Password));
 
         if (result.IsFailed) return result.ToResult<AuthPayload>();
 
@@ -121,11 +122,13 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
     public async Task<Result<AuthPayload>> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input)
     {
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
+        Department? department = await unitOfWork.Departments.GetByIdAsync(input.DepartmentId);
 
         BroadcasterCategory? category = await unitOfWork.Broadcasters.GetCategoryByIdAsync(1)
         ?? throw new ArgumentNullException($"La categoria de locutor {1} no existe en la base de datos.");
 
         if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
+        if (department is null) return DepartmentErrors.DepartmentNotFound(input.DepartmentId);
 
         if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
         {
@@ -137,7 +140,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
             return UserErrors.DuplicatedEmail(input.Email);
         }
 
-        Result<Broadcaster> result = Broadcaster.SignUpFromGoogle(input, country, category);
+        Result<Broadcaster> result = Broadcaster.SignUpFromGoogle(input, country, department, category);
         if (result.IsFailed) return result.ToResult<AuthPayload>();
 
         unitOfWork.Broadcasters.CreateBroadcaster(result.Value);
@@ -149,10 +152,12 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
     public async Task<Result<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
     {
         Country? country = await unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
+        Department? department = await unitOfWork.Departments.GetByIdAsync(input.DepartmentId);
         Agency? agency = await unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName);
         agency ??= new Agency(input.AgencyName);
 
         if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
+        if (department is null) return DepartmentErrors.DepartmentNotFound(input.DepartmentId);
 
         if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
         {
@@ -164,7 +169,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
             return UserErrors.DuplicatedEmail(input.Email);
         }
 
-        Result<Client> result = Client.SignUpFromGoogle(input, country, agency);
+        Result<Client> result = Client.SignUpFromGoogle(input, country, department, agency);
         if (result.IsFailed) return result.ToResult<AuthPayload>();
 
         unitOfWork.Clients.CreateClient(result.Value);

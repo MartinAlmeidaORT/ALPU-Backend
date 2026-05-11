@@ -9,5 +9,5 @@ public class DepartmentRepository(DatabaseContext context) : RepositoryBase<Depa
 {
     public IQueryable<Department> GetAllDepartments() => GetAll();
 
-    public async Task<Department?> GetByCodeAsync(int id) => await Get(id);
+    public async Task<Department?> GetByIdAsync(int id) => await Get(id);
 }

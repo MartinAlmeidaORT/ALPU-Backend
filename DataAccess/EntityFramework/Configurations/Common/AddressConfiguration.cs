@@ -30,10 +30,13 @@ public class AddressConfiguration : IEntityTypeConfiguration<Address>
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(a => a.State)
-            .HasColumnName("state")
-            .HasMaxLength(100)
-            .IsRequired();
+        builder.Property(a => a.DepartmentId)
+            .HasColumnName("department_id");
+
+        builder.HasOne(a => a.Department)
+            .WithMany()
+            .HasForeignKey(a => a.DepartmentId)
+            .HasConstraintName("address_department_id_fkey");
 
         builder.HasOne(a => a.Country)
             .WithMany()

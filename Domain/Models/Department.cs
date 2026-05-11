@@ -1,4 +1,5 @@
 using Domain.Common;
+using Domain.Common.Errors;
 
 namespace Domain.Models;
 
@@ -11,4 +12,11 @@ public class Department : Entity
     public Country Country { get; set; } = null!;
 
     public string Name { get; set; } = null!;
+}
+
+public static class DepartmentErrors
+{
+    public class DepartmentNotFoundError(string msg) : NotFoundError(msg);
+
+    public static DepartmentNotFoundError DepartmentNotFound(int departmentId) => new($"Department with id {departmentId} was not found.");
 }

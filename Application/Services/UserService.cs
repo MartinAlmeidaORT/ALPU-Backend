@@ -21,7 +21,14 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
             country = await unitOfWork.Countries.GetByCodeAsync(dto.Address.CountryCode) ?? throw new KeyNotFoundException($"Country with code {dto.Address.CountryCode} not found.");
         }
 
-        user.Update(dto, country);
+        Department? department = null;
+        if (dto.Address?.DepartmentId != null)
+        {
+            int departmentId = (int)dto.Address.DepartmentId;
+            department = await unitOfWork.Departments.GetByIdAsync(departmentId) ?? throw new KeyNotFoundException($"Department with id {dto.Address.DepartmentId} not found.");
+        }
+
+        user.Update(dto, country, department);
         await unitOfWork.SaveChangesAsync();
 
         return user;

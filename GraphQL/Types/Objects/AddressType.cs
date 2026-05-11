@@ -8,7 +8,7 @@ public class AddressType : ObjectType<Address>
     {
         descriptor.Name("Address");
         descriptor.BindFieldsExplicitly();
-        descriptor.Field(x => x.State);
+        descriptor.Field(x => x.Department);
         descriptor.Field(x => x.City);
         descriptor.Field(x => x.Street);
         descriptor.Field(x => x.Country);

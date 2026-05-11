@@ -6,5 +6,5 @@ public interface IDepartmentRepository
 {
     public IQueryable<Department> GetAllDepartments();
 
-    public Task<Department?> GetByCodeAsync(int id);
+    public Task<Department?> GetByIdAsync(int id);
 }

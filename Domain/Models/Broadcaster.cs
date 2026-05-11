@@ -7,32 +7,32 @@ public partial class Broadcaster : User
 {
     protected Broadcaster() { }
 
-    protected Broadcaster(RegisterBroadcasterInput input, Country country, BroadcasterCategory category)
-        : base(input, country)
+    protected Broadcaster(RegisterBroadcasterInput input, Country country, Department department, BroadcasterCategory category)
+        : base(input, country, department)
     {
         CategoryId = category.BroadcasterCategoryId;
         Category = category;
     }
 
-    protected Broadcaster(CompleteGoogleSignUpBroadcasterInput input, Country country, BroadcasterCategory category)
-        : base(input, country)
+    protected Broadcaster(CompleteGoogleSignUpBroadcasterInput input, Country country, Department department, BroadcasterCategory category)
+        : base(input, country, department)
     {
         CategoryId = category.BroadcasterCategoryId;
         Category = category;
     }
 
-    public static Result<Broadcaster> SignUp(RegisterBroadcasterInput input, Country country, BroadcasterCategory category, string passwordHashed)
+    public static Result<Broadcaster> SignUp(RegisterBroadcasterInput input, Country country, Department department, BroadcasterCategory category, string passwordHashed)
     {
-        Broadcaster newBroadcaster = new(input, country, category);
+        Broadcaster newBroadcaster = new(input, country, department, category);
         Result errors = newBroadcaster.ValidateSignUp();
         if (errors.IsFailed) return errors;
         newBroadcaster.Password = passwordHashed;
         return newBroadcaster;
     }
 
-    public static Result<Broadcaster> SignUpFromGoogle(CompleteGoogleSignUpBroadcasterInput input, Country country, BroadcasterCategory category)
+    public static Result<Broadcaster> SignUpFromGoogle(CompleteGoogleSignUpBroadcasterInput input, Country country, Department department, BroadcasterCategory category)
     {
-        Broadcaster newBroadcaster = new(input, country, category);
+        Broadcaster newBroadcaster = new(input, country, department, category);
         Result errors = newBroadcaster.ValidateGoogleSignUp();
         if (errors.IsFailed) return errors;
         return newBroadcaster;
