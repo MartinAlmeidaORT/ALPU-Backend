@@ -35,6 +35,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICountryService, CountryService>();
+        services.AddScoped<IDepartmentService, DepartmentService>();
         services.AddScoped<IAlpuService, AlpuServiceService>();
         services.AddScoped<IContractService, ContractService>();
         services.AddScoped<IHasher, Hasher>();

@@ -15,6 +15,10 @@ public class Query
     public IQueryable<Country> GetCountries([Service] ICountryService countryService) => countryService.GetAllCountries();
 
     [UseProjection]
+    [UseFiltering]
+    public IQueryable<Department> GetDepartments([Service] IDepartmentService departmentService) => departmentService.GetAllDepartments();
+
+    [UseProjection]
     [UseSorting]
     public IQueryable<Service> GetServices([Service] IAlpuService alpuService) => alpuService.GetAllServices();
 }

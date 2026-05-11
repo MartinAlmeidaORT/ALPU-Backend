@@ -13,6 +13,8 @@ public partial class Country : Entity
 
     public virtual ICollection<Contract> Contracts { get; set; } = [];
 
+    public virtual ICollection<Department> Departments { get; set; } = [];
+
     public virtual Region? Region { get; set; }
 }
 
