@@ -13,77 +13,11 @@ public class AddressTests
             AddressId = 1,
             Country = DomainBuilders.ValidCountry(),
             CountryCode = DomainBuilders.ValidCountry().CountryCode,
-            State = "Estado",
+            Department = DomainBuilders.ValidDepartment(),
+            DepartmentId = DomainBuilders.ValidDepartment().DepartmentId,
             City = "Ciudad",
             Street = "Some Street"
         };
-    }
-
-    [Fact]
-    //Verificar que el estado tenga un minimo de 4 caracteres
-    public void ValidateAddress_WhenStateIsNull_ReturnsFailed()
-    {
-        // Arrange
-        var _sut = BuildAddress();
-        _sut.State = null!;
-
-        // Act
-        var result = _sut.ValidateAddress();
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.HasError<AddressErrors.StateIsRequiredError>();
-    }
-
-    [Fact]
-    //Verificar que el estado tenga un minimo de 4 caracteres
-    public void ValidateAddress_WhenStateBelowMinimumLength_ReturnsFailed()
-    {
-        // Arrange
-        var _sut = BuildAddress();
-        _sut.State = "a";
-
-        // Act
-        var result = _sut.ValidateAddress();
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.HasError<AddressErrors.StateMinLengthError>();
-    }
-
-    [Fact]
-    //Verificar que el estado tenga un maximo de 100 caracteres
-    public void ValidateAddress_WhenStateAboveMaximunLength_ReturnsFailed()
-    {
-        // Arrange
-        var _sut = BuildAddress();
-        _sut.State = new('a', 60);
-
-        // Act
-        var result = _sut.ValidateAddress();
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.HasError<AddressErrors.StateMaxLengthError>();
-    }
-
-    [Theory]
-    [InlineData("Buenos Aires123")]
-    [InlineData("Buenos@Aires")]
-    [InlineData("Buenos-Aires")]
-    //Verificar que el estado no contenga caracteres no alfabéticos
-    public void ValidateAddress_WhenStateContainsNonLetters_ReturnsFailed(string state)
-    {
-        // Arrange
-        var _sut = BuildAddress();
-        _sut.State = state;
-
-        // Act
-        var result = _sut.ValidateAddress();
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.HasError<AddressErrors.StateIsLettersOnlyError>();
     }
 
     [Fact]

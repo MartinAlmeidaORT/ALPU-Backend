@@ -12,7 +12,7 @@ public static class InputBuilders
         Password = "Password123!",
         CountryCode = "UY",
         RUT = "12345678910A",
-        State = "Estado",
+        DepartmentId = 1,
         City = "Ciudad",
     };
 
@@ -25,7 +25,7 @@ public static class InputBuilders
         CountryCode = "UY",
         AgencyName = "Test Agency",
         RUT = "12345678910A",
-        State = "Estado",
+        DepartmentId = 1,
         City = "Ciudad",
     };
 
@@ -38,7 +38,7 @@ public static class InputBuilders
         AgencyName = "Test Agency",
         Subject = googleId,
         RUT = "12345678910A",
-        State = "Estado",
+        DepartmentId = 1,
         City = "Ciudad",
     };
 
@@ -50,7 +50,7 @@ public static class InputBuilders
         CountryCode = "UY",
         Subject = googleId,
         RUT = "12345678910A",
-        State = "Estado",
+        DepartmentId = 1,
         City = "Ciudad",
     };
 }
