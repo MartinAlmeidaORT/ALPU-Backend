@@ -11,6 +11,7 @@ public class ClientTests
         var result = Client.SignUp(
             InputBuilders.ValidClientInput(),
             DomainBuilders.ValidCountry(),
+            DomainBuilders.ValidDepartment(),
             DomainBuilders.ValidAgency(),
             "hashed"
         );

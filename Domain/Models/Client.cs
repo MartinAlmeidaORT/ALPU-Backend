@@ -8,32 +8,32 @@ public partial class Client : User
 {
     protected Client() { }
 
-    protected Client(RegisterClientInput input, Country country, Agency agency)
-        : base(input, country)
+    protected Client(RegisterClientInput input, Country country, Department department, Agency agency)
+        : base(input, country, department)
     {
         AgencyId = agency.AgencyId;
         Agency = agency;
     }
 
-    protected Client(CompleteGoogleSignUpClientInput input, Country country, Agency agency)
-        : base(input, country)
+    protected Client(CompleteGoogleSignUpClientInput input, Country country, Department department, Agency agency)
+        : base(input, country, department)
     {
         AgencyId = agency.AgencyId;
         Agency = agency;
     }
 
-    public static Result<Client> SignUp(RegisterClientInput input, Country country, Agency agency, string passwordHashed)
+    public static Result<Client> SignUp(RegisterClientInput input, Country country, Department department, Agency agency, string passwordHashed)
     {
-        Client newClient = new(input, country, agency);
+        Client newClient = new(input, country, department, agency);
         Result errors = newClient.ValidateSignUp();
         if (errors.IsFailed) return errors;
         newClient.Password = passwordHashed;
         return newClient;
     }
 
-    public static Result<Client> SignUpFromGoogle(CompleteGoogleSignUpClientInput input, Country country, Agency agency)
+    public static Result<Client> SignUpFromGoogle(CompleteGoogleSignUpClientInput input, Country country, Department department, Agency agency)
     {
-        Client newClient = new(input, country, agency);
+        Client newClient = new(input, country, department, agency);
         Result errors = newClient.ValidateGoogleSignUp();
         if (errors.IsFailed) return errors;
         return newClient;

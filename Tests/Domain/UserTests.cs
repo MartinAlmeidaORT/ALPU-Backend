@@ -11,6 +11,7 @@ public class UserTests
         var result = Broadcaster.SignUp(
             InputBuilders.ValidBroadcasterInput(),
             DomainBuilders.ValidCountry(),
+            DomainBuilders.ValidDepartment(),
             new BroadcasterCategory { BroadcasterCategoryId = 1 },
             "hashed"
         );

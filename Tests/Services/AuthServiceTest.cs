@@ -75,6 +75,7 @@ public class AuthServiceTests
         var input = InputBuilders.ValidBroadcasterInput();
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
+        _unitOfWork.Departments.GetByIdAsync(input.DepartmentId).Returns(new Department { DepartmentId = 1 });
         _unitOfWork.Broadcasters.GetCategoryByIdAsync(1).Returns(new BroadcasterCategory { BroadcasterCategoryId = 1 });
         _hasher.Hash(input.Password).Returns("hashed-password");
 
@@ -134,6 +135,7 @@ public class AuthServiceTests
         var input = InputBuilders.ValidClientInput();
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
+        _unitOfWork.Departments.GetByIdAsync(input.DepartmentId).Returns(new Department { DepartmentId = 1 });
         _unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName).Returns((Agency?)null); // no existe
         _hasher.Hash(input.Password).Returns("hashed-password");
 
@@ -158,13 +160,14 @@ public class AuthServiceTests
             LastName = "PrimerApellido",
             RUT = "123456789012",
             CountryCode = "UY",
-            State = "Estado",
+            DepartmentId = 1,
             City = "Ciudad",
             Street = "Calle 123",
             AgencyName = existingAgency.Name // menos de 3 caracteres
         };
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
+        _unitOfWork.Departments.GetByIdAsync(input.DepartmentId).Returns(new Department { DepartmentId = 1 });
         _unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName).Returns(existingAgency);
         _hasher.Hash(input.Password).Returns("hashed-password");
 

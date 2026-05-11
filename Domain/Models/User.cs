@@ -11,17 +11,17 @@ public abstract class User : Entity
 {
     protected User() { }
 
-    protected User(RegisterUserInput input, Country country)
+    protected User(RegisterUserInput input, Country country, Department department)
     {
         Email = input.Email;
         Password = input.Password;
         FirstName = input.FirstName;
         LastName = input.LastName;
         RUT = input.RUT;
-        Address = new Address(country, input.State, input.City, input.Street);
+        Address = new Address(country, department, input.City, input.Street);
     }
 
-    protected User(CompleteGoogleSignUpUserInput input, Country country)
+    protected User(CompleteGoogleSignUpUserInput input, Country country, Department department)
     {
         GoogleId = input.Subject;
         Email = input.Email;
@@ -29,16 +29,16 @@ public abstract class User : Entity
         FirstName = input.FirstName;
         LastName = input.LastName;
         RUT = input.RUT;
-        Address = new Address(country, input.State, input.City, input.Street);
+        Address = new Address(country, department, input.City, input.Street);
     }
 
-    public void Update(UpdateUserInput input, Country? country)
+    public void Update(UpdateUserInput input, Country? country, Department? department)
     {
         Email = input.Email ?? Email;
         FirstName = input.FirstName ?? FirstName;
         LastName = input.LastName ?? LastName;
         RUT = input.RUT ?? RUT;
-        Address.Update(country, input.Address);
+        Address.Update(country, department, input.Address);
     }
 
     public virtual Result ValidateSignUp()

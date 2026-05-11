@@ -9,20 +9,22 @@ public partial class Address : Entity
 {
     public Address() { }
 
-    public Address(Country country, string state, string city, string? street)
+    public Address(Country country, Department department, string city, string? street)
     {
         CountryCode = country.CountryCode;
         Country = country;
-        State = state;
+        DepartmentId = department.DepartmentId;
+        Department = department;
         City = city;
         Street = street;
     }
 
-    public void Update(Country? country, UpdateAddressInput? input)
+    public void Update(Country? country, Department? department, UpdateAddressInput? input)
     {
         CountryCode = country?.CountryCode ?? CountryCode;
         Country = country ?? Country;
-        State = input?.State ?? State;
+        DepartmentId = input?.DepartmentId ?? DepartmentId;
+        Department = department ?? Department;
         City = input?.City ?? City;
         Street = input?.Street ?? Street;
     }
@@ -31,7 +33,7 @@ public partial class Address : Entity
     {
         return Result.Merge(
             ValidateCity(),
-            ValidateState(),
+            ValidateDepartment(),
             ValidateStreet()
         );
     }
@@ -49,17 +51,9 @@ public partial class Address : Entity
         return errors.IsSuccess ? Result.Ok() : errors;
     }
 
-    public Result ValidateState()
+    public Result ValidateDepartment()
     {
-        if (State == null) return AddressErrors.StateIsRequired();
-
-        Result errors = new();
-
-        if (State.Length < 4) errors.WithError(AddressErrors.StateMinLength(State));
-        if (State.Length > 50) errors.WithError(AddressErrors.StateMaxLength(State));
-        if (!State.All(char.IsLetter)) errors.WithError(AddressErrors.StateIsLettersOnly(State));
-
-        return errors.IsSuccess ? Result.Ok() : errors;
+        return Department != null ? Result.Ok() : AddressErrors.StateIsRequired();
     }
 
     public Result ValidateStreet()
@@ -82,7 +76,9 @@ public partial class Address : Entity
 
     public string City { get; set; } = null!;
 
-    public string State { get; set; } = null!;
+    public int DepartmentId { get; set; }
+
+    public Department Department { get; set; } = null!;
 
     public virtual Country Country { get; set; } = null!;
 }
@@ -96,10 +92,7 @@ public static class AddressErrors
     public class CityMaxLengthError(string msg) : ValidationError(msg);
     public class CityIsLettersOnlyError(string msg) : ValidationError(msg);
 
-    public class StateIsRequiredError(string msg) : ValidationError(msg);
-    public class StateMinLengthError(string msg) : ValidationError(msg);
-    public class StateMaxLengthError(string msg) : ValidationError(msg);
-    public class StateIsLettersOnlyError(string msg) : ValidationError(msg);
+    public class DepartmentIsRequiredError(string msg) : ValidationError(msg);
 
     public class StreetIsRequiredError(string msg) : ValidationError(msg);
     public class StreetMinLengthError(string msg) : ValidationError(msg);
@@ -113,10 +106,7 @@ public static class AddressErrors
     public static CityMaxLengthError CityMaxLength(string city) => new($"City must be at most 50 characters long. {city}");
     public static CityIsLettersOnlyError CityIsLettersOnly(string city) => new($"City must contain only letters. {city}");
 
-    public static StateIsRequiredError StateIsRequired() => new($"State is required.");
-    public static StateMinLengthError StateMinLength(string state) => new($"State must be at least 3 characters long. {state}");
-    public static StateMaxLengthError StateMaxLength(string state) => new($"State must be at most 50 characters long. {state}");
-    public static StateIsLettersOnlyError StateIsLettersOnly(string state) => new($"State must contain only letters. {state}");
+    public static DepartmentIsRequiredError StateIsRequired() => new($"Department is required.");
 
     public static StreetIsRequiredError StreetIsRequired() => new($"Street is required.");
     public static StreetMinLengthError StreetMinLength(string street) => new($"Street must be at least 3 characters long. {street}");

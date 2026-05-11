@@ -12,11 +12,20 @@ public static class DomainBuilders
 
     public static Agency ValidAgency() => new("Valid Agency");
 
+    public static Department ValidDepartment() => new()
+    {
+        DepartmentId = 1,
+        Name = "Valid Agency",
+        Country = ValidCountry(),
+        CountryCode = ValidCountry().CountryCode
+    };
+
     public static Client ValidClient()
     {
         var result = Client.SignUp(
             InputBuilders.ValidClientInput(),
             ValidCountry(),
+            ValidDepartment(),
             ValidAgency(),
             "hashed-password"
         );
@@ -28,6 +37,7 @@ public static class DomainBuilders
         var result = Client.SignUpFromGoogle(
             InputBuilders.ValidGoogleClientInput(googleId),
             ValidCountry(),
+            ValidDepartment(),
             ValidAgency()
         );
         return result.Value;
@@ -38,6 +48,7 @@ public static class DomainBuilders
         var result = Broadcaster.SignUp(
             InputBuilders.ValidBroadcasterInput(),
             ValidCountry(),
+            ValidDepartment(),
             new BroadcasterCategory { BroadcasterCategoryId = 1 },
             "hashed-password"
         );
@@ -49,6 +60,7 @@ public static class DomainBuilders
         var result = Broadcaster.SignUpFromGoogle(
             InputBuilders.ValidGoogleBroadcasterInput(googleId),
             ValidCountry(),
+            ValidDepartment(),
             new BroadcasterCategory { BroadcasterCategoryId = 1 }
         );
         return result.Value;
