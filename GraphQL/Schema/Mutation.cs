@@ -1,4 +1,5 @@
 using Application.Interfaces.Public.Services;
+using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
 using GraphQL.Common;
@@ -27,4 +28,8 @@ public class Mutation
     public async Task<AuthPayload> CompleteGoogleSignUpClientAsync(
         CompleteGoogleSignUpClientInput input,
         [Service] IAuthService authService) => (await authService.CompleteGoogleSignUpClientAsync(input)).UnwrapOrThrow();
+
+    public async Task<CalculateContractPayload> CalculateContract(
+        CalculateContractInput input,
+        [Service] IContractService contractService) => (await contractService.CalculateContract(input)).UnwrapOrThrow();
 }

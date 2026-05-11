@@ -1,10 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Common;
+﻿using Domain.Common;
 
 namespace Domain.Models;
 
-[Table("agency")]
 public partial class Agency : Entity
 {
 #pragma warning disable CS8618
@@ -17,14 +14,9 @@ public partial class Agency : Entity
         Name = name;
     }
 
-    [Key]
-    [Column("agency_id")]
     public int AgencyId { get; set; }
 
-    [Column("name")]
-    [StringLength(100)]
     public string Name { get; set; }
 
-    [InverseProperty("Agency")]
     public virtual ICollection<Client> Clients { get; set; } = [];
 }

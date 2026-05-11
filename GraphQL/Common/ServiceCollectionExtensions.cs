@@ -35,6 +35,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICountryService, CountryService>();
+        services.AddScoped<IAlpuService, AlpuServiceService>();
+        services.AddScoped<IContractService, ContractService>();
         services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         return services;
@@ -51,9 +53,19 @@ public static class ServiceCollectionExtensions
         .AddType<AddressType>()
         .AddType<CountryType>()
         .AddType<AgencyType>()
+        .AddType<ServiceInterfaceType>()
+        .AddType<ServiceDurationType>()
+        .AddType<ServiceIVRType>()
+        .AddType<ServiceNarrativeType>()
+        .AddType<ServiceSpecialType>()
+        .AddType<PieceType>()
         .AddType<GoogleAuthInputType>()
         .AddType<CompleteGoogleBroadcasterSignUpInputType>()
         .AddType<CompleteGoogleClientSignUpInputType>()
+        .AddType<CalculateContractInputType>()
+        .AddType<CalculateContractServiceInputType>()
+        .AddType<ServiceFlagsInputType>()
+        .AddType<ServiceFlagsType>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddProjections()             // Optimizes SQL queries
