@@ -1,5 +1,7 @@
 using Domain.Models;
 
+namespace Domain.Interfaces.Public.Repositories;
+
 public interface IBroadcasterRepository
 {
     public Broadcaster CreateBroadcaster(Broadcaster entity);
