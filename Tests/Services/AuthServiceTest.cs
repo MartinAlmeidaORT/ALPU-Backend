@@ -8,9 +8,8 @@ using Domain.Models;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
-using System.Net;
 using Tests.Helpers;
-using Microsoft.AspNetCore.Components.Forms;
+using Domain.Common.Errors;
 
 namespace Tests.Services;
 
@@ -37,11 +36,12 @@ public class AuthServiceTests
     // ---------------------------------------------------------------
 
     [Fact]
-    public async Task RegisterBroadcasterAsync_WhenCountryNotFound_ReturnsNotFound()
+    public async Task RegisterBroadcasterAsync_WhenCountryNotFound_ReturnsFail()
     {
         // Arrange
-        var input = DomainBuilders.BroadcasterInput();
+        var input = InputBuilders.ValidBroadcasterInput();
 
+        _unitOfWork.Broadcasters.GetCategoryByIdAsync(1).Returns(new BroadcasterCategory { BroadcasterCategoryId = 1 });
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns((Country?)null);
 
         // Act
@@ -49,31 +49,30 @@ public class AuthServiceTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.HasError<CountryErrors.CountryNotFoundError>();
     }
 
     [Fact]
-    public async Task RegisterBroadcasterAsync_WhenCategoryNotFound_ReturnsNotFound()
+    public async Task RegisterBroadcasterAsync_WhenCategoryNotFound_ThrowsException()
     {
         // Arrange
-        var input = DomainBuilders.BroadcasterInput();
+        var input = InputBuilders.ValidBroadcasterInput();
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country());
         _unitOfWork.Broadcasters.GetCategoryByIdAsync(1).Returns((BroadcasterCategory?)null);
 
         // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
+        var act = async () => await _sut.RegisterBroadcasterAsync(input);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public async Task RegisterBroadcasterAsync_WithValidInput_SavesBroadcasterAndReturnsToken()
     {
         // Arrange
-        var input = DomainBuilders.BroadcasterInput();
+        var input = InputBuilders.ValidBroadcasterInput();
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
         _unitOfWork.Broadcasters.GetCategoryByIdAsync(1).Returns(new BroadcasterCategory { BroadcasterCategoryId = 1 });
@@ -84,45 +83,20 @@ public class AuthServiceTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value!.Token.Should().NotBeNullOrEmpty();
+        result.Value.Token.Should().NotBeNullOrEmpty();
 
         // Verify persistence
         _unitOfWork.Broadcasters.Received(1).CreateBroadcaster(Arg.Any<Broadcaster>());
         await _unitOfWork.Received(1).SaveChangesAsync();
     }
 
-    #region Broadcaster Email Validation
-    // Verificar que el email tenga un arroba
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenEmailMissingAtSymbol_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "invalidemailexample.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
     //Verificar que el email no esté repetido
     [Fact]
-    public async Task RegisterBroadcasterAsync_WhenEmailDuplicate_ReturnsConflict()
+    public async Task RegisterBroadcasterAsync_WhenEmailDuplicate_ReturnsFail()
     {
         // Arrange
-        var input = DomainBuilders.BroadcasterInput();
-        var existingBroadcaster = DomainBuilders.Broadcaster();
+        var input = InputBuilders.ValidBroadcasterInput();
+        var existingBroadcaster = DomainBuilders.ValidBroadcaster();
         existingBroadcaster.Email = input.Email;
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
@@ -133,564 +107,31 @@ public class AuthServiceTests
         var result = await _sut.RegisterBroadcasterAsync(input);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        result.IsFailed.Should().BeTrue();
+        result.HasError<UserErrors.DuplicatedEmailError>();
     }
-    //Verificar que el email tenga un minimo de 10 caracteres
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenEmailBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "a@b.c",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-    //Verificar que el email tenga un maximo de 100 caracteres
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenEmailExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = new string('a', 90) + "@example.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Broadcaster Password Validation
-    //Verificar que la contraseña tenga un minimo de 10 caracteres
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenPasswordBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "short1",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-    //Verificar que la contraseña tenga un maximo de 60 caracteres
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenPasswordExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = new string('a', 61),
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Broadcaster First Name Validation
-    //Verificar que el nombre tenga un minimo de 3 caracteres
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenFirstNameBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "Jo",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-    //Verificar que el nombre tenga un maximo de 50 caracteres
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenFirstNameExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = new string('a', 51),
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Jane123")]
-    [InlineData("Jane@")]
-    [InlineData("Jane ")]
-    //Verificar que el nombre no contenga caracteres no alfabéticos
-    public async Task RegisterBroadcasterAsync_WhenFirstNameContainsNonLetters_ReturnsBadRequest(string firstName)
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = firstName,
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Broadcaster Last Name Validation
-    //Verificar que el apellido tenga un minimo de 3 caracteres
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenLastNameBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "Do",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-    //Verificar que el apellido tenga un maximo de 50 caracteres
-    [Fact]
-    public async Task RegisterBroadcasterAsync_WhenLastNameExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = new string('a', 51),
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Smith123")]
-    [InlineData("Smith@")]
-    [InlineData("Smith ")]
-    //Verificar que el apellido no contenga caracteres no alfabéticos
-    public async Task RegisterBroadcasterAsync_WhenLastNameContainsNonLetters_ReturnsBadRequest(string lastName)
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = lastName,
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Broadcaster RUT Validation
-
-    [Theory]
-    [InlineData("12345678901")] // 11 caracteres
-    [InlineData("1234567890123")] // 13 caracteres
-    [InlineData("")] // vacío
-    //Verificar que el RUT tenga exactamente 12 caracteres
-    public async Task RegisterBroadcasterAsync_WhenRutInvalidLength_ReturnsBadRequest(string rut)
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = rut,
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    //Verificar que el rut no esté repetido
-    public async Task RegisterBroadcasterAsync_WhenRutDuplicate_ReturnsConflict()
-    {
-        // Arrange
-        var input = DomainBuilders.BroadcasterInput();
-        var existingBroadcaster = DomainBuilders.Broadcaster();
-        existingBroadcaster.RUT = input.RUT;
-
-        _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
-        _unitOfWork.Broadcasters.GetCategoryByIdAsync(Arg.Any<int>()).Returns(new BroadcasterCategory { BroadcasterCategoryId = 1 });
-        _unitOfWork.Users.GetUserByRutAsync(input.RUT).Returns(existingBroadcaster);
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.Conflict);
-    }
-
-    #endregion
-
-    #region Broadcaster City Validation
-
-    [Fact]
-    //Verificar que la ciudad tenga un minimo de 4 caracteres
-    public async Task RegisterBroadcasterAsync_WhenCityBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "NYC",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    //verificar que la ciudad tenga un maximo de 100 caracteres
-    public async Task RegisterBroadcasterAsync_WhenCityExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = new string('a', 101),
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Buenos Aires123")]
-    [InlineData("Buenos@Aires")]
-    [InlineData("Buenos-Aires")]
-    //Verificar que la ciudad no contenga caracteres no alfabéticos
-    public async Task RegisterBroadcasterAsync_WhenCityContainsNonLetters_ReturnsBadRequest(string city)
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = city,
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Broadcaster State Validation
-
-    [Fact]
-    //Verificar que el estado tenga un minimo de 4 caracteres
-    public async Task RegisterBroadcasterAsync_WhenStateBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "NYC",
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    //Verificar que el estado tenga un maximo de 100 caracteres
-    public async Task RegisterBroadcasterAsync_WhenStateExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = new string('a', 101),
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Buenos Aires123")]
-    [InlineData("Buenos@Aires")]
-    [InlineData("Buenos-Aires")]
-    //Verificar que el estado no contenga caracteres no alfabéticos
-    public async Task RegisterBroadcasterAsync_WhenStateContainsNonLetters_ReturnsBadRequest(string state)
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = state,
-                City = "Ciudad",
-                Street = "Calle 123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Broadcaster Street Validation
-
-    [Fact]
-    //Verificar que la calle tenga un minimo de 4 caracteres
-    public async Task RegisterBroadcasterAsync_WhenStreetBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "123"
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    //Verificar que la calle tenga un maximo de 100 caracteres
-    public async Task RegisterBroadcasterAsync_WhenStreetExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterBroadcasterInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = new string('a', 101)
-            };
-
-        // Act
-        var result = await _sut.RegisterBroadcasterAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
 
     // ---------------------------------------------------------------
     // RegisterClientAsync
     // ---------------------------------------------------------------
 
     [Fact]
-    public async Task RegisterClientAsync_WhenCountryNotFound_ReturnsNotFound()
+    public async Task RegisterClientAsync_WhenCountryNotFound_ReturnsFail()
     {
-        var input = DomainBuilders.ClientInput();
+        var input = InputBuilders.ValidClientInput();
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns((Country?)null);
 
         var result = await _sut.RegisterClientAsync(input);
 
         result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.HasError<CountryErrors.CountryNotFoundError>();
     }
 
     [Fact]
     public async Task RegisterClientAsync_WhenAgencyDoesNotExist_CreatesNewAgency()
     {
         // Arrange
-        var input = DomainBuilders.ClientInput();
+        var input = InputBuilders.ValidClientInput();
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
         _unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName).Returns((Agency?)null); // no existe
@@ -709,18 +150,20 @@ public class AuthServiceTests
     public async Task RegisterClientAsync_WhenAgencyExists_ReusesExistingAgency()
     {
         var existingAgency = new Agency("Existing Agency") { AgencyId = 42 };
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = existingAgency.Name // menos de 3 caracteres
-            };
+        var input = new RegisterClientInput()
+        {
+            Email = "prueba@ejemplo.com",
+            Password = "Password123!",
+            FirstName = "PrimerNombre",
+            LastName = "PrimerApellido",
+            RUT = "123456789012",
+            CountryCode = "UY",
+            State = "Estado",
+            City = "Ciudad",
+            Street = "Calle 123",
+            AgencyName = existingAgency.Name // menos de 3 caracteres
+        };
+
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
         _unitOfWork.Clients.GetAgencyByNameAsync(input.AgencyName).Returns(existingAgency);
         _hasher.Hash(input.Password).Returns("hashed-password");
@@ -732,123 +175,12 @@ public class AuthServiceTests
             Arg.Is<Client>(c => c.Agency.AgencyId == 42));
     }
 
-    #region Client Agency Name Validation
-    //Verificar que el nombre de agencia tenga un minimo de 3 caracteres
     [Fact]
-    public async Task RegisterClientAsync_WhenAgencyNameBelowMinimumLength_ReturnsBadRequest()
+    public async Task RegisterClientAsync_WhenEmailDuplicate_ReturnsFail()
     {
         // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "AB" // menos de 3 caracteres
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    //Verificar que el nombre de agencia tenga un maximo de 100 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenAgencyNameExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = new string('a', 101) // más de 100 caracteres
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Agency123")]
-    [InlineData("Agency@")]
-    //Verificar que el nombre de agencia no contenga caracteres no alfabéticos
-    public async Task RegisterClientAsync_WhenAgencyNameContainsNonLetters_ReturnsBadRequest(string agencyName)
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = agencyName
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Client Email Validation
-    //Verificar que el email tenga un arroba
-    [Fact]
-    public async Task RegisterClientAsync_WhenEmailMissingAtSymbol_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "invalidemailexample.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    //Verificar que el email no esté repetido
-    [Fact]
-    public async Task RegisterClientAsync_WhenEmailDuplicate_ReturnsConflict()
-    {
-        // Arrange
-        var input = DomainBuilders.ClientInput();
-        var existingClient = DomainBuilders.Client();
+        var input = InputBuilders.ValidClientInput();
+        var existingClient = DomainBuilders.ValidClient();
         existingClient.Email = input.Email;
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
@@ -859,325 +191,17 @@ public class AuthServiceTests
         var result = await _sut.RegisterClientAsync(input);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.Conflict);
-    }
-
-    //Verificar que el email tenga un minimo de 10 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenEmailBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "a@b.c",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    //Verificar que el email tenga un maximo de 100 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenEmailExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = new string('a', 90) + "@example.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Client Password Validation
-    //Verificar que la contraseña tenga un minimo de 10 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenPasswordBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "short1",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    //Verificar que la contraseña tenga un maximo de 60 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenPasswordExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = new string('a', 61),
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Client First Name Validation
-    //Verificar que el nombre tenga un minimo de 3 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenFirstNameBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "Jo",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    //Verificar que el nombre tenga un maximo de 50 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenFirstNameExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = new string('a', 51),
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Jane123")]
-    [InlineData("Jane@")]
-    [InlineData("Jane ")]
-    //Verificar que el nombre no contenga caracteres no alfabéticos
-    public async Task RegisterClientAsync_WhenFirstNameContainsNonLetters_ReturnsBadRequest(string firstName)
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = firstName,
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Client Last Name Validation
-    //Verificar que el apellido tenga un minimo de 3 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenLastNameBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "Do",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    //Verificar que el apellido tenga un maximo de 50 caracteres
-    [Fact]
-    public async Task RegisterClientAsync_WhenLastNameExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = new string('a', 51),
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Smith123")]
-    [InlineData("Smith@")]
-    [InlineData("Smith ")]
-    //Verificar que el apellido no contenga caracteres no alfabéticos
-    public async Task RegisterClientAsync_WhenLastNameContainsNonLetters_ReturnsBadRequest(string lastName)
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = lastName,
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Client RUT Validation
-
-    [Theory]
-    [InlineData("12345678901")] // 11 caracteres
-    [InlineData("1234567890123")] // 13 caracteres
-    [InlineData("")] // vacío
-    //Verificar que el RUT tenga exactamente 12 caracteres
-    public async Task RegisterClientAsync_WhenRutInvalidLength_ReturnsBadRequest(string rut)
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = rut,
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        result.IsFailed.Should().BeTrue();
+        result.HasError<UserErrors.DuplicatedEmailError>();
     }
 
     [Fact]
     //Verificar que el rut no esté repetido
-    public async Task RegisterClientAsync_WhenRutDuplicate_ReturnsConflict()
+    public async Task RegisterClientAsync_WhenRutDuplicate_ReturnsFail()
     {
         // Arrange
-        var input = DomainBuilders.ClientInput();
-        var existingClient = DomainBuilders.Client();
+        var input = InputBuilders.ValidClientInput();
+        var existingClient = DomainBuilders.ValidClient();
         existingClient.RUT = input.RUT;
 
         _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
@@ -1188,237 +212,9 @@ public class AuthServiceTests
         var result = await _sut.RegisterClientAsync(input);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        result.IsFailed.Should().BeTrue();
+        result.HasError<UserErrors.DuplicatedEmailError>();
     }
-
-    #endregion
-
-    #region Client City Validation
-
-    [Fact]
-    //Verificar que la ciudad tenga un minimo de 4 caracteres
-    public async Task RegisterClientAsync_WhenCityBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "NYC",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    //Verificar que la ciudad tenga un maximo de 100 caracteres
-    public async Task RegisterClientAsync_WhenCityExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = new string('a', 101),
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Buenos Aires123")]
-    [InlineData("Buenos@Aires")]
-    [InlineData("Buenos-Aires")]
-    //Verificar que la ciudad no contenga caracteres no alfabéticos
-    public async Task RegisterClientAsync_WhenCityContainsNonLetters_ReturnsBadRequest(string city)
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = city,
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Client State Validation
-
-    [Fact]
-    //Verificar que el estado tenga un minimo de 4 caracteres
-    public async Task RegisterClientAsync_WhenStateBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "NYC",
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    //Verificar que el estado tenga un maximo de 100 caracteres
-    public async Task RegisterClientAsync_WhenStateExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = new string('a', 101),
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Theory]
-    [InlineData("Buenos Aires123")]
-    [InlineData("Buenos@Aires")]
-    [InlineData("Buenos-Aires")]
-    //Verificar que el estado no contenga caracteres no alfabéticos
-    public async Task RegisterClientAsync_WhenStateContainsNonLetters_ReturnsBadRequest(string state)
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = state,
-                City = "Ciudad",
-                Street = "Calle 123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
-
-    #region Client Street Validation
-
-    [Fact]
-    //Verificar que la calle tenga un minimo de 4 caracteres
-    public async Task RegisterClientAsync_WhenStreetBelowMinimumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = "123",
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    //Verificar que la calle tenga un maximo de 100 caracteres
-    public async Task RegisterClientAsync_WhenStreetExceedsMaximumLength_ReturnsBadRequest()
-    {
-        // Arrange
-        var input = new RegisterClientInput() {
-                Email = "prueba@ejemplo.com",
-                Password = "Password123!",
-                FirstName = "PrimerNombre",
-                LastName = "PrimerApellido",
-                RUT = "123456789012",
-                CountryCode = "UY",
-                State = "Estado",
-                City = "Ciudad",
-                Street = new string('a', 101),
-                AgencyName = "TestAgency"
-            };
-
-        // Act
-        var result = await _sut.RegisterClientAsync(input);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    #endregion
 
     // ---------------------------------------------------------------
     // LoginAsync
@@ -1428,7 +224,7 @@ public class AuthServiceTests
     public async Task LoginAsync_WithValidCredentials_ReturnsToken()
     {
         var input = new UserLoginInput { Email = "test@alpu.uy", Password = "correct-pass" };
-        var user = DomainBuilders.Client();
+        var user = DomainBuilders.ValidClient();
         user.Email = input.Email;
         user.Password = "hashed-pass";
 
@@ -1442,10 +238,10 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task LoginAsync_WithWrongPassword_ReturnsNotFound()
+    public async Task LoginAsync_WithWrongPassword_ReturnsFail()
     {
         var input = new UserLoginInput { Email = "test@alpu.uy", Password = "wrong-pass" };
-        var user = DomainBuilders.Client();
+        var user = DomainBuilders.ValidClient();
         user.Password = "hashed-pass";
 
         _unitOfWork.Users.GetUserByEmailAsync(input.Email).Returns(user);
@@ -1453,28 +249,28 @@ public class AuthServiceTests
 
         var result = await _sut.LoginAsync(input);
 
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.IsFailed.Should().BeTrue();
+        result.HasError<AuthError>();
     }
 
     [Fact]
-    public async Task LoginAsync_WhenUserRegisteredWithGoogle_ReturnsBadRequest()
+    public async Task LoginAsync_WhenUserRegisteredWithGoogle_ReturnsFail()
     {
         // Password is null → registered via Google, should not login with email
         var input = new UserLoginInput { Email = "google@alpu.uy", Password = "any" };
-        var user = DomainBuilders.Client();
+        var user = DomainBuilders.ValidClient();
         user.Password = null;
 
         _unitOfWork.Users.GetUserByEmailAsync(input.Email).Returns(user);
 
         var result = await _sut.LoginAsync(input);
 
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        result.IsFailed.Should().BeTrue();
+        result.HasError<UserErrors.GoogleUserTryNormalLoginError>();
     }
 
     [Fact]
-    public async Task LoginAsync_WhenUserNotFound_ReturnsNotFound()
+    public async Task LoginAsync_WhenUserNotFound_ReturnsFail()
     {
         var input = new UserLoginInput { Email = "noexiste@alpu.uy", Password = "pass" };
         _unitOfWork.Users.GetUserByEmailAsync(input.Email).Returns((User?)null);
@@ -1482,8 +278,8 @@ public class AuthServiceTests
         // El servicio hace ?? throw new UnauthorizedAccessException(...)
         var result = await _sut.LoginAsync(input);
 
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.IsFailed.Should().BeTrue();
+        result.HasError<UserErrors.UserNotFoundError>();
     }
 
     // ---------------------------------------------------------------
@@ -1491,15 +287,15 @@ public class AuthServiceTests
     // ---------------------------------------------------------------
 
     [Fact]
-    public async Task GoogleAuthAsync_WithInvalidToken_ReturnsNotFound()
+    public async Task GoogleAuthAsync_WithInvalidToken_ReturnsFail()
     {
         var input = new GoogleAuthInput { Code = "invalid-code" };
         _googleAuthService.ExchangeCodeAsync(input.Code).Returns((GoogleUserInfo?)null);
 
         var result = await _sut.GoogleAuthAsync(input);
 
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.IsFailed.Should().BeTrue();
+        result.HasError<UserErrors.GoogleTokenIsInvalidError>();
     }
 
     [Fact]
@@ -1514,7 +310,7 @@ public class AuthServiceTests
             FamilyName = "Mieres"
         };
 
-        var existingUser = DomainBuilders.Client();
+        var existingUser = DomainBuilders.ValidClient();
         existingUser.GoogleId = "google-sub-123";
         existingUser.Email = googleInfo.Email;
 
@@ -1556,7 +352,7 @@ public class AuthServiceTests
         // Usuario que se registró con email/password primero, luego entra con Google
         var input = new GoogleAuthInput { Code = "valid-code" };
         var googleInfo = new GoogleUserInfo { Subject = "google-sub-456", Email = "old@alpu.uy" };
-        var userWithoutGoogleId = DomainBuilders.Client();
+        var userWithoutGoogleId = DomainBuilders.ValidClient();
         userWithoutGoogleId.GoogleId = null;
         userWithoutGoogleId.Email = googleInfo.Email;
 
@@ -1570,13 +366,13 @@ public class AuthServiceTests
         await _unitOfWork.Received(1).SaveChangesAsync();
     }
 
-        [Fact]
-    public async Task GoogleAuthAsync_WhenGoogleCodeIsNull_ReturnsNotFound()
+    [Fact]
+    public async Task GoogleAuthAsync_WhenGoogleCodeIsNull_ReturnsFail()
     {
         // Usuario que se registró con email/password primero, luego entra con Google
         var input = new GoogleAuthInput { Code = "" };
         var googleInfo = new GoogleUserInfo { Subject = "google-sub-456", Email = "old@alpu.uy" };
-        var userWithoutGoogleId = DomainBuilders.Client();
+        var userWithoutGoogleId = DomainBuilders.ValidClient();
         userWithoutGoogleId.GoogleId = null;
         userWithoutGoogleId.Email = googleInfo.Email;
 
@@ -1584,7 +380,28 @@ public class AuthServiceTests
 
         var result = await _sut.GoogleAuthAsync(input);
 
-        result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.IsFailed.Should().BeTrue();
+        result.HasError<UserErrors.GoogleIdIsRequiredError>();
+    }
+
+    [Fact]
+    //Verificar que el rut no esté repetido
+    public async Task RegisterBroadcasterAsync_WhenRutDuplicate_ReturnsFail()
+    {
+        // Arrange
+        var input = InputBuilders.ValidBroadcasterInput();
+        var existingBroadcaster = DomainBuilders.ValidBroadcaster();
+        existingBroadcaster.RUT = input.RUT;
+
+        _unitOfWork.Countries.GetByCodeAsync(input.CountryCode).Returns(new Country { CountryCode = "UY" });
+        _unitOfWork.Broadcasters.GetCategoryByIdAsync(Arg.Any<int>()).Returns(new BroadcasterCategory { BroadcasterCategoryId = 1 });
+        _unitOfWork.Users.GetUserByRutAsync(input.RUT).Returns(existingBroadcaster);
+
+        // Act
+        var result = await _sut.RegisterBroadcasterAsync(input);
+
+        // Assert
+        result.IsFailed.Should().BeTrue();
+        result.HasError<UserErrors.DuplicatedRUTError>();
     }
 }

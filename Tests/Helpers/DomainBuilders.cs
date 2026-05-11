@@ -1,106 +1,56 @@
-// Helpers/DomainBuilders.cs
-using Domain.Common.Inputs.Auth;
 using Domain.Models;
 
 namespace Tests.Helpers;
 
 public static class DomainBuilders
 {
-    // --- Inputs ---
-
-    public static RegisterBroadcasterInput BroadcasterInput() => new()
+    public static Country ValidCountry() => new()
     {
-        FirstName = "Tadeo",
-        LastName = "Mieres",
-        Email = "tadeo@alpu.uy",
-        Password = "Password123!",
         CountryCode = "UY",
-        RUT = "12345678910A",
-        State = "Estado",
-        City = "Ciudad",
-    };
-    public static RegisterClientInput ClientInput() => new()
-    {
-        FirstName = "Martin",
-        LastName = "Almeida",
-        Email = "martin@agency.uy",
-        Password = "Password123!",
-        CountryCode = "UY",
-        AgencyName = "Test Agency",
-        RUT = "12345678910A",
-        State = "Estado",
-        City = "Ciudad",
+        Name = "Uruguay"
     };
 
-    public static CompleteGoogleSignUpClientInput GoogleClientInput(string googleId = "google-sub-123") => new()
+    public static Agency ValidAgency() => new("Valid Agency");
+
+    public static Client ValidClient()
     {
-        FirstName = "Martin",
-        LastName = "Almeida",
-        Email = "martin@agency.uy",
-        CountryCode = "UY",
-        AgencyName = "Test Agency",
-        Subject = googleId,
-        RUT = "12345678910A",
-        State = "Estado",
-        City = "Ciudad",
-    };
-
-    public static CompleteGoogleSignUpBroadcasterInput GoogleBroadcasterInput(string googleId = "google-sub-456") => new()
-    {
-        FirstName = "Tadeo",
-        LastName = "Mieres",
-        Email = "tadeo@alpu.uy",
-        CountryCode = "UY",
-        Subject = googleId,
-        RUT = "12345678910A",
-        State = "Estado",
-        City = "Ciudad",
-    };
-
-    // --- Domain objects ---
-
-    public static Country Country(string code = "UY") => new() { CountryCode = code };
-    public static Agency Agency(string name = "Test Agency") => new(name);
-
-    public static Client Client()
-    {
-        var result = Domain.Models.Client.SignUp(
-            ClientInput(),
-            Country(),
-            Agency(),
+        var result = Client.SignUp(
+            InputBuilders.ValidClientInput(),
+            ValidCountry(),
+            ValidAgency(),
             "hashed-password"
         );
-        return result.Value!;
+        return result.Value;
     }
 
-    public static Client ClientFromGoogle(string googleId = "google-sub-123")
+    public static Client ValidClientFromGoogle(string googleId = "google-sub-123")
     {
-        var result = Domain.Models.Client.SignUpFromGoogle(
-            GoogleClientInput(googleId),
-            Country(),
-            Agency()
+        var result = Client.SignUpFromGoogle(
+            InputBuilders.ValidGoogleClientInput(googleId),
+            ValidCountry(),
+            ValidAgency()
         );
-        return result.Value!;
+        return result.Value;
     }
 
-    public static Broadcaster Broadcaster()
+    public static Broadcaster ValidBroadcaster()
     {
-        var result = Domain.Models.Broadcaster.SignUp(
-            BroadcasterInput(),
-            Country(),
+        var result = Broadcaster.SignUp(
+            InputBuilders.ValidBroadcasterInput(),
+            ValidCountry(),
             new BroadcasterCategory { BroadcasterCategoryId = 1 },
             "hashed-password"
         );
-        return result.Value!;
+        return result.Value;
     }
 
-    public static Broadcaster BroadcasterFromGoogle(string googleId = "google-sub-456")
+    public static Broadcaster ValidBroadcasterFromGoogle(string googleId = "google-sub-456")
     {
-        var result = Domain.Models.Broadcaster.SignUpFromGoogle(
-            GoogleBroadcasterInput(googleId),
-            Country(),
+        var result = Broadcaster.SignUpFromGoogle(
+            InputBuilders.ValidGoogleBroadcasterInput(googleId),
+            ValidCountry(),
             new BroadcasterCategory { BroadcasterCategoryId = 1 }
         );
-        return result.Value!;
+        return result.Value;
     }
 }
