@@ -36,7 +36,7 @@ public class CountryConfiguration : IEntityTypeConfiguration<Country>
             .HasConstraintName("country_region_id_fkey");
 
         builder.HasMany(c => c.Contracts)
-            .WithOne(c => c.CountryCodeNavigation)
+            .WithOne(c => c.Country)
             .HasForeignKey(c => c.CountryCode);
     }
 }

@@ -11,6 +11,10 @@ using Domain.Interfaces.Private;
 using DataAccess.Security;
 using GraphQL.Types.Inputs;
 using DataAccess.ExternalServices;
+using Domain.Interfaces.Public.Services;
+using Application.Factories;
+using Domain.Interfaces.Public.Singletons;
+using Application.Singletons;
 
 namespace GraphQL.Common;
 
@@ -22,22 +26,31 @@ public static class ServiceCollectionExtensions
         ?? throw new ArgumentNullException("Connection string 'DefaultConnection' not found.");
 
         services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(
-            connectionString, options => options
-                .MapEnum<Domain.Enums.UserState>("user_state_enum")
-                .MapEnum<BillType>("bill_type_enum")
-                .MapEnum<MembershipState>("membership_state_enum")));
+            connectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.MapEnum<Domain.Enums.UserState>("user_state_enum")
+                             .MapEnum<BillType>("bill_type_enum")
+                             .MapEnum<MembershipState>("membership_state_enum")
+                             .MapEnum<ServiceType>("service_type_enum")
+                             .MapEnum<PriceAdjustmentType>("price_adjustment_type_enum")
+                             .MapEnum<Interval>("interval_enum");
+            }
+        ).UseSnakeCaseNamingConvention());
         return services;
     }
 
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddSingleton<IPriceTable, PriceTable>();
+        services.AddScoped<IAlpuService, AlpuService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IDepartmentService, DepartmentService>();
-        services.AddScoped<IAlpuService, AlpuServiceService>();
         services.AddScoped<IContractService, ContractService>();
+        services.AddScoped<ICampaignService, CampaignService>();
+        services.AddScoped<ICampaignServiceFactory, CampaignServiceFactory>();
         services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         return services;
@@ -55,20 +68,18 @@ public static class ServiceCollectionExtensions
         .AddType<CountryType>()
         .AddType<AgencyType>()
         .AddType<ServiceInterfaceType>()
-        .AddType<ServiceDurationType>()
         .AddType<ServiceIVRType>()
-        .AddType<ServiceNarrativeType>()
-        .AddType<ServiceSpecialType>()
         .AddType<PieceType>()
         .AddType<GoogleAuthInputType>()
         .AddType<CompleteGoogleBroadcasterSignUpInputType>()
         .AddType<CompleteGoogleClientSignUpInputType>()
-        .AddType<CalculateContractInputType>()
-        .AddType<CalculateContractServiceInputType>()
+        .AddType<CampaignInputType>()
+        .AddType<CampaignServiceInputType>()
         .AddType<ServiceFlagsInputType>()
         .AddType<ServiceFlagsType>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
+        .AddType<AnyType>()           // Allow JSON
         .AddProjections()             // Optimizes SQL queries
         .AddFiltering()               // Allow users to filter results
         .AddSorting()                 // Allow users to sort results

@@ -1,4 +1,6 @@
 ﻿using Domain.Models;
+using Domain.Models.Campaign;
+using Domain.Models.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.EntityFramework;
@@ -30,33 +32,23 @@ public partial class DatabaseContext : DbContext
 
     public virtual DbSet<Demo> Demos { get; set; }
 
-    public virtual DbSet<Discount> Discounts { get; set; }
-
-    public virtual DbSet<Duration> Durations { get; set; }
-
-    public virtual DbSet<ExtraCharge> ExtraCharges { get; set; }
+    public virtual DbSet<PriceAdjustment> PriceAdjustments { get; set; }
 
     public virtual DbSet<Membership> Memberships { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
-    public virtual DbSet<Piece> Pieces { get; set; }
-
-    public virtual DbSet<RangeIVR> RangeIvrs { get; set; }
-
     public virtual DbSet<Region> Regions { get; set; }
 
-    public virtual DbSet<Service> Services { get; set; }
+    public virtual DbSet<BaseService> Services { get; set; }
 
-    public virtual DbSet<ServiceDuration> ServiceDurations { get; set; }
+    public virtual DbSet<IvrService> Ivrs { get; set; }
 
-    public virtual DbSet<ServiceNarrative> ServiceNarratives { get; set; }
+    public virtual DbSet<RangeIvr> RangeIvrs { get; set; }
 
-    public virtual DbSet<ServiceSpecial> ServiceSpecials { get; set; }
+    public virtual DbSet<NarrativeService> Narratives { get; set; }
 
-    public virtual DbSet<ServiceIVR> ServiceIVRs { get; set; }
-
-    public virtual DbSet<ServicePrice> ServicePrices { get; set; }
+    public virtual DbSet<Piece> Pieces { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -72,12 +64,35 @@ public partial class DatabaseContext : DbContext
 
     public virtual DbSet<VolumeDiscount> VolumeDiscounts { get; set; }
 
+    public virtual DbSet<MultiServiceDiscount> MultiServiceDiscounts { get; set; }
+
+    public virtual DbSet<Campaign> Campaigns { get; set; }
+
+    public virtual DbSet<BaseCampaignService> CampaignServices { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder
-            .HasPostgresEnum("bill_type_enum", ["expense", "income"])
-            .HasPostgresEnum("membership_state_enum", ["valid", "expired"])
-            .HasPostgresEnum("user_state_enum", ["enabled", "pending", "penalized"]);
+        // modelBuilder
+        //     .HasPostgresEnum("bill_type_enum", ["expense", "income"])
+        //     .HasPostgresEnum("membership_state_enum", ["valid", "expired"])
+        //     .HasPostgresEnum("user_state_enum", ["enabled", "pending", "penalized"])
+        //     .HasPostgresEnum("service_type_enum", [
+        //         "tv_generic",
+        //         "tv_zocalo",
+        //         "tv_host",
+        //         "radio_generic",
+        //         "radio_zocalo",
+        //         "radio_host",
+        //         "internet_video",
+        //         "internet_audio",
+        //         "others_video",
+        //         "others_audio",
+        //         "cinema",
+        //         "ivr",
+        //         "narrative",
+        //         "camera",
+        //         "event"
+        //     ]);
 
         // Registrar todas las clases del assembly automáticamente
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DatabaseContext).Assembly);

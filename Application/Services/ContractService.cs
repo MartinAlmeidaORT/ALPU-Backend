@@ -3,6 +3,7 @@ using Domain.Common.Inputs;
 using Domain.Common.Payloads;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Models;
+using Domain.Models.Services;
 using FluentResults;
 
 namespace Application.Services;
@@ -13,10 +14,12 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
 
     public async Task<Result<CalculateContractPayload>> CalculateContract(CalculateContractInput input)
     {
-        List<Service> services = [];
+        throw new NotImplementedException();
+
+        List<BaseService> services = [];
         foreach (var service in input.Services)
         {
-            Service? serviceResult = await _unitOfWork.Services.GetServiceByIdAsync(service.ServiceId);
+            BaseService? serviceResult = await _unitOfWork.Services.GetServiceByIdAsync(service.ServiceId);
             if (serviceResult is not null) services.Add(serviceResult);
         }
 
@@ -25,7 +28,7 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
         decimal totalPrice = 0;
         for (int i = 0; i < services.Count; i++)
         {
-            pricesPayload[i] = services[i].GetTotalPrice(input.Services[i]).Value;
+            // pricesPayload[i] = services[i].GetTotalPrice(input.Services[i]).Value;
             totalPrice += pricesPayload[i].TotalPriceWithDiscount;
         }
 

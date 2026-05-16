@@ -1,5 +1,10 @@
 using Application.Interfaces.Public.Services;
+using Domain.Common.Inputs.CampaignService;
+using Domain.Common.Payloads;
+using Domain.Interfaces.Public.Services;
 using Domain.Models;
+using Domain.Models.Services;
+using GraphQL.Common;
 
 namespace GraphQL.Schema;
 
@@ -20,5 +25,12 @@ public class Query
 
     [UseProjection]
     [UseSorting]
-    public IQueryable<Service> GetServices([Service] IAlpuService alpuService) => alpuService.GetAllServices();
+    public IQueryable<BaseService> GetServices([Service] IAlpuService alpuService) => alpuService.GetAllServices();
+
+    public async Task<PriceBreakdown> CalculateContract(CampaignInput input, [Service] ICampaignService campaignService)
+    {
+        FluentResults.Result<PriceBreakdown> result = await campaignService.CalculatePrice(input);
+        return result.UnwrapOrThrow();
+    }
+
 }
