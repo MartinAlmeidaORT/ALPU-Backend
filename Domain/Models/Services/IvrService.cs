@@ -4,7 +4,7 @@ public class IvrService : BaseService
 {
     public decimal InitialMessagePrice => (decimal)BasePrice;
 
-    public decimal AdditionalMessagePrice => ExtraPrice ?? 0;
+    public decimal AdditionalMessagePrice => (decimal)ExtraPrice;
 
     public decimal UpdateMessagePrice { get; set; }
 

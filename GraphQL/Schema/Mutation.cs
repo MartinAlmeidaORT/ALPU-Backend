@@ -49,12 +49,4 @@ public class Mutation
         FluentResults.Result<AuthPayload> result = await authService.CompleteGoogleSignUpClientAsync(input);
         return result.UnwrapOrThrow();
     }
-
-    public async Task<CalculateContractPayload> CalculateContract(
-        CalculateContractInput input,
-        [Service] IContractService contractService)
-    {
-        FluentResults.Result<CalculateContractPayload> result = await contractService.CalculateContract(input);
-        return result.UnwrapOrThrow();
-    }
 }

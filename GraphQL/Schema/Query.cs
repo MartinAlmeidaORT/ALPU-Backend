@@ -23,7 +23,6 @@ public class Query
     [UseFiltering]
     public IQueryable<Department> GetDepartments([Service] IDepartmentService departmentService) => departmentService.GetAllDepartments();
 
-    [UseProjection]
     [UseSorting]
     public IQueryable<BaseService> GetServices([Service] IAlpuService alpuService) => alpuService.GetAllServices();
 
