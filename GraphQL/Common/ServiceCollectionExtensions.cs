@@ -18,6 +18,8 @@ using Application.Singletons;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using QuestPDF.Infrastructure;
+
 
 namespace GraphQL.Common;
 
@@ -131,6 +133,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddExternalServices(this IServiceCollection services, IConfiguration configuration)
     {
+        QuestPDF.Settings.License = LicenseType.Community;
         services.AddHttpClient<IGoogleAuthService, GoogleAuthService>(client =>
         {
             client.BaseAddress = new Uri("https://oauth2.googleapis.com/");
