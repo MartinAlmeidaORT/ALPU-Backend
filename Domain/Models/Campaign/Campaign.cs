@@ -86,15 +86,16 @@ public class Campaign
                         baseAmount = breakdown.Total;
                     }
 
-                    decimal adjustedAmount = discount.Type switch
+                    decimal adjusted = discount.Type switch
                     {
                         PriceAdjustmentType.Percentage => baseAmount * discount.Amount,
-                        PriceAdjustmentType.Fixed => discount.Amount,
+                        PriceAdjustmentType.Fixed => baseAmount + discount.Amount,
                         _ => 0
                     };
 
-                    breakdown.Adjustments.Add(new(discount.Key, discount.Amount, adjustedAmount, discount.Type));
-                    breakdown.Total -= adjustedAmount;
+                    decimal difference = adjusted - baseAmount;
+                    breakdown.Adjustments.Add(new("volume_discount", discount.Amount, difference, discount.Type));
+                    breakdown.Total -= adjusted;
                 }
             }
         }

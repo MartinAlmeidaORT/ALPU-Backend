@@ -29,14 +29,14 @@ public class ApplyVolumeDiscountTests
         var discount = new VolumeDiscount
         {
             Type = PriceAdjustmentType.Percentage,
-            Amount = 0.10m // 10%
+            Amount = 0.90m // 10%
         };
 
         campaignService.ApplyVolumeDiscount(ref breakdown, discount);
 
         Assert.Equal(4500, breakdown.SubTotal);         // 5000 - 500
         Assert.Single(breakdown.Adjustments);
-        Assert.Equal(500, breakdown.Adjustments[0].ApplyDiscount); // descuento aplicado
+        Assert.Equal(-500, breakdown.Adjustments[0].ApplyDiscount); // descuento aplicado
     }
 
     [Fact]
@@ -47,14 +47,14 @@ public class ApplyVolumeDiscountTests
         var discount = new VolumeDiscount
         {
             Type = PriceAdjustmentType.Fixed,
-            Amount = 300
+            Amount = -300
         };
 
         campaignService.ApplyVolumeDiscount(ref breakdown, discount);
 
         Assert.Equal(4700, breakdown.SubTotal);         // 5000 - 300
         Assert.Single(breakdown.Adjustments);
-        Assert.Equal(300, breakdown.Adjustments[0].ApplyDiscount);
+        Assert.Equal(-300, breakdown.Adjustments[0].ApplyDiscount);
     }
 
     [Fact]

@@ -92,15 +92,33 @@ public abstract class BaseCampaignService
     public void ApplyVolumeDiscount(ref ServiceBreakdown breakdown, VolumeDiscount volumeDiscount)
     {
 
-        decimal discount = volumeDiscount.Type switch
+        // PriceAdjustment? priceAdjustment = await priceTable.GetPriceAdjustmentAsync(key);
+        // if (priceAdjustment == null) return breakdown;
+
+        // decimal adjusted = priceAdjustment.Type switch
+        // {
+        //     PriceAdjustmentType.Percentage => breakdown.Total * priceAdjustment.Amount,
+        //     PriceAdjustmentType.Fixed => breakdown.Total + priceAdjustment.Amount, // positivo = recargo, negativo = descuento
+        //     _ => throw new ArgumentException()
+        // };
+
+        // decimal difference = adjusted - breakdown.Total;
+        // breakdown.Adjustments.Add(new(key, priceAdjustment.Amount, difference, priceAdjustment.Type));
+        // breakdown.Total = adjusted;
+        // return breakdown;
+
+
+
+        decimal adjusted = volumeDiscount.Type switch
         {
             PriceAdjustmentType.Percentage => breakdown.SubTotal * volumeDiscount.Amount,
-            PriceAdjustmentType.Fixed => volumeDiscount.Amount,
+            PriceAdjustmentType.Fixed => breakdown.SubTotal + volumeDiscount.Amount,
             _ => throw new ArgumentException()
         };
 
-        breakdown.SubTotal -= discount;
-        breakdown.Adjustments.Add(new("volume_discount", volumeDiscount.Amount, discount, volumeDiscount.Type));
+        decimal difference = adjusted - breakdown.SubTotal;
+        breakdown.Adjustments.Add(new("volume_discount", volumeDiscount.Amount, difference, volumeDiscount.Type));
+        breakdown.SubTotal = adjusted;
     }
 
     public PieceBreakdown[] CalculatePieces()
