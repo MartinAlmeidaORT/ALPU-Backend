@@ -76,11 +76,12 @@ public abstract class BaseCampaignService
             total += (decimal)Service.FirstExtraPrice;
             pieces--;
         }
-        else if (pieces > 0 && Service.ExtraPrice != null)
+
+        if (pieces > 0 && Service.ExtraPrice != null)
         {
             total += (decimal)Service.ExtraPrice * pieces;
         }
-        else
+        else if (pieces > 0)
         {
             total += (decimal)Service.BasePrice * pieces;
         }
@@ -94,7 +95,7 @@ public abstract class BaseCampaignService
         decimal discount = volumeDiscount.Type switch
         {
             PriceAdjustmentType.Percentage => breakdown.SubTotal * volumeDiscount.Amount,
-            PriceAdjustmentType.Fixed => breakdown.SubTotal - volumeDiscount.Amount,
+            PriceAdjustmentType.Fixed => volumeDiscount.Amount,
             _ => throw new ArgumentException()
         };
 

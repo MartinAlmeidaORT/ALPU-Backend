@@ -60,8 +60,11 @@ public class IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTa
         if (Service is IvrService ivr)
         {
             int words = CountWords(Options.MessageText);
-            RangeIvr range = ivr.RangeIvr.Last(r => words >= r.MinWord && (r.MaxWord == null || words <= r.MaxWord));
-            subtotal += words * range.PricePerWord;
+            if (words > 0)
+            {
+                RangeIvr range = ivr.RangeIvr.Last(r => words >= r.MinWord && (r.MaxWord == null || words <= r.MaxWord));
+                subtotal += words * range.PricePerWord;
+            }
         }
 
         subtotal += Options.AdditionalMessages * (decimal)Service.ExtraPrice;

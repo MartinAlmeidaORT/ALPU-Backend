@@ -10,34 +10,36 @@ public static class PriceBreakdownExtensions
     public static async Task<PriceBreakdown> ApplyPriceAdjustment(this PriceBreakdown breakdown, string key, IPriceTable priceTable)
     {
         PriceAdjustment? priceAdjustment = await priceTable.GetPriceAdjustmentAsync(key);
+        if (priceAdjustment == null) return breakdown;
 
-        decimal discount = priceAdjustment.Type switch
+        decimal adjusted = priceAdjustment.Type switch
         {
             PriceAdjustmentType.Percentage => breakdown.Total * priceAdjustment.Amount,
-            PriceAdjustmentType.Fixed => breakdown.Total - priceAdjustment.Amount,
+            PriceAdjustmentType.Fixed => breakdown.Total + priceAdjustment.Amount, // positivo = recargo, negativo = descuento
             _ => throw new ArgumentException()
         };
 
-        breakdown.Total -= discount;
-
-        breakdown.Adjustments.Add(new(key, priceAdjustment.Amount, discount, priceAdjustment.Type));
+        decimal difference = adjusted - breakdown.Total;
+        breakdown.Adjustments.Add(new(key, priceAdjustment.Amount, difference, priceAdjustment.Type));
+        breakdown.Total = adjusted;
         return breakdown;
     }
 
     public static async Task<ServiceBreakdown> ApplyPriceAdjustment(this ServiceBreakdown breakdown, string key, IPriceTable priceTable)
     {
         PriceAdjustment? priceAdjustment = await priceTable.GetPriceAdjustmentAsync(key);
+        if (priceAdjustment == null) return breakdown;
 
-        decimal discount = priceAdjustment.Type switch
+        decimal adjusted = priceAdjustment.Type switch
         {
             PriceAdjustmentType.Percentage => breakdown.SubTotal * priceAdjustment.Amount,
-            PriceAdjustmentType.Fixed => breakdown.SubTotal - priceAdjustment.Amount,
+            PriceAdjustmentType.Fixed => breakdown.SubTotal + priceAdjustment.Amount,
             _ => throw new ArgumentException()
         };
 
-        breakdown.SubTotal -= discount;
-
-        breakdown.Adjustments.Add(new(key, priceAdjustment.Amount, discount, priceAdjustment.Type));
+        decimal difference = adjusted - breakdown.SubTotal;
+        breakdown.Adjustments.Add(new(key, priceAdjustment.Amount, difference, priceAdjustment.Type));
+        breakdown.SubTotal = adjusted;
         return breakdown;
     }
 

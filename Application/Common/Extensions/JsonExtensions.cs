@@ -34,13 +34,20 @@ public static class JsonExtensions
             if (!jsonElement.TryGetProperty(key, out _))
                 return Result.Fail($"La opción '{key}' es requerida para {typeof(T).Name}.");
 
-        T? jsonObject = JsonSerializer.Deserialize<T>(jsonElement.GetRawText(), new JsonSerializerOptions
+        try
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper) }
-        });
-        return jsonObject != null ? Result.Ok(jsonObject) : Result.Fail($"No se pudo deserializar las opciones para {typeof(T).Name}");
+            T? jsonObject = JsonSerializer.Deserialize<T>(jsonElement.GetRawText(), new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper) }
+            });
+            return jsonObject != null ? Result.Ok(jsonObject) : Result.Fail($"No se pudo deserializar las opciones para {typeof(T).Name}");
+        }
+        catch (JsonException ex)
+        {
+            return Result.Fail(ex.Message);
+        }
     }
 
     public static string? GetString(this Dictionary<string, JsonElement> json, string key)

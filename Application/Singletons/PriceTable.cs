@@ -2,7 +2,6 @@ using Domain.Enums;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Interfaces.Public.Singletons;
 using Domain.Models.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Singletons;
@@ -69,7 +68,7 @@ public class PriceTable(IServiceScopeFactory scopeFactory) : IPriceTable
         return _multiServiceDiscounts
             .FirstOrDefault(m =>
                 (m.ServiceA == typeA && m.ServiceB == typeB) ||
-                (m.ServiceB == typeB && m.ServiceA == typeA));
+                (m.ServiceA == typeB && m.ServiceB == typeA));
     }
 
     public async Task<PriceAdjustment?> GetPriceAdjustmentAsync(string key)
