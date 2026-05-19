@@ -32,4 +32,8 @@ public class Query
         return result.UnwrapOrThrow();
     }
 
+    [UsePaging(IncludeTotalCount = true)]
+    [UseProjection]
+    [UseSorting]
+    public IQueryable<Contract> GetContracts([Service] IContractService contractService) => contractService.GetAllContracts();
 }

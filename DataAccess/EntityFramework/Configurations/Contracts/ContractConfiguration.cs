@@ -19,8 +19,14 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.Property(c => c.ClientId)
             .HasColumnName("client_id");
 
+        builder.Property(c => c.ClientApproved)
+            .HasColumnName("client_approved");
+
         builder.Property(c => c.BroadcasterId)
             .HasColumnName("broadcaster_id");
+
+        builder.Property(c => c.BroadcasterApproved)
+            .HasColumnName("broadcaster_approved");
 
         builder.Property(c => c.Date)
             .HasColumnName("date");
@@ -35,6 +41,9 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
 
         builder.Property(c => c.TotalPrice)
             .HasColumnName("total_price");
+
+        builder.Property(c => c.State)
+            .HasColumnName("state");
 
         builder.Property(c => c.TermYears)
             .HasColumnName("term_years");

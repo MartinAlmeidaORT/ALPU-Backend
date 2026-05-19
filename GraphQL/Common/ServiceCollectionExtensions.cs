@@ -33,7 +33,8 @@ public static class ServiceCollectionExtensions
                              .MapEnum<MembershipState>("membership_state_enum")
                              .MapEnum<ServiceType>("service_type_enum")
                              .MapEnum<PriceAdjustmentType>("price_adjustment_type_enum")
-                             .MapEnum<Interval>("interval_enum");
+                             .MapEnum<Interval>("interval_enum")
+                             .MapEnum<ContractState>("contract_state_enum");
             }
         ).UseSnakeCaseNamingConvention());
         return services;
@@ -73,11 +74,23 @@ public static class ServiceCollectionExtensions
         .AddType<ServiceNarrativeType>()
         .AddType<ServiceDateType>()
         .AddType<PieceType>()
+        .AddType<ContractType>()
         .AddType<GoogleAuthInputType>()
         .AddType<CompleteGoogleBroadcasterSignUpInputType>()
         .AddType<CompleteGoogleClientSignUpInputType>()
         .AddType<CampaignInputType>()
         .AddType<CampaignServiceInputType>()
+        .AddType<CampaignType>()
+        .AddType<EventCampaignServiceType>()
+        .AddType<NarrativeCampaignServiceType>()
+        .AddType<IvrCampaignServiceType>()
+        .AddType<TvCampaignServiceType>()
+        .AddType<RadioCampaignServiceType>()
+        .AddType<CinemaCampaignServiceType>()
+        .AddType<CameraCampaignServiceType>()
+        .AddType<OtherMediaCampaignServiceType>()
+        .AddType<CampaignType>()
+        .AddType<CampaignType>()
         .AddType<ServiceFlagsInputType>()
         .AddType<ServiceFlagsType>()
         .AddQueryType<Query>()

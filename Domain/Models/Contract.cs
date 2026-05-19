@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Enums;
 using Domain.Models.Campaign;
 
 namespace Domain.Models;
@@ -11,15 +12,21 @@ public class Contract : Entity
 
     public virtual Client Client { get; set; } = null!;
 
+    public bool ClientApproved { get; set; }
+
     public int BroadcasterId { get; set; }
 
     public virtual Broadcaster Broadcaster { get; set; } = null!;
+
+    public bool BroadcasterApproved { get; set; }
 
     public DateOnly Date { get; set; }
 
     public DateOnly DueDate { get; set; }
 
     public decimal TotalPrice { get; set; }
+
+    public ContractState State { get; set; }
 
     public int TermYears { get; set; }
 

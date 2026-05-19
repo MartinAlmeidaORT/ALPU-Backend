@@ -58,7 +58,7 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
 
     public Task<Contract?> GetContractByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return _unitOfWork.Contracts.GetByIdAsync(id);
     }
 
     public Task<Contract> UpdateContractAsync(Contract contract)
