@@ -6,6 +6,7 @@ public record PriceBreakdown
 {
     public List<ServiceBreakdown> Services { get; init; } = [];
     public List<PriceAdjustmentBreakdown> Adjustments { get; set; } = [];
+    public decimal BeforeDiscount { get; set; }
     public decimal Total { get; set; }
 }
 
@@ -34,6 +35,7 @@ public record ServiceBreakdown
     public decimal BasePrice { get; set; }
     public decimal? SubsequentPrice { get; init; }
     public decimal? VolumeDiscount { get; init; }
+    public decimal BeforeDiscount { get; set; }
     public decimal SubTotal { get; set; }
     public List<PriceAdjustmentBreakdown> Adjustments { get; set; } = [];
     public PieceBreakdown[] Pieces { get; init; } = null!;

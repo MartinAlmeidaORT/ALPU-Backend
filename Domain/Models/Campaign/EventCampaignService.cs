@@ -24,9 +24,10 @@ public class EventCampaignService(BaseService service, List<Piece> pieces, IPric
             BasePrice = (decimal)Service.BasePrice,
             SubsequentPrice = Service.ExtraPrice,
             Pieces = CalculatePieces(),
+            BeforeDiscount = CalculateSubTotal()
         };
 
-        decimal subtotal = CalculateSubTotal();
+        decimal subtotal = breakdown.BeforeDiscount;
 
         if (Options.ForMassBroadcast)
         {

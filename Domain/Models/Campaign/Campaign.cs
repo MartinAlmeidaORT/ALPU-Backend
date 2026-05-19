@@ -43,8 +43,9 @@ public class Campaign
             Result<ServiceBreakdown> serviceBreakdown = await campaignService.Calculate();
             if (serviceBreakdown.IsFailed) return Result.Fail(serviceBreakdown.Errors);
             breakdown.Services.Add(serviceBreakdown.Value);
-            breakdown.Total += serviceBreakdown.Value.SubTotal;
+            breakdown.BeforeDiscount += serviceBreakdown.Value.SubTotal;
         }
+        breakdown.Total = breakdown.BeforeDiscount;
 
         await ApplyMultiServiceDiscount(breakdown, [.. serviceTypes], priceTable);
 

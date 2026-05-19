@@ -50,9 +50,10 @@ public abstract class BaseCampaignService
             BasePrice = (decimal)Service.BasePrice,
             SubsequentPrice = Service.ExtraPrice,
             Pieces = CalculatePieces(),
+            BeforeDiscount = CalculateSubTotal()
         };
 
-        decimal subtotal = CalculateSubTotal();
+        decimal subtotal = breakdown.BeforeDiscount;
 
         VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Pieces.Count());
         if (volumeDiscount != null)

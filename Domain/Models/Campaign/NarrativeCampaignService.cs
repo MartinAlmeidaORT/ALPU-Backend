@@ -28,11 +28,13 @@ public class NarrativeCampaignService(NarrativeService service, List<Piece> piec
 
         if (Options.PriceOverride != null)
         {
+            breakdown.BeforeDiscount = (decimal)Options.PriceOverride;
             breakdown.SubTotal = (decimal)Options.PriceOverride;
             return breakdown;
         }
 
-        breakdown.SubTotal = CalculateSubTotal();
+        breakdown.BeforeDiscount = CalculateSubTotal();
+        breakdown.SubTotal = breakdown.BeforeDiscount;
 
         VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Options.ExtraMinutes);
         if (volumeDiscount != null)

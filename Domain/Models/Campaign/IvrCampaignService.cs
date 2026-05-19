@@ -28,13 +28,15 @@ public class IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTa
 
         if (Options.PriceOverride != null)
         {
+            breakdown.BeforeDiscount = (decimal)Options.PriceOverride;
             breakdown.SubTotal = (decimal)Options.PriceOverride;
             return breakdown;
         }
 
         if (string.IsNullOrWhiteSpace(Options.MessageText)) return Result.Fail("Es necesario ingresar un texto en el servicio IVR.");
 
-        decimal subtotal = CalculateSubTotal();
+        breakdown.BeforeDiscount = CalculateSubTotal();
+        decimal subtotal = breakdown.BeforeDiscount;
 
         if (Options.CanUpdate)
         {
