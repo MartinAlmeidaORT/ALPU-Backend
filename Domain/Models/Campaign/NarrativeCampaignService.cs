@@ -48,17 +48,17 @@ public class NarrativeCampaignService(NarrativeService service, List<Piece> piec
 
         if (Options.HasLipSync)
         {
-            await breakdown.ApplyPriceAdjustment(nameof(Options.HasLipSync).ToSnakeCase(), priceTable);
+            await breakdown.ApplyPriceAdjustment(nameof(Options.HasLipSync).ToSnakeCase(), _priceTable);
         }
 
         if (Options.IsNonCommercial)
         {
-            await breakdown.ApplyPriceAdjustment(nameof(Options.IsNonCommercial).ToSnakeCase(), priceTable);
+            await breakdown.ApplyPriceAdjustment(nameof(Options.IsNonCommercial).ToSnakeCase(), _priceTable);
         }
 
         if (Options.OnInternet)
         {
-            await breakdown.ApplyPriceAdjustment(nameof(Options.OnInternet).ToSnakeCase(), priceTable);
+            await breakdown.ApplyPriceAdjustment(nameof(Options.OnInternet).ToSnakeCase(), _priceTable);
         }
 
         return breakdown;

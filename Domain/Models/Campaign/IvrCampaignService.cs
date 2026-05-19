@@ -39,12 +39,11 @@ public class IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTa
         if (Options.CanUpdate)
         {
             breakdown.Adjustments.Add(new(nameof(Options.CanUpdate).ToSnakeCase(), ((IvrService)Service).UpdateMessagePrice, ((IvrService)Service).UpdateMessagePrice, Enums.PriceAdjustmentType.Fixed));
-            // await breakdown.ApplyPriceAdjustment(nameof(Options.CanUpdate).ToSnakeCase(), priceTable);
         }
 
         if (Options.IsInterior)
         {
-            await breakdown.ApplyPriceAdjustment(nameof(Options.IsInterior).ToSnakeCase(), priceTable);
+            await breakdown.ApplyPriceAdjustment(nameof(Options.IsInterior).ToSnakeCase(), _priceTable);
         }
 
         breakdown.SubTotal = subtotal;

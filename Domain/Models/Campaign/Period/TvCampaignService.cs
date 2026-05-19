@@ -19,7 +19,7 @@ public class TvCampaignService(PeriodService service, List<Piece> pieces, IPrice
 
         if (Options.IsInterior)
         {
-            await result.Value.ApplyPriceAdjustment(nameof(Options.IsInterior).ToSnakeCase(), priceTable);
+            await result.Value.ApplyPriceAdjustment(nameof(Options.IsInterior).ToSnakeCase(), _priceTable);
         }
 
         return result.Value;

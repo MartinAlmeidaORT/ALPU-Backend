@@ -19,7 +19,7 @@ public class CameraCampaignService(PeriodService service, List<Piece> pieces, IP
 
         if (Options.ForInternalUse)
         {
-            await result.Value.ApplyPriceAdjustment(nameof(Options.ForInternalUse).ToSnakeCase(), priceTable);
+            await result.Value.ApplyPriceAdjustment(nameof(Options.ForInternalUse).ToSnakeCase(), _priceTable);
         }
 
         return result.Value;

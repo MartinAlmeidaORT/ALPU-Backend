@@ -30,7 +30,7 @@ public class EventCampaignService(BaseService service, List<Piece> pieces, IPric
 
         if (Options.ForMassBroadcast)
         {
-            await breakdown.ApplyPriceAdjustment(nameof(Options.ForMassBroadcast).ToSnakeCase(), priceTable);
+            await breakdown.ApplyPriceAdjustment(nameof(Options.ForMassBroadcast).ToSnakeCase(), _priceTable);
         }
 
         breakdown.SubTotal = subtotal;

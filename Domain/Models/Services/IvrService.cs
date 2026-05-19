@@ -2,9 +2,9 @@ namespace Domain.Models.Services;
 
 public class IvrService : BaseService
 {
-    public decimal InitialMessagePrice => (decimal)BasePrice;
+    public decimal InitialMessagePrice => BasePrice ?? throw new NullReferenceException();
 
-    public decimal AdditionalMessagePrice => (decimal)ExtraPrice;
+    public decimal AdditionalMessagePrice => ExtraPrice ?? throw new NullReferenceException();
 
     public decimal UpdateMessagePrice { get; set; }
 

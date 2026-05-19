@@ -35,9 +35,8 @@ public abstract class PeriodCampaignService(PeriodService service, List<Piece> p
             BasePrice = interval.BasePrice,
             SubsequentPrice = Service.ExtraPrice,
             Pieces = CalculatePieces(),
+            SubTotal = CalculateSubTotal()
         };
-
-        breakdown.SubTotal = CalculateSubTotal();
 
         VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Pieces.Count());
         if (volumeDiscount != null)
