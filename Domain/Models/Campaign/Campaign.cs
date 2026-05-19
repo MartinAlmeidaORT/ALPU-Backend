@@ -95,8 +95,8 @@ public class Campaign
                     };
 
                     decimal difference = adjusted - baseAmount;
-                    breakdown.Adjustments.Add(new(discount.Name, "volume_discount", discount.Amount, difference, discount.Type));
-                    breakdown.Total -= adjusted;
+                    breakdown.Adjustments.Add(new(discount.Name, discount.Key, discount.Amount, difference, discount.Type));
+                    breakdown.Total += difference;
                 }
             }
         }
