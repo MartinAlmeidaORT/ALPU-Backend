@@ -11,15 +11,17 @@ public record PriceBreakdown
 
 public record PriceAdjustmentBreakdown
 {
-    public PriceAdjustmentBreakdown(string key, decimal amount, decimal applyDiscount, PriceAdjustmentType type)
+    public PriceAdjustmentBreakdown(string key, string name, decimal amount, decimal applyDiscount, PriceAdjustmentType type)
     {
         Key = key;
+        Name = name;
         Amount = amount;
         ApplyDiscount = applyDiscount;
         Type = type;
     }
 
     public string Key { get; set; } = null!;
+    public string Name { get; set; } = null!;
     public decimal Amount { get; set; }
     public decimal ApplyDiscount { get; set; }
     public PriceAdjustmentType Type { get; set; }

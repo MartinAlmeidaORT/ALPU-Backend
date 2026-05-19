@@ -7,6 +7,8 @@ public class VolumeDiscount : Entity
 {
     public int VolumeDiscountId { get; set; }
 
+    public string Name { get; set; } = null!;
+
     public ServiceType ServiceType { get; set; }
 
     public int MinQuantity { get; set; }

@@ -38,7 +38,7 @@ public class IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTa
 
         if (Options.CanUpdate)
         {
-            breakdown.Adjustments.Add(new(nameof(Options.CanUpdate).ToSnakeCase(), ((IvrService)Service).UpdateMessagePrice, ((IvrService)Service).UpdateMessagePrice, Enums.PriceAdjustmentType.Fixed));
+            await breakdown.ApplyPriceAdjustment(nameof(Options.CanUpdate).ToSnakeCase(), _priceTable);
         }
 
         if (Options.IsInterior)

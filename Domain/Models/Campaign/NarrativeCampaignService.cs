@@ -43,7 +43,7 @@ public class NarrativeCampaignService(NarrativeService service, List<Piece> piec
         if (Options.ExtraRoles > 0)
         {
             breakdown.SubTotal += Options.ExtraRoles * Service.RolePrice;
-            breakdown.Adjustments.Add(new(nameof(Options.ExtraRoles).ToSnakeCase(), Service.RolePrice, Options.ExtraRoles * Service.RolePrice, Enums.PriceAdjustmentType.Fixed));
+            breakdown.Adjustments.Add(new("Roles Extras", nameof(Options.ExtraRoles).ToSnakeCase(), Service.RolePrice, Options.ExtraRoles * Service.RolePrice, Enums.PriceAdjustmentType.Fixed));
         }
 
         if (Options.HasLipSync)

@@ -20,7 +20,7 @@ public static class PriceBreakdownExtensions
         };
 
         decimal difference = adjusted - breakdown.Total;
-        breakdown.Adjustments.Add(new(key, priceAdjustment.Amount, difference, priceAdjustment.Type));
+        breakdown.Adjustments.Add(new(key, priceAdjustment.Name, priceAdjustment.Amount, difference, priceAdjustment.Type));
         breakdown.Total = adjusted;
         return breakdown;
     }
@@ -38,7 +38,7 @@ public static class PriceBreakdownExtensions
         };
 
         decimal difference = adjusted - breakdown.SubTotal;
-        breakdown.Adjustments.Add(new(key, priceAdjustment.Amount, difference, priceAdjustment.Type));
+        breakdown.Adjustments.Add(new(key, priceAdjustment.Name, priceAdjustment.Amount, difference, priceAdjustment.Type));
         breakdown.SubTotal = adjusted;
         return breakdown;
     }

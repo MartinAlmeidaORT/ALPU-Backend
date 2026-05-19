@@ -4,6 +4,8 @@ namespace Domain.Models.Services;
 
 public class MultiServiceDiscount
 {
+    public string Name { get; set; } = null!;
+
     public string Key { get; set; } = null!;
 
     public ServiceType ServiceA { get; set; }

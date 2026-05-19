@@ -16,6 +16,10 @@ public class VolumeDiscountConfiguration : IEntityTypeConfiguration<VolumeDiscou
         builder.Property(vd => vd.VolumeDiscountId)
             .HasColumnName("volume_discount_id");
 
+        builder.Property(vd => vd.Name)
+            .HasColumnName("name")
+            .IsRequired();
+
         builder.Property(vd => vd.ServiceType)
             .HasColumnName("service_type")
             .HasColumnType("service_type_enum")

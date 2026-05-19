@@ -13,6 +13,10 @@ public class MultiServiceDiscountConfiguration : IEntityTypeConfiguration<MultiS
         builder.HasKey(m => new { m.ServiceA, m.ServiceB })
             .HasName("multi_service_discount_pkey");
 
+        builder.Property(m => m.Name)
+            .HasColumnName("name")
+            .IsRequired();
+
         builder.Property(m => m.Key)
             .HasColumnName("key")
             .IsRequired();
