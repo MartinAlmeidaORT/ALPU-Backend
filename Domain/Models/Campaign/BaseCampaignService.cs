@@ -100,8 +100,8 @@ public abstract class BaseCampaignService
         };
 
         decimal difference = adjusted - breakdown.SubTotal;
-        breakdown.Adjustments.Add(new(volumeDiscount.Name, "volume_discount", volumeDiscount.Amount, difference, volumeDiscount.Type));
-        breakdown.SubTotal = adjusted;
+        breakdown.Adjustments.Add(new("volume_discount", volumeDiscount.Name, volumeDiscount.Amount, difference, volumeDiscount.Type));
+        breakdown.SubTotal += difference;
     }
 
     public PieceBreakdown[] CalculatePieces()
