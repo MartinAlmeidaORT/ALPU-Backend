@@ -15,6 +15,9 @@ using Domain.Interfaces.Public.Services;
 using Application.Factories;
 using Domain.Interfaces.Public.Singletons;
 using Application.Singletons;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GraphQL.Common;
 
@@ -60,6 +63,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServiceGraphQL(this IServiceCollection services)
     {
         services.AddGraphQLServer()
+        .AddAuthorization()
         .AddType<AuthPayloadType>()
         .AddType<GoogleAuthType>()
         .AddType<UserInterfaceType>()
@@ -122,13 +126,28 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddExternalServices(this IServiceCollection services)
+    public static IServiceCollection AddExternalServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpClient<IGoogleAuthService, GoogleAuthService>(client =>
         {
             client.BaseAddress = new Uri("https://oauth2.googleapis.com/");
             client.Timeout = TimeSpan.FromSeconds(30);
         });
+        services.AddHttpContextAccessor();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.MapInboundClaims = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration["JWT:Secret"]!)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true
+                };
+            });
+        services.AddAuthorization();
         return services;
     }
 
