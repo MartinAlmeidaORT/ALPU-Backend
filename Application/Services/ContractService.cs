@@ -56,6 +56,17 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
         return _unitOfWork.Contracts.GetAllContracts();
     }
 
+    public IQueryable<Contract> GetAllContracts(int userId, string role)
+    {
+        return role switch
+        {
+            "Administrator" or "Supervisor" or "Accountant" => _unitOfWork.Contracts.GetAllContracts(),
+            "Client" => _unitOfWork.Contracts.GetAllContracts().Where(c => c.ClientId == userId),
+            "Broadcaster" => _unitOfWork.Contracts.GetAllContracts().Where(c => c.BroadcasterId == userId),
+            _ => Enumerable.Empty<Contract>().AsQueryable()
+        };
+    }
+
     public Task<Contract?> GetContractByIdAsync(int id)
     {
         return _unitOfWork.Contracts.GetByIdAsync(id);

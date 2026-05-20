@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
@@ -5,6 +7,7 @@ using Domain.Interfaces.Public.Services;
 using Domain.Models;
 using Domain.Models.Services;
 using GraphQL.Common;
+using HotChocolate.Authorization;
 
 namespace GraphQL.Schema;
 
@@ -32,8 +35,18 @@ public class Query
         return result.UnwrapOrThrow();
     }
 
+    [Authorize]
     [UsePaging(IncludeTotalCount = true)]
     [UseProjection]
     [UseSorting]
-    public IQueryable<Contract> GetContracts([Service] IContractService contractService) => contractService.GetAllContracts();
+    public IQueryable<Contract> GetContracts(
+        [Service] IContractService contractService,
+        [Service] IHttpContextAccessor httpContextAccessor)
+    {
+        ClaimsPrincipal? user = httpContextAccessor.HttpContext?.User ?? throw new NullReferenceException();
+        string? role = user.FindFirstValue(ClaimTypes.Role) ?? throw new NullReferenceException();
+        string? userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? throw new NullReferenceException();
+
+        return contractService.GetAllContracts(int.Parse(userId), role);
+    }
 }
