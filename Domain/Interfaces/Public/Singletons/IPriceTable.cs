@@ -7,7 +7,7 @@ public interface IPriceTable
 {
     Task<BaseService?> GetServiceById(int id);
 
-    Task<VolumeDiscount?> GetVolumeDiscountAsync(ServiceType typeA, int quantity);
+    Task<VolumeDiscount?> GetVolumeDiscountAsync(ServiceType type, int quantity);
 
     Task<MultiServiceDiscount?> GetMultiServiceDiscountAsync(ServiceType typeA, ServiceType typeB);
 
