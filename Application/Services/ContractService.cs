@@ -72,8 +72,25 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
         return _unitOfWork.Contracts.GetByIdAsync(id);
     }
 
-    public Task<Contract> UpdateContractAsync(Contract contract)
+    public async Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId)
     {
-        throw new NotImplementedException();
+        Contract? contract = _unitOfWork.Contracts
+            .GetAllContracts()
+            .Where(c => (c.ClientId == userId || c.BroadcasterId == userId) && c.ContractId == input.ContractId)
+            .SingleOrDefault();
+
+        if (contract == null)
+        {
+            return Result.Fail($"El contrato con id: {input.ContractId} no existe o no tiene acceso al mismo.");
+        }
+
+        if (contract.State == input.NewState)
+        {
+            return Result.Fail("El contrato ya se encuentra en ese estado.");
+        }
+
+        contract.State = input.NewState;
+        await _unitOfWork.SaveChangesAsync();
+        return Result.Ok();
     }
 }

@@ -1,8 +1,12 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
+using Domain.Models;
 using GraphQL.Common;
+using HotChocolate.Authorization;
 
 namespace GraphQL.Schema;
 
@@ -48,5 +52,22 @@ public class Mutation
     {
         FluentResults.Result<AuthPayload> result = await authService.CompleteGoogleSignUpClientAsync(input);
         return result.UnwrapOrThrow();
+    }
+
+    [Authorize]
+    [UseSingleOrDefault]
+    [UseProjection]
+    public async Task<IQueryable<Contract>> UpdateContractState(
+        UpdateContractStateInput input,
+        [Service] IContractService contractService,
+        [Service] IHttpContextAccessor httpContextAccessor)
+    {
+        ClaimsPrincipal? user = httpContextAccessor.HttpContext?.User ?? throw new NullReferenceException();
+        string? role = user.FindFirstValue(ClaimTypes.Role) ?? throw new NullReferenceException();
+        string? userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? throw new NullReferenceException();
+
+        FluentResults.Result result = await contractService.UpdateContractAsync(input, int.Parse(userId));
+        result.UnwrapOrThrow();
+        return contractService.GetAllContracts().Where(c => c.ContractId == input.ContractId);
     }
 }
