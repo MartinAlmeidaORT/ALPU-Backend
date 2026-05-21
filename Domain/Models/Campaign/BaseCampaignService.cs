@@ -14,7 +14,7 @@ public abstract class BaseCampaignService
         _priceTable = null!;
     }
 
-    public BaseCampaignService(BaseService service, List<Piece> pieces, IPriceTable priceTable)
+    protected BaseCampaignService(BaseService service, List<Piece> pieces, IPriceTable priceTable)
     {
         Service = service;
         Pieces = pieces;
