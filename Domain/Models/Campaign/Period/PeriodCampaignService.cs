@@ -39,7 +39,7 @@ public abstract class PeriodCampaignService(PeriodService service, List<Piece> p
         };
         breakdown.SubTotal = breakdown.BeforeDiscount;
 
-        VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Pieces.Count());
+        VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Pieces.Count);
         if (volumeDiscount != null)
         {
             ApplyVolumeDiscount(ref breakdown, volumeDiscount);

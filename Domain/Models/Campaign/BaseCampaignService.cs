@@ -55,7 +55,7 @@ public abstract class BaseCampaignService
 
         decimal subtotal = breakdown.BeforeDiscount;
 
-        VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Pieces.Count());
+        VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Pieces.Count);
         if (volumeDiscount != null)
         {
             ApplyVolumeDiscount(ref breakdown, volumeDiscount);
@@ -70,7 +70,7 @@ public abstract class BaseCampaignService
         if (Service.BasePrice == null) throw new NullReferenceException();
 
         decimal total = (decimal)Service.BasePrice;
-        int pieces = Pieces.Count() - 1;
+        int pieces = Pieces.Count - 1;
 
         if (pieces > 0 && Service.FirstExtraPrice != null)
         {
@@ -108,10 +108,10 @@ public abstract class BaseCampaignService
     {
         if (Service.BasePrice == null) throw new NullReferenceException();
 
-        int pieces = Pieces.Count();
+        int pieces = Pieces.Count;
         PieceBreakdown[] pieceBreakdowns = new PieceBreakdown[pieces];
 
-        for (int i = 0; i < Pieces.Count(); i++)
+        for (int i = 0; i < Pieces.Count; i++)
         {
             if (i == 0)
             {
