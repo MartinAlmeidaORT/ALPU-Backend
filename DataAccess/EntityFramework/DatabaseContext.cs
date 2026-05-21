@@ -72,28 +72,6 @@ public partial class DatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // modelBuilder
-        //     .HasPostgresEnum("bill_type_enum", ["expense", "income"])
-        //     .HasPostgresEnum("membership_state_enum", ["valid", "expired"])
-        //     .HasPostgresEnum("user_state_enum", ["enabled", "pending", "penalized"])
-        //     .HasPostgresEnum("service_type_enum", [
-        //         "tv_generic",
-        //         "tv_zocalo",
-        //         "tv_host",
-        //         "radio_generic",
-        //         "radio_zocalo",
-        //         "radio_host",
-        //         "internet_video",
-        //         "internet_audio",
-        //         "others_video",
-        //         "others_audio",
-        //         "cinema",
-        //         "ivr",
-        //         "narrative",
-        //         "camera",
-        //         "event"
-        //     ]);
-
         // Registrar todas las clases del assembly automáticamente
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DatabaseContext).Assembly);
     }
