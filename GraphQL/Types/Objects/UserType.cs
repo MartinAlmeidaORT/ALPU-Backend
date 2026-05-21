@@ -25,12 +25,6 @@ public class BroadcasterType : ObjectType<Broadcaster>
         descriptor.Name("Broadcaster");
         descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
-        descriptor.Field(x => x.UserId);
-        descriptor.Field(x => x.Email);
-        descriptor.Field(x => x.FirstName);
-        descriptor.Field(x => x.LastName);
-        descriptor.Field(x => x.RUT);
-        descriptor.Field(x => x.UserState);
         descriptor.Field(x => x.Category);
     }
 }
@@ -42,12 +36,7 @@ public class ClientType : ObjectType<Client>
         descriptor.Name("Client");
         descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
-        descriptor.Field(x => x.UserId);
-        descriptor.Field(x => x.Email);
-        descriptor.Field(x => x.FirstName);
-        descriptor.Field(x => x.LastName);
-        descriptor.Field(x => x.RUT);
-        descriptor.Field(x => x.UserState);
+        descriptor.ExtendsType<UserInterfaceType>();
         descriptor.Field(x => x.Agency).Type<AgencyType>();
     }
 }
@@ -57,8 +46,8 @@ public class AdministratorType : ObjectType<Administrator>
     protected override void Configure(IObjectTypeDescriptor<Administrator> descriptor)
     {
         descriptor.Name("Administrator");
+        descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
-        descriptor.IgnoreSensitiveFields();
     }
 }
 
@@ -82,12 +71,17 @@ public class AccountantType : ObjectType<Accountant>
     }
 }
 
-public static class UserInterfaceTypeExtensions
+public static class UserTypeExtensions
 {
-    public static void IgnoreSensitiveFields<T>(this IObjectTypeDescriptor<T> descriptor)
+    public static void MapCommonFields<T>(this IObjectTypeDescriptor<T> descriptor)
         where T : User
     {
-        descriptor.Field(x => x.Password).Ignore();
-        descriptor.Field(x => x.GoogleId).Ignore();
+        descriptor.Field(x => x.UserId);
+        descriptor.Field(x => x.Email);
+        descriptor.Field(x => x.FirstName);
+        descriptor.Field(x => x.LastName);
+        descriptor.Field(x => x.RUT);
+        descriptor.Field(x => x.UserState);
+        descriptor.Field(x => x.Address).Type<AddressType>();
     }
 }
