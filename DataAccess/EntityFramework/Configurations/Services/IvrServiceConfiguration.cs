@@ -27,7 +27,7 @@ public class IvrServiceConfiguration : IEntityTypeConfiguration<IvrService>
     }
 }
 
-public class RangeIVRConfiguration : IEntityTypeConfiguration<RangeIvr>
+public class RangeIvrConfiguration : IEntityTypeConfiguration<RangeIvr>
 {
     public void Configure(EntityTypeBuilder<RangeIvr> builder)
     {
