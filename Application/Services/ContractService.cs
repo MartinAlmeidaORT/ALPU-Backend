@@ -3,6 +3,7 @@ using Domain.Common.Inputs;
 using Domain.Common.Payloads;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Models;
+using Domain.Models.Services;
 using FluentResults;
 
 namespace Application.Services;
@@ -13,10 +14,12 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
 
     public async Task<Result<CalculateContractPayload>> CalculateContract(CalculateContractInput input)
     {
-        List<Service> services = [];
+        throw new NotImplementedException();
+
+        List<BaseService> services = [];
         foreach (var service in input.Services)
         {
-            Service? serviceResult = await _unitOfWork.Services.GetServiceByIdAsync(service.ServiceId);
+            BaseService? serviceResult = await _unitOfWork.Services.GetServiceByIdAsync(service.ServiceId);
             if (serviceResult is not null) services.Add(serviceResult);
         }
 
@@ -25,7 +28,7 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
         decimal totalPrice = 0;
         for (int i = 0; i < services.Count; i++)
         {
-            pricesPayload[i] = services[i].GetTotalPrice(input.Services[i]).Value;
+            // pricesPayload[i] = services[i].GetTotalPrice(input.Services[i]).Value;
             totalPrice += pricesPayload[i].TotalPriceWithDiscount;
         }
 
@@ -53,13 +56,41 @@ public class ContractService(IUnitOfWork unitOfWork) : IContractService
         return _unitOfWork.Contracts.GetAllContracts();
     }
 
-    public Task<Contract?> GetContractByIdAsync(int id)
+    public IQueryable<Contract> GetAllContracts(int userId, string role)
     {
-        throw new NotImplementedException();
+        return role switch
+        {
+            "Administrator" or "Supervisor" or "Accountant" => _unitOfWork.Contracts.GetAllContracts(),
+            "Client" => _unitOfWork.Contracts.GetAllContracts().Where(c => c.ClientId == userId),
+            "Broadcaster" => _unitOfWork.Contracts.GetAllContracts().Where(c => c.BroadcasterId == userId),
+            _ => Enumerable.Empty<Contract>().AsQueryable()
+        };
     }
 
-    public Task<Contract> UpdateContractAsync(Contract contract)
+    public Task<Contract?> GetContractByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return _unitOfWork.Contracts.GetByIdAsync(id);
+    }
+
+    public async Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId)
+    {
+        Contract? contract = _unitOfWork.Contracts
+            .GetAllContracts()
+            .Where(c => (c.ClientId == userId || c.BroadcasterId == userId) && c.ContractId == input.ContractId)
+            .SingleOrDefault();
+
+        if (contract == null)
+        {
+            return Result.Fail($"El contrato con id: {input.ContractId} no existe o no tiene acceso al mismo.");
+        }
+
+        if (contract.State == input.NewState)
+        {
+            return Result.Fail("El contrato ya se encuentra en ese estado.");
+        }
+
+        contract.State = input.NewState;
+        await _unitOfWork.SaveChangesAsync();
+        return Result.Ok();
     }
 }

@@ -17,7 +17,7 @@ public class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IErr
             return error;
         }
 
-        _logger.LogError(error.Exception, "Unhandled exception: {Message}", error.Exception?.Message);
+        _logger.LogError(error.Exception, $"Unhandled exception: {error.Message}");
 
         return ErrorBuilder.New()
             .SetMessage("Fallo en el servidor.")

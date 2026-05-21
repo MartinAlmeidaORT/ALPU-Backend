@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="HotChocolate.AspNetCore" Version="15.1.14" />
+    <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.14" />
     <PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.15">

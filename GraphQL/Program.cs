@@ -8,7 +8,7 @@ builder.Services.AddDatabase(builder.Configuration);
 
 builder.Services.AddServiceGraphQL();
 
-builder.Services.AddExternalServices();
+builder.Services.AddExternalServices(builder.Configuration);
 
 builder.Services.AddGlobalExceptionHandler();
 
@@ -19,6 +19,10 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapGraphQL(); // Default endpoint is /graphql
 

@@ -11,6 +11,13 @@ using Domain.Interfaces.Private;
 using DataAccess.Security;
 using GraphQL.Types.Inputs;
 using DataAccess.ExternalServices;
+using Domain.Interfaces.Public.Services;
+using Application.Factories;
+using Domain.Interfaces.Public.Singletons;
+using Application.Singletons;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GraphQL.Common;
 
@@ -22,22 +29,32 @@ public static class ServiceCollectionExtensions
         ?? throw new ArgumentNullException("Connection string 'DefaultConnection' not found.");
 
         services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(
-            connectionString, options => options
-                .MapEnum<Domain.Enums.UserState>("user_state_enum")
-                .MapEnum<BillType>("bill_type_enum")
-                .MapEnum<MembershipState>("membership_state_enum")));
+            connectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.MapEnum<Domain.Enums.UserState>("user_state_enum")
+                             .MapEnum<BillType>("bill_type_enum")
+                             .MapEnum<MembershipState>("membership_state_enum")
+                             .MapEnum<ServiceType>("service_type_enum")
+                             .MapEnum<PriceAdjustmentType>("price_adjustment_type_enum")
+                             .MapEnum<Interval>("interval_enum")
+                             .MapEnum<ContractState>("contract_state_enum");
+            }
+        ).UseSnakeCaseNamingConvention());
         return services;
     }
 
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddSingleton<IPriceTable, PriceTable>();
+        services.AddScoped<IAlpuService, AlpuService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IDepartmentService, DepartmentService>();
-        services.AddScoped<IAlpuService, AlpuServiceService>();
         services.AddScoped<IContractService, ContractService>();
+        services.AddScoped<ICampaignService, CampaignService>();
+        services.AddScoped<ICampaignServiceFactory, CampaignServiceFactory>();
         services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         return services;
@@ -46,6 +63,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServiceGraphQL(this IServiceCollection services)
     {
         services.AddGraphQLServer()
+        .AddAuthorization()
         .AddType<AuthPayloadType>()
         .AddType<GoogleAuthType>()
         .AddType<UserInterfaceType>()
@@ -55,20 +73,33 @@ public static class ServiceCollectionExtensions
         .AddType<CountryType>()
         .AddType<AgencyType>()
         .AddType<ServiceInterfaceType>()
-        .AddType<ServiceDurationType>()
-        .AddType<ServiceIVRType>()
+        .AddType<ServiceIvrType>()
+        .AddType<ServicePeriodType>()
         .AddType<ServiceNarrativeType>()
-        .AddType<ServiceSpecialType>()
+        .AddType<ServiceDateType>()
         .AddType<PieceType>()
+        .AddType<ContractType>()
         .AddType<GoogleAuthInputType>()
         .AddType<CompleteGoogleBroadcasterSignUpInputType>()
         .AddType<CompleteGoogleClientSignUpInputType>()
-        .AddType<CalculateContractInputType>()
-        .AddType<CalculateContractServiceInputType>()
+        .AddType<CampaignInputType>()
+        .AddType<CampaignServiceInputType>()
+        .AddType<CampaignType>()
+        .AddType<EventCampaignServiceType>()
+        .AddType<NarrativeCampaignServiceType>()
+        .AddType<IvrCampaignServiceType>()
+        .AddType<TvCampaignServiceType>()
+        .AddType<RadioCampaignServiceType>()
+        .AddType<CinemaCampaignServiceType>()
+        .AddType<CameraCampaignServiceType>()
+        .AddType<OtherMediaCampaignServiceType>()
+        .AddType<CampaignType>()
+        .AddType<CampaignType>()
         .AddType<ServiceFlagsInputType>()
         .AddType<ServiceFlagsType>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
+        .AddType<AnyType>()           // Allow JSON
         .AddProjections()             // Optimizes SQL queries
         .AddFiltering()               // Allow users to filter results
         .AddSorting()                 // Allow users to sort results
@@ -95,13 +126,28 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddExternalServices(this IServiceCollection services)
+    public static IServiceCollection AddExternalServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpClient<IGoogleAuthService, GoogleAuthService>(client =>
         {
             client.BaseAddress = new Uri("https://oauth2.googleapis.com/");
             client.Timeout = TimeSpan.FromSeconds(30);
         });
+        services.AddHttpContextAccessor();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.MapInboundClaims = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration["JWT:Secret"]!)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true
+                };
+            });
+        services.AddAuthorization();
         return services;
     }
 

@@ -19,8 +19,14 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.Property(c => c.ClientId)
             .HasColumnName("client_id");
 
+        builder.Property(c => c.ClientApproved)
+            .HasColumnName("client_approved");
+
         builder.Property(c => c.BroadcasterId)
             .HasColumnName("broadcaster_id");
+
+        builder.Property(c => c.BroadcasterApproved)
+            .HasColumnName("broadcaster_approved");
 
         builder.Property(c => c.Date)
             .HasColumnName("date");
@@ -33,11 +39,11 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
             .HasMaxLength(3)
             .IsFixedLength();
 
-        builder.Property(c => c.Price)
-            .HasColumnName("price");
+        builder.Property(c => c.TotalPrice)
+            .HasColumnName("total_price");
 
-        builder.Property(c => c.DiscountId)
-            .HasColumnName("discount_id");
+        builder.Property(c => c.State)
+            .HasColumnName("state");
 
         builder.Property(c => c.TermYears)
             .HasColumnName("term_years");
@@ -54,7 +60,7 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
             .OnDelete(DeleteBehavior.ClientSetNull)
             .HasConstraintName("contract_client_id_fkey");
 
-        builder.HasOne(c => c.CountryCodeNavigation)
+        builder.HasOne(c => c.Country)
             .WithMany(co => co.Contracts)
             .HasForeignKey(c => c.CountryCode)
             .OnDelete(DeleteBehavior.ClientSetNull)
@@ -63,9 +69,5 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.HasMany(c => c.Bills)
             .WithOne(b => b.Contract)
             .HasForeignKey(b => b.ContractId);
-
-        builder.HasMany(c => c.Pieces)
-            .WithOne(p => p.Contract)
-            .HasForeignKey(p => p.ContractId);
     }
 }
