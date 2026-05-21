@@ -9,6 +9,10 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
 {
     public IQueryable<User> GetAllUsers() => unitOfWork.Users.GetAllUsers();
 
+    public IQueryable<Client> GetAllClients() => unitOfWork.Users.GetAllClients();
+
+    public IQueryable<Broadcaster> GetAllBroadcasters() => unitOfWork.Users.GetAllBroadcasters();
+
     public async Task<User?> GetUserByIdAsync(int id) => await unitOfWork.Users.GetUserByIdAsync(id);
 
     public async Task<User> UpdateUserAsync(int id, UpdateUserInput dto)

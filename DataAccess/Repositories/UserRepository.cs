@@ -10,6 +10,8 @@ public class UserRepository(DatabaseContext context) : RepositoryBase<User>(cont
 {
     public IQueryable<User> GetAllUsers() => GetAll();
 
+    public IQueryable<Client> GetAllClients() => context.Clients;
+    public IQueryable<Broadcaster> GetAllBroadcasters() => context.Broadcasters;
     public async Task<User?> GetUserByIdAsync(int id) => await Get(id);
 
     public User DeleteUser(User entity) => Delete(entity);

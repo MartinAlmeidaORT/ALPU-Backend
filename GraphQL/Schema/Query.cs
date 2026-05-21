@@ -17,7 +17,16 @@ public class Query
     public string Ping() => "Pong";
 
     [UseProjection]
+    [UseFiltering]
     public IQueryable<User> GetUsers([Service] IUserService userService) => userService.GetAllUsers();
+
+    [UseProjection]
+    [UseFiltering]
+    public IQueryable<Client> GetClients([Service] IUserService userService) => userService.GetAllClients();
+
+    [UseProjection]
+    [UseFiltering]
+    public IQueryable<Broadcaster> GetBroadcasters([Service] IUserService userService) => userService.GetAllBroadcasters();
 
     [UseProjection]
     public IQueryable<Country> GetCountries([Service] ICountryService countryService) => countryService.GetAllCountries();

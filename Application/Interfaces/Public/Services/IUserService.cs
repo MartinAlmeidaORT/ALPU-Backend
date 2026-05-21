@@ -7,6 +7,10 @@ public interface IUserService
 {
     IQueryable<User> GetAllUsers();
 
+    IQueryable<Client> GetAllClients();
+
+    IQueryable<Broadcaster> GetAllBroadcasters();
+
     Task<User?> GetUserByIdAsync(int id);
 
     Task<User> UpdateUserAsync(int id, UpdateUserInput dto);
