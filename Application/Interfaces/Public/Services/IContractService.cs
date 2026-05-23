@@ -17,5 +17,7 @@ public interface IContractService
 
     Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId);
 
+    Task<Result> ApproveContractAsync(int userId, int contractId);
+
     Task<Contract> DeleteContractAsync(int id);
 }

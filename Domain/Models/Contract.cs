@@ -44,5 +44,9 @@ public static class ContractErrors
 {
     public class ContractNotFoundError(string msg) : NotFoundError(msg);
 
-    public static ContractNotFoundError ContractNotFound(int id) => new($"Contrato con {id} no encontrado.");
+    public class UnauthorizedUserError(string msg) : AuthError(msg);
+
+    public static UnauthorizedUserError UnauthorizedUser(int userId) => new($"El usuario con id {userId} no tiene acceso a este contrato.");
+
+    public static ContractNotFoundError ContractNotFound(int contractId) => new($"El contrato con id {contractId} no existe.");
 }

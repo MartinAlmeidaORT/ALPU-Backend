@@ -85,4 +85,17 @@ public class Mutation
         FluentResults.Result<Contract> contract = await contractService.CreateContractAsync(input);
         return contract.UnwrapOrThrow();
     }
+
+    [Authorize]
+    [UseSingleOrDefault]
+    [UseProjection]
+    public async Task<IQueryable<Contract>> ApproveContract(int contractId, [Service] IContractService contractService, [Service] IHttpContextAccessor httpContextAccessor)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+
+        FluentResults.Result<string> result = await contractService.ApproveContractAsync(int.Parse(userId), contractId);
+        result.UnwrapOrThrow();
+        return contractService.GetAllContracts().Where(c => c.ContractId == contractId);
+    }
 }
