@@ -2,6 +2,7 @@ using Domain.Models;
 using Application.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Common.Inputs;
+using FluentResults;
 
 namespace Application.Services;
 
@@ -36,6 +37,22 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
         await unitOfWork.SaveChangesAsync();
 
         return user;
+    }
+
+    public async Task<Result> ApproveUser(UpdateUserStateInput input)
+    {
+        User? user = unitOfWork.Users.GetAllUsers()
+            .Where(u => u.UserId == input.UserId && (u is Client || u is Broadcaster))
+            .SingleOrDefault();
+
+        if (user == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(input.UserId));
+        }
+
+        user.UserState = input.NewState;
+        await unitOfWork.SaveChangesAsync();
+        return Result.Ok();
     }
 
     public async Task<User> DeleteUserAsync(int id)
