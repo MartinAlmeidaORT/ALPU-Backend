@@ -214,6 +214,8 @@ public abstract class User : Entity
     public virtual Address Address { get; set; } = null!;
 
     public virtual ICollection<Notification> Notifications { get; set; } = [];
+
+    public string FullName => $"{FirstName} {LastName}";
 }
 
 public static class UserErrors

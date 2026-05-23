@@ -81,6 +81,11 @@ public partial class Address : Entity
     public Department Department { get; set; } = null!;
 
     public virtual Country Country { get; set; } = null!;
+
+    public override string ToString()
+    {
+        return $"{City}, {Department.Name} {Street}";
+    }
 }
 
 public static class AddressErrors

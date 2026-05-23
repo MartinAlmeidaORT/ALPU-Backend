@@ -8,6 +8,8 @@ using Domain.Interfaces.Public.Singletons;
 using Domain.Models;
 using Domain.Models.Campaign;
 using FluentResults;
+using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
 
 namespace Application.Services;
 
@@ -44,8 +46,20 @@ public class ContractService(ICampaignService campaignService, IPriceTable price
             _unitOfWork.Attach(cs.Service);
         }
 
-        _unitOfWork.Contracts.CreateContract(contract);
+        contract = _unitOfWork.Contracts.CreateContract(contract);
         await _unitOfWork.SaveChangesAsync();
+        contract = _unitOfWork.Contracts.GetAllContracts()
+            .Where(c => c.ContractId == contract.ContractId)
+            .Include(c => c.Client.Agency)
+            .Include(c => c.Client.Address.Country)
+            .Include(c => c.Client.Address.Department)
+            .Include(c => c.Broadcaster.Address.Country)
+            .Include(c => c.Broadcaster.Address.Department)
+            .Single();
+        var document = new ContractDocument(contract);
+        var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Contrato_Prueba.pdf");
+        document.GeneratePdf(filePath);
+
 
         return contract;
     }

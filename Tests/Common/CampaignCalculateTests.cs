@@ -1,4 +1,3 @@
-using Domain.Common.Inputs.Auth;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Enums;
@@ -21,7 +20,8 @@ public class CampaignCalculateTests
         BroadcasterId = broadcasterId,
         Campaign = "Test",
         InCash = inCash,
-        Services = []
+        Services = [],
+        CountryCode = "UY"
     };
 
     private static BaseCampaignService CreateMockService(
