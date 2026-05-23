@@ -5,7 +5,7 @@ namespace Domain.Models.Campaign;
 
 public class CampaignServiceDate : BaseCampaignService
 {
-    private CampaignServiceDate()
+    protected CampaignServiceDate()
     {
 
     }
@@ -17,4 +17,6 @@ public class CampaignServiceDate : BaseCampaignService
     }
 
     public DateOnly Date { get; set; }
+
+    public override DateOnly GetExpireDate() => Date;
 }

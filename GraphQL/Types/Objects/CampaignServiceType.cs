@@ -10,6 +10,7 @@ public class CampaignServiceInterface : InterfaceType<BaseCampaignService>
         descriptor.Name("BaseCampaignService");
         descriptor.BindFieldsExplicitly();
         descriptor.Field(x => x.Campaign);
+        descriptor.Field(x => x.Service);
         descriptor.Field(x => x.Pieces);
         descriptor.Field(x => x.BasePriceOverride);
     }

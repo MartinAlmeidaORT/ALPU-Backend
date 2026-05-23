@@ -1,5 +1,6 @@
 using DataAccess.EntityFramework;
 using Domain.Interfaces.Public.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -22,6 +23,13 @@ public class UnitOfWork(DatabaseContext context) : IUnitOfWork
     public IDepartmentRepository Departments => _departments ??= new DepartmentRepository(_context);
     public IAlpuServiceRepository Services => _services ??= new AlpuServiceRepository(_context);
     public IContractRepository Contracts => _contracts ??= new ContractRepository(_context);
+
+    public void Attach<T>(T entity) where T : class
+    {
+        var entry = _context.Entry(entity);
+        if (entry.State == EntityState.Detached)
+            _context.Attach(entity);
+    }
 
     public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
 }

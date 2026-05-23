@@ -8,10 +8,20 @@ using FluentResults;
 
 namespace Domain.Models.Campaign;
 
-public class IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTable priceTable, IvrCampaignServiceOptions options)
-    : BaseCampaignService(service, pieces, priceTable)
+public class IvrCampaignService : BaseCampaignService
 {
-    private new IvrCampaignServiceOptions Options => options;
+    protected IvrCampaignService()
+    {
+        Options = null!;
+    }
+
+    public IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTable priceTable, IvrCampaignServiceOptions options)
+        : base(service, pieces, priceTable)
+    {
+        Options = options;
+    }
+
+    private readonly new IvrCampaignServiceOptions Options;
 
     public async override Task<Result<ServiceBreakdown>> Calculate()
     {
@@ -71,6 +81,12 @@ public class IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTa
         subtotal += Options.AdditionalMessages * (decimal)Service.ExtraPrice;
 
         return subtotal;
+    }
+
+    public override DateOnly GetExpireDate()
+    {
+        Console.WriteLine("GetExpireDate en IVR no implementado.");
+        return new DateOnly();
     }
 
     private int CountWords(string text)

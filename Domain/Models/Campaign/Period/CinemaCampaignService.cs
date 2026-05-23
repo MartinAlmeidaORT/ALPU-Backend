@@ -8,10 +8,20 @@ using FluentResults;
 
 namespace Domain.Models.Campaign.Period;
 
-public class CinemaCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, CinemaCampaignServiceOptions options)
-    : PeriodCampaignService(service, pieces, priceTable, options)
+public class CinemaCampaignService : PeriodCampaignService
 {
-    private new CinemaCampaignServiceOptions Options => options;
+    protected CinemaCampaignService()
+    {
+        Options = null!;
+    }
+
+    public CinemaCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, CinemaCampaignServiceOptions options)
+    : base(service, pieces, priceTable, options)
+    {
+        Options = options;
+    }
+
+    private readonly new CinemaCampaignServiceOptions Options;
 
     public async override Task<Result<ServiceBreakdown>> Calculate()
     {

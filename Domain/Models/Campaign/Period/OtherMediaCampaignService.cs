@@ -4,8 +4,18 @@ using Domain.Models.Services;
 
 namespace Domain.Models.Campaign.Period;
 
-public class OtherMediaCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, OtherMediaCampaignServiceOptions options)
-    : PeriodCampaignService(service, pieces, priceTable, options)
+public class OtherMediaCampaignService : PeriodCampaignService
 {
-    private new OtherMediaCampaignServiceOptions Options => options;
+    OtherMediaCampaignService()
+    {
+        Options = null!;
+    }
+
+    public OtherMediaCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, OtherMediaCampaignServiceOptions options)
+    : base(service, pieces, priceTable, options)
+    {
+        Options = options;
+    }
+
+    private readonly new OtherMediaCampaignServiceOptions Options;
 }

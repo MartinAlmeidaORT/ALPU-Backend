@@ -8,10 +8,20 @@ using FluentResults;
 
 namespace Domain.Models.Campaign.Period;
 
-public class RadioCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, RadioCampaignServiceOptions options)
-    : PeriodCampaignService(service, pieces, priceTable, options)
+public class RadioCampaignService : PeriodCampaignService
 {
-    private new RadioCampaignServiceOptions Options => options;
+    public RadioCampaignService()
+    {
+        Options = null!;
+    }
+
+    public RadioCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, RadioCampaignServiceOptions options)
+        : base(service, pieces, priceTable, options)
+    {
+        Options = options;
+    }
+
+    private readonly new RadioCampaignServiceOptions Options;
 
     public async override Task<Result<ServiceBreakdown>> Calculate()
     {

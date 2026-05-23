@@ -15,7 +15,7 @@ public class CampaignService(ICampaignServiceFactory campaignFactory, IPriceTabl
     public readonly IPriceTable _priceTable = priceTable;
     public readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result<PriceBreakdown>> CalculatePrice(CampaignInput input)
+    public async Task<Result<Campaign>> CreateCampaign(CampaignInput input)
     {
         List<BaseCampaignService> campaignServices = [];
         Result<BaseCampaignService> service;
@@ -27,6 +27,15 @@ public class CampaignService(ICampaignServiceFactory campaignFactory, IPriceTabl
             campaignServices.Add(service.Value);
         }
 
-        return await new Campaign(input.Campaign, campaignServices).Calculate(input, _priceTable, _unitOfWork);
+        return new Campaign(input.Campaign, campaignServices);
+    }
+
+    public async Task<Result<PriceBreakdown>> CalculatePrice(CampaignInput input)
+    {
+        Result<Campaign> campaign = await CreateCampaign(input);
+
+        if (campaign.IsFailed) return Result.Fail(campaign.Errors);
+
+        return await campaign.Value.Calculate(input, _priceTable, _unitOfWork);
     }
 }

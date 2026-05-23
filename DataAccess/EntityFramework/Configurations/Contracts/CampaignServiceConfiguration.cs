@@ -30,5 +30,9 @@ public class CampaignServiceConfiguration : IEntityTypeConfiguration<BaseCampaig
             .WithMany(c => c.Services)
             .HasForeignKey(cs => cs.CampaignId)
             .IsRequired();
+
+        builder.HasMany(cs => cs.Pieces)
+            .WithOne(p => p.CampaignService)
+            .HasForeignKey(p => p.CampaignServiceId);
     }
 }

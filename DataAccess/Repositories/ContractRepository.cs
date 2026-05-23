@@ -7,6 +7,8 @@ namespace DataAccess.Repositories;
 
 public class ContractRepository(DatabaseContext context) : RepositoryBase<Contract>(context), IContractRepository
 {
+    public Contract CreateContract(Contract entity) => Create(entity);
+
     public IQueryable<Contract> GetAllContracts() => GetAll();
 
     public async Task<Contract?> GetByIdAsync(int id) => await Get(id);
