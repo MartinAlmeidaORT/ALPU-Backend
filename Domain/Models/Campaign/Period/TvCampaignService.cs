@@ -8,10 +8,20 @@ using Domain.Common.Extensions;
 
 namespace Domain.Models.Campaign.Period;
 
-public class TvCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, TvCampaignServiceOptions options)
-    : PeriodCampaignService(service, pieces, priceTable, options)
+public class TvCampaignService : PeriodCampaignService
 {
-    private new TvCampaignServiceOptions Options => options;
+    protected TvCampaignService()
+    {
+        Options = null!;
+    }
+
+    public TvCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, TvCampaignServiceOptions options)
+        : base(service, pieces, priceTable, options)
+    {
+        Options = options;
+    }
+
+    private readonly new TvCampaignServiceOptions Options;
 
     public async override Task<Result<ServiceBreakdown>> Calculate()
     {

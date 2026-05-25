@@ -102,8 +102,16 @@ public class Campaign
         }
     }
 
-    public void ApplyIsNewBroadcaster()
+    public DateOnly GetExpireDate()
     {
-
+        DateOnly lastExpireDate = Services[0].GetExpireDate();
+        foreach (BaseCampaignService service in Services)
+        {
+            if (service.GetExpireDate() > lastExpireDate)
+            {
+                lastExpireDate = service.GetExpireDate();
+            }
+        }
+        return lastExpireDate;
     }
 }

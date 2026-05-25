@@ -1,5 +1,5 @@
 using Domain.Common.Inputs;
-using Domain.Common.Payloads;
+using Domain.Common.Inputs.CampaignService;
 using Domain.Models;
 using FluentResults;
 
@@ -7,15 +7,13 @@ namespace Application.Interfaces.Public.Services;
 
 public interface IContractService
 {
-    Task<Result<CalculateContractPayload>> CalculateContract(CalculateContractInput input);
-
     IQueryable<Contract> GetAllContracts();
 
     IQueryable<Contract> GetAllContracts(int userId, string role);
 
     Task<Contract?> GetContractByIdAsync(int id);
 
-    Task<Contract> CreateContractAsync(Contract contract);
+    Task<Result<Contract>> CreateContractAsync(CampaignInput input);
 
     Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId);
 

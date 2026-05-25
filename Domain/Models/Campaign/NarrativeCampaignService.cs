@@ -8,12 +8,24 @@ using FluentResults;
 
 namespace Domain.Models.Campaign;
 
-public class NarrativeCampaignService(NarrativeService service, List<Piece> pieces, IPriceTable priceTable, NarrativeCampaignServiceOptions options)
-    : BaseCampaignService(service, pieces, priceTable)
+public class NarrativeCampaignService : BaseCampaignService
 {
-    private readonly new NarrativeService Service = service;
+    protected NarrativeCampaignService()
+    {
+        Service = null!;
+        Options = null!;
+    }
 
-    private readonly new NarrativeCampaignServiceOptions Options = options;
+    public NarrativeCampaignService(NarrativeService service, List<Piece> pieces, IPriceTable priceTable, NarrativeCampaignServiceOptions options)
+        : base(service, pieces, priceTable)
+    {
+        Service = service;
+        Options = options;
+    }
+
+    private readonly new NarrativeService Service;
+
+    private readonly new NarrativeCampaignServiceOptions Options;
 
     public override async Task<Result<ServiceBreakdown>> Calculate()
     {
@@ -75,5 +87,11 @@ public class NarrativeCampaignService(NarrativeService service, List<Piece> piec
         subtotal += (decimal)Service.ExtraPrice * Options.ExtraMinutes;
 
         return subtotal;
+    }
+
+    public override DateOnly GetExpireDate()
+    {
+        Console.WriteLine("GetExpireDate en Narrative no implementado.");
+        return new DateOnly();
     }
 }

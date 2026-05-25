@@ -8,10 +8,20 @@ using FluentResults;
 
 namespace Domain.Models.Campaign;
 
-public class EventCampaignService(BaseService service, List<Piece> pieces, IPriceTable priceTable, EventCampaignServiceOptions options)
-    : CampaignServiceDate(service, pieces, priceTable, options.Date)
+public class EventCampaignService : CampaignServiceDate
 {
-    private new EventCampaignServiceOptions Options => options;
+    protected EventCampaignService() : base()
+    {
+        Options = null!;
+    }
+
+    public EventCampaignService(BaseService service, List<Piece> pieces, IPriceTable priceTable, EventCampaignServiceOptions options)
+        : base(service, pieces, priceTable, options.Date)
+    {
+        Options = options;
+    }
+
+    private readonly new EventCampaignServiceOptions Options;
 
     public override async Task<Result<ServiceBreakdown>> Calculate()
     {

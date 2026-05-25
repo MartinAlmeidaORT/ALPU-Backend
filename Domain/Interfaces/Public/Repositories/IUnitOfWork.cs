@@ -10,5 +10,6 @@ public interface IUnitOfWork
     IContractRepository Contracts { get; }
     IAlpuServiceRepository Services { get; }
 
+    void Attach<T>(T entity) where T : class;
     Task SaveChangesAsync();
 }

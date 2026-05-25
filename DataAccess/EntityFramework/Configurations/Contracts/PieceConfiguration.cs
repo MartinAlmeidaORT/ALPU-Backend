@@ -10,11 +10,14 @@ public class PieceConfiguration : IEntityTypeConfiguration<Piece>
     {
         builder.ToTable("piece");
 
-        builder.HasKey(p => p.CampaignServiceId)
+        builder.HasKey(p => p.PieceId)
             .HasName("piece_pkey");
 
         builder.Property(p => p.CampaignServiceId)
             .HasColumnName("piece_id");
+
+        builder.Property(p => p.CampaignServiceId)
+            .HasColumnName("campaign_service_id");
 
         builder.Property(p => p.Name)
             .HasColumnName("name")

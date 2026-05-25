@@ -1,15 +1,26 @@
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
+using Domain.Enums;
 using Domain.Interfaces.Public.Singletons;
 using Domain.Models.Services;
 using FluentResults;
 
 namespace Domain.Models.Campaign.Period;
 
-public abstract class PeriodCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, PeriodCampaignServiceOptions options)
-    : BaseCampaignService(service, pieces, priceTable)
+public abstract class PeriodCampaignService : BaseCampaignService
 {
-    protected new PeriodCampaignServiceOptions Options { get; } = options;
+    protected PeriodCampaignService()
+    {
+        Options = null!;
+    }
+
+    public PeriodCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, PeriodCampaignServiceOptions options)
+        : base(service, pieces, priceTable)
+    {
+        Options = options;
+    }
+
+    protected readonly new PeriodCampaignServiceOptions Options;
 
     public async override Task<Result<ServiceBreakdown>> Calculate()
     {
@@ -46,5 +57,18 @@ public abstract class PeriodCampaignService(PeriodService service, List<Piece> p
         }
 
         return breakdown;
+    }
+
+    public override DateOnly GetExpireDate()
+    {
+        return Options.Period switch
+        {
+            Interval.OneWeek => new DateOnly().AddDays(7),
+            Interval.OneMonth => new DateOnly().AddMonths(1),
+            Interval.ThreeMonths => new DateOnly().AddMonths(1),
+            Interval.SixMonths => new DateOnly().AddMonths(1),
+            Interval.OneYear => new DateOnly().AddYears(1),
+            _ => throw new NotImplementedException(),
+        };
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Common.Errors;
 using Domain.Enums;
 using Domain.Models.Campaign;
 
@@ -37,4 +38,11 @@ public class Contract : Entity
     public string CountryCode { get; set; } = null!;
 
     public virtual Country Country { get; set; } = null!;
+}
+
+public static class ContractErrors
+{
+    public class ContractNotFoundError(string msg) : NotFoundError(msg);
+
+    public static ContractNotFoundError ContractNotFound(int id) => new($"Contrato con {id} no encontrado.");
 }

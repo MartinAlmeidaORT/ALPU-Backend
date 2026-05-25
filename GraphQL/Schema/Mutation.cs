@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;
+using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Models;
 using GraphQL.Common;
@@ -69,5 +70,19 @@ public class Mutation
         FluentResults.Result result = await contractService.UpdateContractAsync(input, int.Parse(userId));
         result.UnwrapOrThrow();
         return contractService.GetAllContracts().Where(c => c.ContractId == input.ContractId);
+    }
+
+    [Authorize]
+    public async Task<Contract> GenerateContract(
+        CampaignInput input,
+        [Service] IContractService contractService,
+        [Service] IHttpContextAccessor httpContextAccessor)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        string role = user.FindFirstValue(ClaimTypes.Role)!;
+        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+
+        FluentResults.Result<Contract> contract = await contractService.CreateContractAsync(input);
+        return contract.UnwrapOrThrow();
     }
 }

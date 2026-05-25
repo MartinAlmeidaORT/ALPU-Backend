@@ -33,11 +33,11 @@ public abstract class BaseCampaignService
 
     public int ServiceId { get; set; }
 
-    public BaseService Service { get; init; } = null!;
+    public BaseService Service { get; set; } = null!;
 
     public List<Piece> Pieces { get; init; } = null!;
 
-    public decimal BasePriceOverride { get; set; }
+    public decimal? BasePriceOverride { get; set; }
 
     public virtual async Task<Result<ServiceBreakdown>> Calculate()
     {
@@ -143,4 +143,6 @@ public abstract class BaseCampaignService
         }
         return pieceBreakdowns;
     }
+
+    public abstract DateOnly GetExpireDate();
 }

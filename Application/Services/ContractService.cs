@@ -1,24 +1,67 @@
+
 using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs;
+using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Interfaces.Public.Repositories;
+using Domain.Interfaces.Public.Singletons;
 using Domain.Models;
+using Domain.Models.Campaign;
 using FluentResults;
+using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
 
 namespace Application.Services;
 
-public class ContractService(IUnitOfWork unitOfWork) : IContractService
+public class ContractService(ICampaignService campaignService, IPriceTable priceTable, IUnitOfWork unitOfWork) : IContractService
 {
+    private readonly ICampaignService _campaignService = campaignService;
+    private readonly IPriceTable _priceTable = priceTable;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result<CalculateContractPayload>> CalculateContract(CalculateContractInput input)
+    public async Task<Result<Contract>> CreateContractAsync(CampaignInput input)
     {
-        throw new NotImplementedException();
-    }
+        Country? country = await _unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
+        if (country == null) return Result.Fail(CountryErrors.CountryNotFound(input.CountryCode));
 
-    public Task<Contract> CreateContractAsync(Contract contract)
-    {
-        throw new NotImplementedException();
+        Result<Campaign> campaign = await _campaignService.CreateCampaign(input);
+        if (campaign.IsFailed) return Result.Fail(campaign.Errors);
+
+        Result<PriceBreakdown> price = await campaign.Value.Calculate(input, _priceTable, _unitOfWork);
+        if (price.IsFailed) return Result.Fail(price.Errors);
+
+        Contract contract = new()
+        {
+            ClientId = input.ClientId,
+            BroadcasterId = input.BroadcasterId,
+            Date = new DateOnly(),
+            DueDate = campaign.Value.GetExpireDate(),
+            Campaigns = [campaign.Value],
+            Country = country,
+            TotalPrice = price.Value.Total
+        };
+
+        foreach (var cs in campaign.Value.Services)
+        {
+            _unitOfWork.Attach(cs.Service);
+        }
+
+        contract = _unitOfWork.Contracts.CreateContract(contract);
+        await _unitOfWork.SaveChangesAsync();
+        contract = _unitOfWork.Contracts.GetAllContracts()
+            .Where(c => c.ContractId == contract.ContractId)
+            .Include(c => c.Client.Agency)
+            .Include(c => c.Client.Address.Country)
+            .Include(c => c.Client.Address.Department)
+            .Include(c => c.Broadcaster.Address.Country)
+            .Include(c => c.Broadcaster.Address.Department)
+            .Single();
+        var document = new ContractDocument(contract);
+        var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Contrato_Prueba.pdf");
+        document.GeneratePdf(filePath);
+
+
+        return contract;
     }
 
     public Task<Contract> DeleteContractAsync(int id)
