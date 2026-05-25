@@ -1,5 +1,6 @@
 using Domain.Common.Inputs;
 using Domain.Models;
+using FluentResults;
 
 namespace Application.Interfaces.Public.Services;
 
@@ -14,6 +15,8 @@ public interface IUserService
     Task<User?> GetUserByIdAsync(int id);
 
     Task<User> UpdateUserAsync(int id, UpdateUserInput dto);
+
+    Task<Result> ApproveUser(UpdateUserStateInput input);
 
     Task<User> DeleteUserAsync(int id);
 }

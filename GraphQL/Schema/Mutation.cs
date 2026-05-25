@@ -6,6 +6,7 @@ using Domain.Common.Inputs.Auth;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Models;
+using FluentResults;
 using GraphQL.Common;
 using HotChocolate.Authorization;
 
@@ -97,5 +98,17 @@ public class Mutation
         FluentResults.Result<string> result = await contractService.ApproveContractAsync(int.Parse(userId), contractId);
         result.UnwrapOrThrow();
         return contractService.GetAllContracts().Where(c => c.ContractId == contractId);
+     }
+  
+    [Authorize(Roles = ["Administrator", "Supervisor"])]
+    [UseSingleOrDefault]
+    [UseProjection]
+    public async Task<IQueryable<User>> ApproveUser(
+        UpdateUserStateInput input,
+        [Service] IUserService userService)
+    {
+        Result result = await userService.ApproveUser(input);
+        result.UnwrapOrThrow();
+        return userService.GetAllUsers().Where(u => u.UserId == input.UserId);
     }
 }
