@@ -140,7 +140,7 @@ public class ContractService(ICampaignService campaignService, IPriceTable price
 
         if (contract.BroadcasterApproved && contract.ClientApproved)
         {
-            contract.State = ContractState.Approved;
+            contract.State = ContractState.Active;
         }
 
         await _unitOfWork.SaveChangesAsync();

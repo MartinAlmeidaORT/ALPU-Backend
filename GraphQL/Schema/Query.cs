@@ -47,6 +47,7 @@ public class Query
     [Authorize]
     [UsePaging(IncludeTotalCount = true)]
     [UseProjection]
+    [UseFiltering]
     [UseSorting]
     public IQueryable<Contract> GetContracts(
         [Service] IContractService contractService,
