@@ -3,6 +3,7 @@ using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
+using Domain.Enums;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Interfaces.Public.Singletons;
 using Domain.Models;
@@ -108,6 +109,40 @@ public class ContractService(ICampaignService campaignService, IPriceTable price
         }
 
         contract.State = input.NewState;
+        await _unitOfWork.SaveChangesAsync();
+        return Result.Ok();
+    }
+
+    public async Task<Result> ApproveContractAsync(int userId, int contractId)
+    {
+        Contract? contract = _unitOfWork.Contracts.GetAllContracts()
+            .Where(c => c.ContractId == contractId)
+            .SingleOrDefault();
+
+        if (contract == null)
+        {
+            return Result.Fail(ContractErrors.ContractNotFound(contractId));
+        }
+
+        if (!(contract.ClientId == userId || contract.BroadcasterId == userId))
+        {
+            return Result.Fail(ContractErrors.UnauthorizedUser(userId));
+        }
+
+        if (contract.ClientId == userId)
+        {
+            contract.ClientApproved = true;
+        }
+        else
+        {
+            contract.BroadcasterApproved = true;
+        }
+
+        if (contract.BroadcasterApproved && contract.ClientApproved)
+        {
+            contract.State = ContractState.Approved;
+        }
+
         await _unitOfWork.SaveChangesAsync();
         return Result.Ok();
     }
