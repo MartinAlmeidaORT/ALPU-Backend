@@ -99,7 +99,7 @@ public class Mutation
         result.UnwrapOrThrow();
         return contractService.GetAllContracts().Where(c => c.ContractId == contractId);
     }
-  
+
     [Authorize(Roles = ["Administrator", "Supervisor"])]
     [UseSingleOrDefault]
     [UseProjection]

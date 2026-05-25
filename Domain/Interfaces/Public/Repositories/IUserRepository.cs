@@ -7,7 +7,7 @@ public interface IUserRepository
     public IQueryable<User> GetAllUsers();
 
     public IQueryable<Client> GetAllClients();
-    
+
     public IQueryable<Broadcaster> GetAllBroadcasters();
 
     public Task<User?> GetUserByIdAsync(int id);

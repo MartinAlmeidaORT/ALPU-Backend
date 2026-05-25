@@ -42,7 +42,7 @@ public class PdfGeneratorTest
 
         // Assert
         Assert.True(File.Exists(filePath), $"El archivo PDF no fue creado en: {filePath}");
-        
+
         var fileInfo = new FileInfo(filePath);
         Assert.True(fileInfo.Length > 0, "El archivo PDF está vacío");
     }

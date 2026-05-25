@@ -13,7 +13,7 @@ public class ContractPdfModel
     public string BroadcasterName { get; set; }
 
     public string BroadcasterAddress { get; set; }
-    
+
     public string[] PiecesNames { get; set; }
 
     public string[] Media { get; set; }
