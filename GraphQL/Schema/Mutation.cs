@@ -98,7 +98,7 @@ public class Mutation
         FluentResults.Result<string> result = await contractService.ApproveContractAsync(int.Parse(userId), contractId);
         result.UnwrapOrThrow();
         return contractService.GetAllContracts().Where(c => c.ContractId == contractId);
-     }
+    }
   
     [Authorize(Roles = ["Administrator", "Supervisor"])]
     [UseSingleOrDefault]
