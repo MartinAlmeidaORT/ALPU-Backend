@@ -142,7 +142,9 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
 
         string key = Environment.GetEnvironmentVariable("JWT_KEY") ??
-             throw new ApplicationException("JWT key is not configured.");
+            configuration["JWT:Secret"] ??
+            throw new ApplicationException("JWT key is not configured.");
+
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {

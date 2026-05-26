@@ -181,6 +181,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
     private string GenerateJWT(User user)
     {
         var key = Environment.GetEnvironmentVariable("JWT_KEY") ??
+            configuration["JWT:Secret"] ??
             throw new ApplicationException("JWT key is not configured.");
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
