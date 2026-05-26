@@ -180,8 +180,11 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
     private string GenerateJWT(User user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Secret"]!));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var key = Environment.GetEnvironmentVariable("JWT_KEY") ??
+            throw new ApplicationException("JWT key is not configured.");
+
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
