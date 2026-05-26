@@ -140,14 +140,17 @@ public static class ServiceCollectionExtensions
             client.Timeout = TimeSpan.FromSeconds(30);
         });
         services.AddHttpContextAccessor();
+
+        string key = Environment.GetEnvironmentVariable("JWT_KEY") ??
+             throw new ApplicationException("JWT key is not configured.");
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
                 options.MapInboundClaims = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(configuration["JWT:Secret"]!)),
+                    IssuerSigningKey = securityKey,
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true
