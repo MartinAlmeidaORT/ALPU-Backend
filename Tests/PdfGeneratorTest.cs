@@ -1,5 +1,8 @@
+using Domain.Models;
+using Domain.Models.Campaign;
+using Domain.Models.Campaign.Period;
+using Domain.Models.Services;
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 namespace Tests;
@@ -10,25 +13,84 @@ public class PdfGeneratorTest
     public void GenerateContractPdf_ShouldCreateValidPdf()
     {
         // Arrange - Crear datos de prueba
-
         QuestPDF.Settings.License = LicenseType.Community;
-        var contract = new ContractPdfModel
+        DateOnly date = new();
+        Country country = new()
         {
-            Id = "026",
-            ContractDate = DateTime.Now,
-            ClientAgencyName = "Uva Creativos Ltda",
-            ClientRut = "123456789",
-            ClientAddress = "Calle Principal 123",
-            ClientName = "Juan Pérez",
-            BroadcasterName = "Radio AM 1000",
-            BroadcasterAddress = "Avenida Central 456",
-            PiecesNames = new[] { "Spot de 30 segundos", "Jingle", "Cuña comercial" },
-            Media = new[] { "Radio", "TV", "Digital" },
-            Deadlines = new[] { "15/06/2025", "22/06/2025", "30/06/2025" },
-            ContractPriceNumber = 5000,
-            ContractPriceString = "Cinco mil pesos",
-            Country = "Uruguay",
-            EndOfContract = DateTime.Now.AddMonths(3)
+            CountryCode = "UY",
+            Name = "Uruguay"
+        };
+        var contract = new Contract
+        {
+            ContractId = 26,
+            Date = date,
+            DueDate = date.AddMonths(3),
+            TotalPrice = 5000,
+            Country = country,
+            Client = new()
+            {
+                FirstName = "Juan",
+                LastName = "Pérez",
+                RUT = "123456789",
+                Address = new()
+                {
+                    Country = country,
+                    Department = new()
+                    {
+                        Name = "Treinta y Tres"
+                    },
+                    City = "Treinta y Tres",
+                    Street = "Calle Principal 123"
+                },
+                Agency = new()
+                {
+                    Name = "Uva Creativos Ltda"
+                }
+            },
+            Broadcaster = new()
+            {
+                FirstName = "Pedro",
+                LastName = "Lamont",
+                Address = new()
+                {
+                    Country = country,
+                    Department = new()
+                    {
+                        Name = "Treinta y Tres"
+                    },
+                    City = "Treinta y Tres",
+                    Street = "Avenida Central 456"
+                },
+            },
+            Campaigns = [
+                new Campaign() {
+                    Services = [
+                        new RadioCampaignService() {
+                            Service = new PeriodService() {
+                                Name = "Radio"
+                            },
+                            Pieces = [
+                                new() {
+                                    Name = "Spot de 30 segundos"
+                                }
+                            ]
+                        },
+                        new TvCampaignService() {
+                            Service = new PeriodService() {
+                                Name = "Television"
+                            },
+                            Pieces = [
+                                new() {
+                                    Name = "Jingle"
+                                },
+                                new () {
+                                    Name = "Cuña comercial"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
         };
 
         // Act - Generar el PDF
@@ -46,23 +108,4 @@ public class PdfGeneratorTest
         var fileInfo = new FileInfo(filePath);
         Assert.True(fileInfo.Length > 0, "El archivo PDF está vacío");
     }
-}
-
-public class Contract
-{
-    public string Id { get; set; }
-    public DateTime ContractDate { get; set; }
-    public string ClientAgencyName { get; set; }
-    public string ClientRut { get; set; }
-    public string ClientAddress { get; set; }
-    public string ClientName { get; set; }
-    public string BroadcasterName { get; set; }
-    public string BroadcasterAddress { get; set; }
-    public string[] PiecesNames { get; set; }
-    public string[] Media { get; set; }
-    public string[] Deadlines { get; set; }
-    public int ContractPriceNumber { get; set; }
-    public string ContractPriceString { get; set; }
-    public string Country { get; set; }
-    public DateTime EndOfContract { get; set; }
 }

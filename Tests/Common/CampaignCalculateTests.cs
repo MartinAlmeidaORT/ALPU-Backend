@@ -82,8 +82,10 @@ public class CampaignCalculateTests
         // Sobrescribir con categoryId específico usando un stub
         if (broadcasterCategoryId > 0)
         {
-            var broadcaster = Substitute.ForPartsOf<Broadcaster>();
-            broadcaster.CategoryId = broadcasterCategoryId;
+            var broadcaster = new Broadcaster
+            {
+                CategoryId = broadcasterCategoryId
+            };
             broadcasterRepo.GetBroadcasterByIdAsync(Arg.Any<int>())
                 .Returns(broadcaster);
         }
