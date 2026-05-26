@@ -28,7 +28,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
         {
-            return UserErrors.DuplicatedRUT(input.RUT);
+            return UserErrors.DuplicatedRut(input.RUT);
         }
 
         if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
@@ -58,7 +58,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
         {
-            return UserErrors.DuplicatedRUT(input.RUT);
+            return UserErrors.DuplicatedRut(input.RUT);
         }
 
         if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
@@ -132,7 +132,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
         {
-            return UserErrors.DuplicatedRUT(input.RUT);
+            return UserErrors.DuplicatedRut(input.RUT);
         }
 
         if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
@@ -161,7 +161,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         if (await unitOfWork.Users.GetUserByRutAsync(input.RUT) != null)
         {
-            return UserErrors.DuplicatedRUT(input.RUT);
+            return UserErrors.DuplicatedRut(input.RUT);
         }
 
         if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)

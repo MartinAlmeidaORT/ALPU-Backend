@@ -405,6 +405,6 @@ public class AuthServiceTests
 
         // Assert
         result.IsFailed.Should().BeTrue();
-        result.HasError<UserErrors.DuplicatedRUTError>();
+        result.HasError<UserErrors.DuplicatedRutError>();
     }
 }

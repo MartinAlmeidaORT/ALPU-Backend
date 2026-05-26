@@ -14,7 +14,7 @@ public abstract class PeriodCampaignService : BaseCampaignService
         Options = null!;
     }
 
-    public PeriodCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, PeriodCampaignServiceOptions options)
+    protected PeriodCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, PeriodCampaignServiceOptions options)
         : base(service, pieces, priceTable)
     {
         Options = options;

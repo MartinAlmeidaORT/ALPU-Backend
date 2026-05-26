@@ -235,7 +235,7 @@ public static class UserErrors
 
     public class RutIsRequiredError(string msg) : ConflictError(msg);
     public class RutIsInvalidError(string msg) : ValidationError(msg);
-    public class DuplicatedRUTError(string msg) : ConflictError(msg);
+    public class DuplicatedRutError(string msg) : ConflictError(msg);
 
     public class PasswordIsRequiredError(string msg) : ValidationError(msg);
     public class PasswordMinLengthError(string msg) : ValidationError(msg);
@@ -267,7 +267,7 @@ public static class UserErrors
 
     public static RutIsRequiredError RutIsRequired() => new("RUT es requerido.");
     public static RutIsInvalidError RutIsInvalid(string rut) => new($"RUT debe tener exactamente 12 caracteres. {rut}");
-    public static DuplicatedRUTError DuplicatedRUT(string rut) => new($"RUT {rut} ya esta en uso.");
+    public static DuplicatedRutError DuplicatedRut(string rut) => new($"RUT {rut} ya esta en uso.");
 
     public static PasswordIsRequiredError PasswordIsRequired() => new("Se requiere de una contraseña.");
     public static PasswordMinLengthError PasswordMinLength() => new("La contraseña debe tener al menos 10 caracteres.");
