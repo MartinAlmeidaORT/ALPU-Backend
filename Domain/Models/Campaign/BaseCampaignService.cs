@@ -9,7 +9,7 @@ namespace Domain.Models.Campaign;
 
 public abstract class BaseCampaignService
 {
-    protected BaseCampaignService()
+    internal protected BaseCampaignService()
     {
         _priceTable = null!;
     }

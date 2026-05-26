@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models;
 
-public partial class Accountant : User
+public class Accountant : User
 {
-
+    internal Accountant() { }
 }

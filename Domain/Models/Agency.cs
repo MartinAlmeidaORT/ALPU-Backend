@@ -6,10 +6,7 @@ namespace Domain.Models;
 
 public partial class Agency : Entity
 {
-#pragma warning disable CS8618
-    [Obsolete("EF Core only", error: false)]
-    public Agency() { }
-#pragma warning restore CS0618
+    internal Agency() { }
 
     public Agency(string name)
     {
@@ -18,7 +15,7 @@ public partial class Agency : Entity
 
     public int AgencyId { get; set; }
 
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
 
     public virtual ICollection<Client> Clients { get; set; } = [];
 

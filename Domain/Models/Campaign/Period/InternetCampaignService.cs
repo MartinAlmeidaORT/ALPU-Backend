@@ -6,7 +6,7 @@ namespace Domain.Models.Campaign.Period;
 
 public class InternetCampaignService : PeriodCampaignService
 {
-    protected InternetCampaignService()
+    internal protected InternetCampaignService()
     {
         Options = null!;
     }

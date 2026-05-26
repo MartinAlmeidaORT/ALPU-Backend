@@ -5,6 +5,8 @@ namespace Domain.Models;
 
 public class Department : Entity
 {
+    internal Department() { }
+
     public int DepartmentId { get; set; }
 
     public string CountryCode { get; set; } = null!;

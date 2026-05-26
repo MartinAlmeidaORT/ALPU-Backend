@@ -2,8 +2,10 @@
 
 namespace Domain.Models;
 
-public partial class Region : Entity
+public class Region : Entity
 {
+    internal Region() { }
+
     public int RegionId { get; set; }
 
     public decimal Multiplier { get; set; }

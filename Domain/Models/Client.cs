@@ -4,9 +4,9 @@ using FluentResults;
 
 namespace Domain.Models;
 
-public partial class Client : User
+public class Client : User
 {
-    protected Client() { }
+    internal Client() { }
 
     protected Client(RegisterClientInput input, Country country, Department department, Agency agency)
         : base(input, country, department)

@@ -3,8 +3,10 @@ using Domain.Common.Errors;
 
 namespace Domain.Models;
 
-public partial class Country : Entity
+public class Country : Entity
 {
+    internal Country() { }
+
     public string CountryCode { get; set; } = null!;
 
     public int? RegionId { get; set; }

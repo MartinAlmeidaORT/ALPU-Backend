@@ -4,6 +4,8 @@ namespace Domain.Models.Services;
 
 public class Period
 {
+    internal Period() { }
+
     public int ServiceId { get; set; }
 
     public PeriodService Service { get; set; } = null!;

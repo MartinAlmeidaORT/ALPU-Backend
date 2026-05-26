@@ -5,7 +5,7 @@ namespace Domain.Models.Campaign;
 
 public class CampaignServiceDate : BaseCampaignService
 {
-    protected CampaignServiceDate()
+    internal protected CampaignServiceDate()
     {
 
     }

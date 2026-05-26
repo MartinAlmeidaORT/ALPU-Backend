@@ -10,7 +10,7 @@ namespace Domain.Models.Campaign.Period;
 
 public class TvCampaignService : PeriodCampaignService
 {
-    protected TvCampaignService()
+    internal protected TvCampaignService()
     {
         Options = null!;
     }

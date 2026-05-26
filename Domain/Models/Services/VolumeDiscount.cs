@@ -5,6 +5,8 @@ namespace Domain.Models.Services;
 
 public class VolumeDiscount : Entity
 {
+    internal VolumeDiscount() { }
+
     public int VolumeDiscountId { get; set; }
 
     public string Name { get; set; } = null!;

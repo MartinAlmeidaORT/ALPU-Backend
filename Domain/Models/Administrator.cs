@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models;
 
-public partial class Administrator : User
+public class Administrator : User
 {
-
+    internal Administrator() { }
 }

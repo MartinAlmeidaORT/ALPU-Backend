@@ -3,9 +3,9 @@ using FluentResults;
 
 namespace Domain.Models;
 
-public partial class Broadcaster : User
+public class Broadcaster : User
 {
-    protected Broadcaster() { }
+    internal Broadcaster() { }
 
     protected Broadcaster(RegisterBroadcasterInput input, Country country, Department department, BroadcasterCategory category)
         : base(input, country, department)

@@ -2,8 +2,10 @@
 
 namespace Domain.Models;
 
-public partial class Demo : Entity
+public class Demo : Entity
 {
+    internal Demo() { }
+
     public int BroadcasterId { get; set; }
 
     public string FileName { get; set; } = null!;

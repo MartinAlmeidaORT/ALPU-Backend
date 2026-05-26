@@ -10,7 +10,7 @@ namespace Domain.Models.Campaign;
 
 public class EventCampaignService : CampaignServiceDate
 {
-    protected EventCampaignService() : base()
+    internal protected EventCampaignService() : base()
     {
         Options = null!;
     }

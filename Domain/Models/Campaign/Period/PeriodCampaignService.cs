@@ -9,7 +9,7 @@ namespace Domain.Models.Campaign.Period;
 
 public abstract class PeriodCampaignService : BaseCampaignService
 {
-    protected PeriodCampaignService()
+    internal protected PeriodCampaignService()
     {
         Options = null!;
     }

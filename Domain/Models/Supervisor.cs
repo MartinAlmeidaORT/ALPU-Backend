@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models;
 
-public partial class Supervisor : User
+public class Supervisor : User
 {
-
+    internal Supervisor() { }
 }

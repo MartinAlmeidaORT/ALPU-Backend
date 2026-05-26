@@ -5,9 +5,9 @@ using FluentResults;
 
 namespace Domain.Models;
 
-public partial class Address : Entity
+public class Address : Entity
 {
-    public Address() { }
+    internal Address() { }
 
     public Address(Country country, Department department, string city, string? street)
     {

@@ -10,7 +10,7 @@ namespace Domain.Models.Campaign.Period;
 
 public class CameraCampaignService : PeriodCampaignService
 {
-    public CameraCampaignService()
+    internal protected CameraCampaignService()
     {
         Options = null!;
     }

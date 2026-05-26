@@ -3,8 +3,10 @@ using Domain.Enums;
 
 namespace Domain.Models;
 
-public partial class Membership : Entity
+public class Membership : Entity
 {
+    internal Membership() { }
+
     public int MembershipId { get; set; }
 
     public MembershipState State { get; set; }

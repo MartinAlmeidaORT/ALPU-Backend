@@ -10,7 +10,7 @@ namespace Domain.Models.Campaign;
 
 public class IvrCampaignService : BaseCampaignService
 {
-    protected IvrCampaignService()
+    internal protected IvrCampaignService()
     {
         Options = null!;
     }

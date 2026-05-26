@@ -21,10 +21,7 @@ public class Campaign
 
     public List<BaseCampaignService> Services { get; set; } = null!;
 
-    private Campaign()
-    {
-
-    }
+    internal Campaign() { }
 
     public Campaign(string name, List<BaseCampaignService> services)
     {

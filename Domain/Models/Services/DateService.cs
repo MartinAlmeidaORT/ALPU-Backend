@@ -2,5 +2,5 @@
 
 public class DateService : BaseService
 {
-
+    internal DateService() { }
 }

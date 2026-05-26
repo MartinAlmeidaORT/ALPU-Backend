@@ -9,7 +9,7 @@ namespace Domain.Models;
 
 public abstract class User : Entity
 {
-    protected User() { }
+    internal User() { }
 
     protected User(RegisterUserInput input, Country country, Department department)
     {

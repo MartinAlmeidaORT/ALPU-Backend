@@ -3,8 +3,10 @@ using Domain.Enums;
 
 namespace Domain.Models;
 
-public partial class Bill : Entity
+public class Bill : Entity
 {
+    internal Bill() { }
+
     public int BillId { get; set; }
 
     public BillType State { get; set; }

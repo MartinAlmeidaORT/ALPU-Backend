@@ -5,6 +5,8 @@ namespace Domain.Models.Services;
 
 public class PriceAdjustment : Entity
 {
+    internal PriceAdjustment() { }
+
     public int PriceAdjustmentId { get; set; }
 
     public string Name { get; set; } = null!;

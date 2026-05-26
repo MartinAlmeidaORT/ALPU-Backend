@@ -2,8 +2,10 @@
 
 namespace Domain.Models;
 
-public partial class Notification : Entity
+public class Notification : Entity
 {
+    internal Notification() { }
+
     public int NotificationId { get; set; }
 
     public int UserId { get; set; }

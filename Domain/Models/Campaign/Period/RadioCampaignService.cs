@@ -10,7 +10,7 @@ namespace Domain.Models.Campaign.Period;
 
 public class RadioCampaignService : PeriodCampaignService
 {
-    public RadioCampaignService()
+    internal protected RadioCampaignService()
     {
         Options = null!;
     }

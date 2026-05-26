@@ -4,6 +4,8 @@ namespace Domain.Models.Services;
 
 public class RangeIvr : Entity
 {
+    internal RangeIvr() { }
+
     public int ServiceId { get; set; }
 
     public int MinWord { get; set; }

@@ -6,7 +6,7 @@ namespace Domain.Models.Campaign.Period;
 
 public class OtherMediaCampaignService : PeriodCampaignService
 {
-    OtherMediaCampaignService()
+    internal protected OtherMediaCampaignService()
     {
         Options = null!;
     }

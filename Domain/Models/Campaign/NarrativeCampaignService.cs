@@ -10,7 +10,7 @@ namespace Domain.Models.Campaign;
 
 public class NarrativeCampaignService : BaseCampaignService
 {
-    protected NarrativeCampaignService()
+    internal protected NarrativeCampaignService()
     {
         Service = null!;
         Options = null!;
