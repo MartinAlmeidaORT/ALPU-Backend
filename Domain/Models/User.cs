@@ -186,9 +186,9 @@ public abstract class User : Entity
 
     public Result ValidateRUT()
     {
-        if (RUT == null) return UserErrors.RUTIsRequired();
+        if (RUT == null) return UserErrors.RutIsRequired();
 
-        if (RUT.Length != 12) return UserErrors.RUTIsInvalid(RUT);
+        if (RUT.Length != 12) return UserErrors.RutIsInvalid(RUT);
 
         return Result.Ok();
     }
@@ -233,8 +233,8 @@ public static class UserErrors
     public class EmailMaxLengthError(string msg) : ValidationError(msg);
     public class DuplicatedEmailError(string msg) : ConflictError(msg);
 
-    public class RUTIsRequiredError(string msg) : ConflictError(msg);
-    public class RUTIsInvalidError(string msg) : ValidationError(msg);
+    public class RutIsRequiredError(string msg) : ConflictError(msg);
+    public class RutIsInvalidError(string msg) : ValidationError(msg);
     public class DuplicatedRUTError(string msg) : ConflictError(msg);
 
     public class PasswordIsRequiredError(string msg) : ValidationError(msg);
@@ -265,8 +265,8 @@ public static class UserErrors
     public static EmailMaxLengthError EmailMaxLength(string email) => new($"Email must be at most 100 characters long. {email}");
     public static DuplicatedEmailError DuplicatedEmail(string email) => new($"Email {email} ya esta en uso.");
 
-    public static RUTIsRequiredError RUTIsRequired() => new("RUT es requerido.");
-    public static RUTIsInvalidError RUTIsInvalid(string rut) => new($"RUT debe tener exactamente 12 caracteres. {rut}");
+    public static RutIsRequiredError RutIsRequired() => new("RUT es requerido.");
+    public static RutIsInvalidError RutIsInvalid(string rut) => new($"RUT debe tener exactamente 12 caracteres. {rut}");
     public static DuplicatedRUTError DuplicatedRUT(string rut) => new($"RUT {rut} ya esta en uso.");
 
     public static PasswordIsRequiredError PasswordIsRequired() => new("Se requiere de una contraseña.");

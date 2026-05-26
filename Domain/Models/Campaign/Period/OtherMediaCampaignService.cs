@@ -6,16 +6,11 @@ namespace Domain.Models.Campaign.Period;
 
 public class OtherMediaCampaignService : PeriodCampaignService
 {
-    internal protected OtherMediaCampaignService()
-    {
-        Options = null!;
-    }
+    internal protected OtherMediaCampaignService() { }
 
     public OtherMediaCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, OtherMediaCampaignServiceOptions options)
     : base(service, pieces, priceTable, options)
     {
-        Options = options;
-    }
 
-    private readonly new OtherMediaCampaignServiceOptions Options;
+    }
 }

@@ -12,7 +12,7 @@ public interface IUserRepository
 
     public Task<User?> GetUserByIdAsync(int id);
 
-    public User DeleteUser(User user);
+    public User DeleteUser(User entity);
 
     public Task<User?> GetUserByEmailAsync(string email);
 

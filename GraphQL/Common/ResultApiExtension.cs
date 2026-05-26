@@ -1,6 +1,6 @@
 namespace GraphQL.Common;
 
-public static class ResultAPIExtensions
+public static class ResultApiExtensions
 {
     public static void UnwrapOrThrow(this FluentResults.Result result)
     {

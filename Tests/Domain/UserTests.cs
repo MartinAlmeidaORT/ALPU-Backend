@@ -208,6 +208,6 @@ public class UserTests
 
         // Assert
         result.IsFailed.Should().BeTrue();
-        result.HasError<UserErrors.RUTIsInvalidError>();
+        result.HasError<UserErrors.RutIsInvalidError>();
     }
 }
