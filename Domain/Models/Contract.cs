@@ -7,6 +7,22 @@ namespace Domain.Models;
 
 public class Contract : Entity
 {
+    internal Contract() { }
+
+    public static Contract CreateContract(int clientId, int broadcasterId, Campaign.Campaign campaign, decimal price, string countryCode)
+    {
+        return new()
+        {
+            ClientId = clientId,
+            BroadcasterId = broadcasterId,
+            Date = new DateOnly(),
+            DueDate = campaign.GetExpireDate(),
+            Campaigns = [campaign],
+            CountryCode = countryCode,
+            TotalPrice = price
+        };
+    }
+
     public int ContractId { get; set; }
 
     public int ClientId { get; set; }

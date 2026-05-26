@@ -31,16 +31,13 @@ public class ContractService(ICampaignService campaignService, IPriceTable price
         Result<PriceBreakdown> price = await campaign.Value.Calculate(input, _priceTable, _unitOfWork);
         if (price.IsFailed) return Result.Fail(price.Errors);
 
-        Contract contract = new()
-        {
-            ClientId = input.ClientId,
-            BroadcasterId = input.BroadcasterId,
-            Date = new DateOnly(),
-            DueDate = campaign.Value.GetExpireDate(),
-            Campaigns = [campaign.Value],
-            Country = country,
-            TotalPrice = price.Value.Total
-        };
+        Contract contract = Contract.CreateContract(
+            input.ClientId,
+            input.BroadcasterId,
+            campaign.Value,
+            price.Value.Total,
+            country.CountryCode
+        );
 
         foreach (var cs in campaign.Value.Services)
         {
@@ -60,7 +57,6 @@ public class ContractService(ICampaignService campaignService, IPriceTable price
         var document = new ContractDocument(contract);
         var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Contrato_Prueba.pdf");
         document.GeneratePdf(filePath);
-
 
         return contract;
     }
