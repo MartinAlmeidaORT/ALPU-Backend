@@ -1,9 +1,10 @@
-
 using Domain.Models;
 using Domain.Models.Campaign;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+
+namespace Application.QuestPDF;
 
 public class ContractDocument(Contract model) : IDocument
 {
