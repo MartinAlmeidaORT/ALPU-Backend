@@ -51,10 +51,13 @@ public class CampaignServiceFactory(IPriceTable alpuService) : ICampaignServiceF
 
         string basePieceName = pieces[0].Name!;
 
-        return pieces.Select((p, i) => new Piece
+        List<Piece> pieceList = [.. pieces.Select((p, i) =>
         {
-            Name = string.IsNullOrWhiteSpace(p.Name) ? $"{basePieceName}#{i + 1}" : p.Name
-        }).ToList();
+            string name = string.IsNullOrWhiteSpace(p.Name) ? $"{basePieceName}#{i + 1}" : p.Name;
+            return Piece.CreatePiece(name);
+        })];
+
+        return Result.Ok(pieceList);
     }
 
     private Result<BaseCampaignService> BuildService<O>(
