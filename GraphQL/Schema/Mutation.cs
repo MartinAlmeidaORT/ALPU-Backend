@@ -64,11 +64,11 @@ public class Mutation
         [Service] IContractService contractService,
         [Service] IHttpContextAccessor httpContextAccessor)
     {
-        ClaimsPrincipal? user = httpContextAccessor.HttpContext?.User ?? throw new NullReferenceException();
-        string? role = user.FindFirstValue(ClaimTypes.Role) ?? throw new NullReferenceException();
-        string? userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? throw new NullReferenceException();
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        string role = user.FindFirstValue(ClaimTypes.Role)!;
+        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
 
-        FluentResults.Result result = await contractService.UpdateContractAsync(input, int.Parse(userId));
+        Result result = await contractService.UpdateContractAsync(input, int.Parse(userId));
         result.UnwrapOrThrow();
         return contractService.GetAllContracts().Where(c => c.ContractId == input.ContractId);
     }
@@ -76,13 +76,8 @@ public class Mutation
     [Authorize]
     public async Task<Contract> GenerateContract(
         CampaignInput input,
-        [Service] IContractService contractService,
-        [Service] IHttpContextAccessor httpContextAccessor)
+        [Service] IContractService contractService)
     {
-        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        string role = user.FindFirstValue(ClaimTypes.Role)!;
-        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
-
         FluentResults.Result<Contract> contract = await contractService.CreateContractAsync(input);
         return contract.UnwrapOrThrow();
     }

@@ -53,9 +53,9 @@ public class Query
         [Service] IContractService contractService,
         [Service] IHttpContextAccessor httpContextAccessor)
     {
-        ClaimsPrincipal? user = httpContextAccessor.HttpContext?.User ?? throw new NullReferenceException();
-        string? role = user.FindFirstValue(ClaimTypes.Role) ?? throw new NullReferenceException();
-        string? userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? throw new NullReferenceException();
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        string role = user.FindFirstValue(ClaimTypes.Role)!;
+        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
 
         return contractService.GetAllContracts(int.Parse(userId), role);
     }
