@@ -19,6 +19,7 @@ public abstract class User : Entity
         LastName = input.LastName;
         RUT = input.RUT;
         Address = new Address(country, department, input.City, input.Street);
+        UserState = UserState.Pending;
     }
 
     protected User(CompleteGoogleSignUpUserInput input, Country country, Department department)
@@ -30,6 +31,7 @@ public abstract class User : Entity
         LastName = input.LastName;
         RUT = input.RUT;
         Address = new Address(country, department, input.City, input.Street);
+        UserState = UserState.Pending;
     }
 
     public void Update(UpdateUserInput input, Country? country, Department? department)
