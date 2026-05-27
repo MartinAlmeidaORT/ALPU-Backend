@@ -163,4 +163,9 @@ public class ContractService(
         await _unitOfWork.SaveChangesAsync();
         return Result.Ok();
     }
+
+    public async Task<Result<string>> GetContractPdfDownloadUrl(Contract contract)
+    {
+        return _amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key);
+    }
 }
