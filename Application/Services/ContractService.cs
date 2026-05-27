@@ -164,8 +164,8 @@ public class ContractService(
         return Result.Ok();
     }
 
-    public async Task<Result<string>> GetContractPdfDownloadUrl(Contract contract)
+    public async Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(Contract contract)
     {
-        return _amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key);
+        return new ContractUrlPayload(_amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key));
     }
 }

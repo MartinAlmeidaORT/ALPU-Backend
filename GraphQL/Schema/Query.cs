@@ -62,7 +62,7 @@ public class Query
     }
 
     [Authorize]
-    public async Task<string> GetContractPdfDownloadUrl(
+    public async Task<ContractUrlPayload> GetContractPdfDownloadUrl(
         [Service] IContractService contractService,
         [Service] IHttpContextAccessor httpContextAccessor,
         IResolverContext resolverContext,
@@ -83,10 +83,10 @@ public class Query
                         .SetMessage(error.Message)
                         .SetCode(error.GetType().Name)
                         .Build());
-            return string.Empty;
+            return new(null!);
         }
 
-        FluentResults.Result<string> result = await contractService.GetContractPdfDownloadUrl(contract);
+        FluentResults.Result<ContractUrlPayload> result = await contractService.GetContractPdfDownloadUrl(contract);
         return result.UnwrapOrThrow();
     }
 }
