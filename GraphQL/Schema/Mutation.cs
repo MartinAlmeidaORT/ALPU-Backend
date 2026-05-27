@@ -74,20 +74,12 @@ public class Mutation
     }
 
     [Authorize]
-    public async Task<Contract> GenerateContract(
+    public async Task<GenerateContractPayload> GenerateContract(
         CampaignInput input,
         [Service] IContractService contractService)
     {
-        FluentResults.Result<(Contract, string)> contract = await contractService.CreateContractAsync(input);
-        if (contract.IsSuccess)
-        {
-            return contract.Value.Item1;
-        }
-        else
-        {
-            throw new GraphQLException();
-        }
-        // return contract.UnwrapOrThrow();
+        FluentResults.Result<GenerateContractPayload> contract = await contractService.CreateContractAsync(input);
+        return contract.UnwrapOrThrow();
     }
 
     [Authorize]

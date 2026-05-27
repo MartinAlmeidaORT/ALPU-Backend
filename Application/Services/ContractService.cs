@@ -27,7 +27,7 @@ public class ContractService(
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
 
-    public async Task<Result<(Contract, string)>> CreateContractAsync(CampaignInput input)
+    public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
     {
         Country? country = await _unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         if (country == null) return Result.Fail(CountryErrors.CountryNotFound(input.CountryCode));
@@ -68,7 +68,13 @@ public class ContractService(
         var url = _amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key);
         await _unitOfWork.SaveChangesAsync();
 
-        return (contract, url);
+        var payload = new GenerateContractPayload()
+        {
+            Contract = contract,
+            PdfAmazonS3Url = url
+        };
+
+        return payload;
     }
 
     public Task<Contract> DeleteContractAsync(int id)
