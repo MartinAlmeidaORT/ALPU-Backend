@@ -2,7 +2,7 @@ using GraphQL.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplicationServices();
+builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddDatabase(builder.Configuration);
 

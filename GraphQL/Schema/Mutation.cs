@@ -78,8 +78,16 @@ public class Mutation
         CampaignInput input,
         [Service] IContractService contractService)
     {
-        FluentResults.Result<Contract> contract = await contractService.CreateContractAsync(input);
-        return contract.UnwrapOrThrow();
+        FluentResults.Result<(Contract, string)> contract = await contractService.CreateContractAsync(input);
+        if (contract.IsSuccess)
+        {
+            return contract.Value.Item1;
+        }
+        else
+        {
+            throw new GraphQLException();
+        }
+        // return contract.UnwrapOrThrow();
     }
 
     [Authorize]

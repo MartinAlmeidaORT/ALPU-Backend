@@ -13,7 +13,7 @@ public interface IContractService
 
     Task<Contract?> GetContractByIdAsync(int id);
 
-    Task<Result<Contract>> CreateContractAsync(CampaignInput input);
+    Task<Result<(Contract, string)>> CreateContractAsync(CampaignInput input);
 
     Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId);
 

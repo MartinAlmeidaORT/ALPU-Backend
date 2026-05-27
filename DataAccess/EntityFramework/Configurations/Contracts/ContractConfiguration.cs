@@ -48,6 +48,9 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.Property(c => c.TermYears)
             .HasColumnName("term_years");
 
+        builder.Property(c => c.PdfAmazonS3Key)
+            .HasColumnName("pdf_amazon_s3_key");
+
         builder.HasOne(c => c.Broadcaster)
             .WithMany(b => b.Contracts)
             .HasForeignKey(c => c.BroadcasterId)
