@@ -89,4 +89,14 @@ public class Query
         FluentResults.Result<ContractUrlPayload> result = await contractService.GetContractPdfDownloadUrl(contract);
         return result.UnwrapOrThrow();
     }
+
+    [Authorize]
+    [UsePaging(IncludeTotalCount = true)]
+    [UseProjection]
+    [UseFiltering]
+    [UseSorting]
+    public async Task<IQueryable<Bill>> GetBills([Service] IBillService billService)
+    {
+        return billService.GetAllBills();
+    }
 }
