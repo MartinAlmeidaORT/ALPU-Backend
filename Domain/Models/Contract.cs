@@ -47,6 +47,8 @@ public class Contract : Entity
 
     public int TermYears { get; set; }
 
+    public string PdfAmazonS3Key { get; set; }
+
     public virtual ICollection<Campaign.Campaign> Campaigns { get; set; } = [];
 
     public virtual ICollection<Bill> Bills { get; set; } = [];

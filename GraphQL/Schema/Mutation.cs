@@ -74,11 +74,11 @@ public class Mutation
     }
 
     [Authorize]
-    public async Task<Contract> GenerateContract(
+    public async Task<GenerateContractPayload> GenerateContract(
         CampaignInput input,
         [Service] IContractService contractService)
     {
-        FluentResults.Result<Contract> contract = await contractService.CreateContractAsync(input);
+        FluentResults.Result<GenerateContractPayload> contract = await contractService.CreateContractAsync(input);
         return contract.UnwrapOrThrow();
     }
 

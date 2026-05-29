@@ -1,5 +1,6 @@
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.CampaignService;
+using Domain.Common.Payloads;
 using Domain.Models;
 using FluentResults;
 
@@ -13,7 +14,9 @@ public interface IContractService
 
     Task<Contract?> GetContractByIdAsync(int id);
 
-    Task<Result<Contract>> CreateContractAsync(CampaignInput input);
+    Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input);
+
+    Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(Contract contract);
 
     Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId);
 

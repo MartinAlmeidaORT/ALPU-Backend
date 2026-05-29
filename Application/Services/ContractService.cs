@@ -1,6 +1,7 @@
 
 using Application.Interfaces.Public.Services;
 using Application.QuestPDF;
+using DataAccess.ExternalServices;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
@@ -15,13 +16,18 @@ using QuestPDF.Fluent;
 
 namespace Application.Services;
 
-public class ContractService(ICampaignService campaignService, IPriceTable priceTable, IUnitOfWork unitOfWork) : IContractService
+public class ContractService(
+    ICampaignService campaignService,
+    IPriceTable priceTable,
+    IUnitOfWork unitOfWork,
+    AmazonS3Service amazonS3Service) : IContractService
 {
     private readonly ICampaignService _campaignService = campaignService;
     private readonly IPriceTable _priceTable = priceTable;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
 
-    public async Task<Result<Contract>> CreateContractAsync(CampaignInput input)
+    public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
     {
         Country? country = await _unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         if (country == null) return Result.Fail(CountryErrors.CountryNotFound(input.CountryCode));
@@ -55,11 +61,20 @@ public class ContractService(ICampaignService campaignService, IPriceTable price
             .Include(c => c.Broadcaster.Address.Country)
             .Include(c => c.Broadcaster.Address.Department)
             .Single();
+
         var document = new ContractDocument(contract);
         var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Contrato_Prueba.pdf");
-        document.GeneratePdf(filePath);
+        contract.PdfAmazonS3Key = await _amazonS3Service.SaveContractAsync(document.GeneratePdf(), contract.ContractId);
+        var url = _amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key);
+        await _unitOfWork.SaveChangesAsync();
 
-        return contract;
+        var payload = new GenerateContractPayload()
+        {
+            Contract = contract,
+            PdfAmazonS3Url = url
+        };
+
+        return payload;
     }
 
     public Task<Contract> DeleteContractAsync(int id)
@@ -106,6 +121,11 @@ public class ContractService(ICampaignService campaignService, IPriceTable price
         }
 
         contract.State = input.NewState;
+        if (contract.State == ContractState.Canceled)
+        {
+            await _amazonS3Service.MoveContractToCancelledAsync(contract.PdfAmazonS3Key);
+        }
+
         await _unitOfWork.SaveChangesAsync();
         return Result.Ok();
     }
@@ -142,5 +162,10 @@ public class ContractService(ICampaignService campaignService, IPriceTable price
 
         await _unitOfWork.SaveChangesAsync();
         return Result.Ok();
+    }
+
+    public async Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(Contract contract)
+    {
+        return new ContractUrlPayload(_amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key));
     }
 }

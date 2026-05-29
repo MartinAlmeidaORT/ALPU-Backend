@@ -19,6 +19,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using QuestPDF.Infrastructure;
+using Amazon.S3;
+using Amazon.Runtime;
+using Amazon;
 
 
 namespace GraphQL.Common;
@@ -45,10 +48,23 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IPriceTable, PriceTable>();
+        services.AddSingleton<IAmazonS3>(_ =>
+        {
+            var credentials = new SessionAWSCredentials(
+                   configuration["AWS:AccessKeyId"],
+                   configuration["AWS:SecretAccessKey"],
+                   configuration["AWS:SessionToken"]
+               );
+
+            var region = RegionEndpoint.GetBySystemName(configuration["AWS:Region"]);
+
+            return new AmazonS3Client(credentials, region);
+        });
+        services.AddSingleton<AmazonS3Service>();
         services.AddScoped<IAlpuService, AlpuService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
