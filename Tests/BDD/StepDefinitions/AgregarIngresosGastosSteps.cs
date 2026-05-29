@@ -10,6 +10,8 @@ using NSubstitute.ReturnsExtensions;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http;
+using Domain.Common.Payloads;
+using FluentResults;
 
 namespace Tests.BDD.StepDefinitions;
 
@@ -48,7 +50,9 @@ public class RegistrarFacturaSteps
                     Type = input.Type,
                     ContractId = input.ContractId
                 };
-                return Task.FromResult(_registroGuardado);
+
+                RegisterBillPayload payload = new(_registroGuardado, "");
+                return Task.FromResult(Result.Ok(payload));
             });
 
         _contractServiceMock

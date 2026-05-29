@@ -39,8 +39,8 @@ public class BillConfiguration : IEntityTypeConfiguration<Bill>
         builder.Property(b => b.Amount)
             .HasColumnName("amount");
 
-        builder.Property(b => b.ProofAmazonS3Key)
-            .HasColumnName("proof_amazon_s3_key")
+        builder.Property(b => b.ProofFile)
+            .HasColumnName("proof_file")
             .HasMaxLength(200)
             .IsRequired();
 

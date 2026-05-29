@@ -15,6 +15,7 @@ public class UnitOfWork(DatabaseContext context) : IUnitOfWork
     private IDepartmentRepository? _departments;
     private IAlpuServiceRepository? _services;
     private IContractRepository? _contracts;
+    private IBillRepository? _bills;
 
     public IUserRepository Users => _users ??= new UserRepository(_context);
     public IBroadcasterRepository Broadcasters => _broadcasters ??= new BroadcasterRepository(_context);
@@ -23,6 +24,7 @@ public class UnitOfWork(DatabaseContext context) : IUnitOfWork
     public IDepartmentRepository Departments => _departments ??= new DepartmentRepository(_context);
     public IAlpuServiceRepository Services => _services ??= new AlpuServiceRepository(_context);
     public IContractRepository Contracts => _contracts ??= new ContractRepository(_context);
+    public IBillRepository Bills => _bills ??= new BillRepository(_context);
 
     public void Attach<T>(T entity) where T : class
     {

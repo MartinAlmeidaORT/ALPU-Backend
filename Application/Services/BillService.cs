@@ -1,4 +1,6 @@
+using DataAccess.ExternalServices;
 using Domain.Common.Inputs;
+using Domain.Common.Payloads;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Interfaces.Public.Services;
 using Domain.Models;
@@ -6,28 +8,43 @@ using FluentResults;
 
 namespace Application.Services;
 
-public class BillService(IUnitOfWork unitOfWork) : IBillService
+public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service) : IBillService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
 
     public IQueryable<Bill> GetAllBills()
     {
         return _unitOfWork.Bills.GetAllBills();
     }
 
-    public async Task<Result<Bill>> RegisterBillAsync(BillInput input)
+    public async Task<Result<RegisterBillPayload>> RegisterBillAsync(BillInput input)
     {
-        Contract? contract = await _unitOfWork.Contracts.GetByIdAsync(input.ContractId);
-
-        if (contract == null)
+        Contract? contract = null;
+        if (input.ContractId != null)
         {
-            return Result.Fail(ContractErrors.ContractNotFound(input.ContractId));
+            contract = await _unitOfWork.Contracts.GetByIdAsync((int)input.ContractId);
+
+            if (contract == null)
+            {
+                return Result.Fail(ContractErrors.ContractNotFound((int)input.ContractId));
+            }
         }
 
+        Result<Bill> newBill = Bill.CreateBill(input.Type, input.Title, input.Description, input.Date, input.Amount, contract);
+        var amazonS3 = await _amazonS3Service.SaveBillProofAsync(input.FileName, input.Type);
 
+        if (newBill.IsSuccess && amazonS3.IsSuccess)
+        {
+            newBill.Value.ProofFile = amazonS3.Value.Item1;
+            _unitOfWork.Bills.CreateBill(newBill.Value);
+            await _unitOfWork.SaveChangesAsync();
+        }
 
-        Bill newBill = Bill.CreateBill(input.Type, input.Title, input.Description, input.Date, input.Amount, contract, );
-
-        _unitOfWork.Bills.CreateBill();
+        return new RegisterBillPayload()
+        {
+            Bill = newBill.Value,
+            AmazonS3Url = amazonS3.Value.Item2
+        };
     }
 }

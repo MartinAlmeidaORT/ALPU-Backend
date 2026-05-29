@@ -6,15 +6,17 @@ public record BillInput
 {
     internal BillInput() { }
 
-    public string Title = string.Empty;
+    public string Title { get; set; } = string.Empty;
 
-    public string Description = string.Empty;
+    public string Description { get; set; } = string.Empty;
 
-    public DateOnly Date;
+    public DateOnly Date { get; set; }
 
-    public decimal Amount;
+    public decimal Amount { get; set; }
 
-    public BillType Type;
+    public BillType Type { get; set; }
 
-    public int ContractId;
+    public int? ContractId { get; set; }
+
+    public string FileName { get; set; } = string.Empty;
 }
