@@ -73,7 +73,7 @@ public class Query
         int userId = int.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
 
         Contract? contract = contractService.GetAllContracts(userId, role)
-            .Where(c => c.ContractId == contractId)
+            .Where(c => c.ContractId == contractId && (role == "Administrator" || role == "Supervisor" || c.ClientId == userId || c.BroadcasterId == userId))
             .SingleOrDefault();
 
         if (contract == null)

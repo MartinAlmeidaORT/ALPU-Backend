@@ -63,7 +63,6 @@ public class ContractService(
             .Single();
 
         var document = new ContractDocument(contract);
-        var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Contrato_Prueba.pdf");
         contract.PdfAmazonS3Key = await _amazonS3Service.SaveContractAsync(document.GeneratePdf(), contract.ContractId);
         var url = _amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key);
         await _unitOfWork.SaveChangesAsync();

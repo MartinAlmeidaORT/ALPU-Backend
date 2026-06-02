@@ -116,6 +116,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
             Email = payload.Email,
             FirstName = payload.GivenName,
             LastName = payload.FamilyName,
+            User = user
         });
     }
 

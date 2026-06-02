@@ -1,3 +1,5 @@
+using Domain.Models;
+
 namespace Domain.Common.Payloads;
 
 public class GoogleAuthPayload
@@ -8,4 +10,6 @@ public class GoogleAuthPayload
     public string? Email { get; init; }
     public string? FirstName { get; init; }
     public string? LastName { get; init; }
+
+    public User? User { get; init; }
 }
