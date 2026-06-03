@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.reqnroll.net/reqnroll-config-latest.json",
+
+  "reqnroll": {
+    "language": {
+      "feature": "es"
+    },
+    "bindingCulture": {
+      "name": "es-UY"
+    },
+    "unitTestProvider": {
+      "name": "xUnit"
+    },
+    "trace": {
+      "traceSuccessfulSteps": true,
+      "traceTimings": false
+    }
+  }
+}

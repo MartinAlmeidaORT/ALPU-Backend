@@ -9,6 +9,7 @@ public interface IUnitOfWork
     IDepartmentRepository Departments { get; }
     IContractRepository Contracts { get; }
     IAlpuServiceRepository Services { get; }
+    IBillRepository Bills { get; }
 
     void Attach<T>(T entity) where T : class;
     Task SaveChangesAsync();

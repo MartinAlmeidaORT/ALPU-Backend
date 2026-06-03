@@ -5,6 +5,7 @@ using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
+using Domain.Interfaces.Public.Services;
 using Domain.Models;
 using FluentResults;
 using GraphQL.Common;
@@ -105,5 +106,23 @@ public class Mutation
         Result result = await userService.ApproveUser(input);
         result.UnwrapOrThrow();
         return userService.GetAllUsers().Where(u => u.UserId == input.UserId);
+    }
+
+    [Authorize(Roles = ["Administrator", "Supervisor", "Accountant"])]
+    [UseSingleOrDefault]
+    [UseProjection]
+    public async Task<RegisterBillPayload> RegisterBill(BillInput input, [Service] IBillService billService)
+    {
+        FluentResults.Result<RegisterBillPayload> result = await billService.RegisterBillAsync(input);
+        return result.UnwrapOrThrow();
+    }
+
+    [Authorize(Roles = ["Supervisor", "Accountant"])]
+    [UseSingleOrDefault]
+    [UseProjection]
+    public async Task<Bill> DeleteBill(int billId, [Service] IBillService billService)
+    {
+        FluentResults.Result<Bill> result = await billService.DeleteBillAsync(billId);
+        return result.UnwrapOrThrow();
     }
 }

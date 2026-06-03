@@ -73,7 +73,7 @@ public class Query
         int userId = int.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
 
         Contract? contract = contractService.GetAllContracts(userId, role)
-            .Where(c => c.ContractId == contractId)
+            .Where(c => c.ContractId == contractId && (role == "Administrator" || role == "Supervisor" || c.ClientId == userId || c.BroadcasterId == userId))
             .SingleOrDefault();
 
         if (contract == null)
@@ -88,5 +88,36 @@ public class Query
 
         FluentResults.Result<ContractUrlPayload> result = await contractService.GetContractPdfDownloadUrl(contract);
         return result.UnwrapOrThrow();
+    }
+
+    [Authorize]
+    [UsePaging(IncludeTotalCount = true)]
+    [UseProjection]
+    [UseFiltering]
+    [UseSorting]
+    public async Task<IQueryable<Bill>> GetBills([Service] IBillService billService)
+    {
+        return billService.GetAllBills();
+    }
+
+    [Authorize]
+    public async Task<BillUrlPayload> GetBillProofDownloadUrl(
+        [Service] IBillService billService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        IResolverContext resolverContext,
+        int billId)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        string role = user.FindFirstValue(ClaimTypes.Role)!;
+        int userId = int.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+
+        Bill? bill = billService.GetAllBills()
+            .Where(b => b.BillId == billId &&
+                (role == "Administrator" || role == "Supervisor" || role == "Accountant" || b.Contract.ClientId == userId || b.Contract.BroadcasterId == userId))
+            .SingleOrDefault();
+
+        return new() {
+            AmazonS3Url = billService.GetBillProofDownloadUrl(bill)
+        };
     }
 }

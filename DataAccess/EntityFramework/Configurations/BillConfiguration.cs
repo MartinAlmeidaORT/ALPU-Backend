@@ -16,7 +16,7 @@ public class BillConfiguration : IEntityTypeConfiguration<Bill>
         builder.Property(b => b.BillId)
             .HasColumnName("bill_id");
 
-        builder.Property(b => b.State)
+        builder.Property(b => b.Type)
             .HasColumnName("type")
             .HasColumnType("bill_type_enum");
 

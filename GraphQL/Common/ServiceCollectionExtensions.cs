@@ -37,7 +37,7 @@ public static class ServiceCollectionExtensions
             connectionString, npgsqlOptions =>
             {
                 npgsqlOptions.MapEnum<Domain.Enums.UserState>("user_state_enum")
-                             .MapEnum<BillType>("bill_type_enum")
+                             .MapEnum<Domain.Enums.BillType>("bill_type_enum")
                              .MapEnum<MembershipState>("membership_state_enum")
                              .MapEnum<ServiceType>("service_type_enum")
                              .MapEnum<PriceAdjustmentType>("price_adjustment_type_enum")
@@ -72,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDepartmentService, DepartmentService>();
         services.AddScoped<IContractService, ContractService>();
         services.AddScoped<ICampaignService, CampaignService>();
+        services.AddScoped<IBillService, BillService>();
         services.AddScoped<ICampaignServiceFactory, CampaignServiceFactory>();
         services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
@@ -100,6 +101,8 @@ public static class ServiceCollectionExtensions
         .AddType<ServiceDateType>()
         .AddType<PieceType>()
         .AddType<ContractType>()
+        .AddType<Types.Objects.BillType>()
+        .AddType<BillInputType>()
         .AddType<GoogleAuthInputType>()
         .AddType<CompleteGoogleBroadcasterSignUpInputType>()
         .AddType<CompleteGoogleClientSignUpInputType>()
