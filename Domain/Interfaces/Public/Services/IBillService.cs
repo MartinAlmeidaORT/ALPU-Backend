@@ -10,4 +10,6 @@ public interface IBillService
     Task<Result<RegisterBillPayload>> RegisterBillAsync(BillInput input);
 
     IQueryable<Bill> GetAllBills();
+
+    string GetBillProofDownloadUrl(Bill bill);
 }

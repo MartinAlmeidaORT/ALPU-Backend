@@ -99,4 +99,25 @@ public class Query
     {
         return billService.GetAllBills();
     }
+
+    [Authorize]
+    public async Task<BillUrlPayload> GetBillProofDownloadUrl(
+        [Service] IBillService billService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        IResolverContext resolverContext,
+        int billId)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        string role = user.FindFirstValue(ClaimTypes.Role)!;
+        int userId = int.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+
+        Bill? bill = billService.GetAllBills()
+            .Where(b => b.BillId == billId &&
+                (role == "Administrator" || role == "Supervisor" || role == "Accountant" || b.Contract.ClientId == userId || b.Contract.BroadcasterId == userId))
+            .SingleOrDefault();
+
+        return new() {
+            AmazonS3Url = billService.GetBillProofDownloadUrl(bill)
+        };
+    }
 }

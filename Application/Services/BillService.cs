@@ -47,4 +47,9 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
             AmazonS3Url = amazonS3.Value.Item2
         };
     }
+
+    public string GetBillProofDownloadUrl(Bill bill)
+    {
+        return _amazonS3Service.GetDownloadUrl(bill.ProofFile);
+    }
 }
