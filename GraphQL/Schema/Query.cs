@@ -116,7 +116,8 @@ public class Query
                 (role == "Administrator" || role == "Supervisor" || role == "Accountant" || b.Contract.ClientId == userId || b.Contract.BroadcasterId == userId))
             .SingleOrDefault();
 
-        return new() {
+        return new()
+        {
             AmazonS3Url = billService.GetBillProofDownloadUrl(bill)
         };
     }
