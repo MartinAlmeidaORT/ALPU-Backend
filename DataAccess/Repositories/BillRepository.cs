@@ -11,5 +11,7 @@ public class BillRepository(DatabaseContext context) : RepositoryBase<Bill>(cont
 
     public IQueryable<Bill> GetAllBills() => GetAll();
 
-    public Bill DeleteBill(Bill entity) => Delete(entity);
+    public async Task<Bill?> GetBillByIdAsync(int id) => await Get(id);
+
+    public void DeleteBill(Bill entity) => Delete(entity);
 }

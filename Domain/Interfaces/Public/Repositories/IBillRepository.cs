@@ -8,5 +8,7 @@ public interface IBillRepository
 
     public IQueryable<Bill> GetAllBills();
 
-    public Bill DeleteBill(Bill entity);
+    public Task<Bill?> GetBillByIdAsync(int id);
+
+    public void DeleteBill(Bill entity);
 }

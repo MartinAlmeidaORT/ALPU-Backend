@@ -52,4 +52,17 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
     {
         return _amazonS3Service.GetDownloadUrl(bill.ProofFile);
     }
+
+    public async Task<Result<Bill>> DeleteBillAsync(int billId)
+    {
+        Bill? bill = await _unitOfWork.Bills.GetBillByIdAsync(billId);
+        if (bill == null)
+        {
+            return Result.Fail(BillErrors.BillNotFound(billId));
+        }
+
+        _unitOfWork.Bills.DeleteBill(bill);
+        _unitOfWork.SaveChangesAsync();
+        return bill;
+    }
 }

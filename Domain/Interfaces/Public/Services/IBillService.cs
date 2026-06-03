@@ -12,4 +12,6 @@ public interface IBillService
     IQueryable<Bill> GetAllBills();
 
     string GetBillProofDownloadUrl(Bill bill);
+
+    Task<Result<Bill>> DeleteBillAsync(int billId);
 }

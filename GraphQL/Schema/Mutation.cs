@@ -116,4 +116,13 @@ public class Mutation
         FluentResults.Result<RegisterBillPayload> result = await billService.RegisterBillAsync(input);
         return result.UnwrapOrThrow();
     }
+
+    [Authorize(Roles = ["Supervisor", "Accountant"])]
+    [UseSingleOrDefault]
+    [UseProjection]
+    public async Task<Bill> DeleteBill(int billId, [Service] IBillService billService)
+    {
+        FluentResults.Result<Bill> result = await billService.DeleteBillAsync(billId);
+        return result.UnwrapOrThrow();
+    }
 }

@@ -75,26 +75,27 @@ public class Bill : Entity
 
     public virtual Contract? Contract { get; set; }
 
-    public static class BillErrors
-    {
-        public class BillNotFoundError(string msg) : NotFoundError(msg);
+}
 
-        public class TitleIsRequiredError(string msg) : ValidationError(msg);
+public static class BillErrors
+{
+    public class BillNotFoundError(string msg) : NotFoundError(msg);
 
-        public class DescriptionMinLengthError(string msg) : ValidationError(msg);
+    public class TitleIsRequiredError(string msg) : ValidationError(msg);
 
-        public class DescriptionMaxLengthError(string msg) : ValidationError(msg);
+    public class DescriptionMinLengthError(string msg) : ValidationError(msg);
 
-        public class NegativeAmountError(string msg) : ValidationError(msg);
+    public class DescriptionMaxLengthError(string msg) : ValidationError(msg);
 
-        public static BillNotFoundError BillNotFound(int id) => new($"Factura con {id} no encontrado.");
+    public class NegativeAmountError(string msg) : ValidationError(msg);
 
-        public static TitleIsRequiredError TitleIsRequired() => new("La factura require un titulo.");
+    public static BillNotFoundError BillNotFound(int id) => new($"Factura con {id} no encontrado.");
 
-        public static DescriptionMinLengthError DescriptionMinLength() => new("La descripcion debe tener al menos 10 caracteres");
+    public static TitleIsRequiredError TitleIsRequired() => new("La factura require un titulo.");
 
-        public static DescriptionMaxLengthError DescriptionMaxLength() => new("La descripcion puede tener hasta 200 caracteres");
+    public static DescriptionMinLengthError DescriptionMinLength() => new("La descripcion debe tener al menos 10 caracteres");
 
-        public static NegativeAmountError NegativeAmount() => new("El monto debe ser mayor a 0.");
-    }
+    public static DescriptionMaxLengthError DescriptionMaxLength() => new("La descripcion puede tener hasta 200 caracteres");
+
+    public static NegativeAmountError NegativeAmount() => new("El monto debe ser mayor a 0.");
 }
