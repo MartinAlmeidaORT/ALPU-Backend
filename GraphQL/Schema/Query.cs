@@ -16,9 +16,10 @@ public class Query
 {
     [GraphQLDescription("Healthcheck")]
     public string Ping() => "Pong";
-
+    [UsePaging (IncludeTotalCount = true)]
     [UseProjection]
     [UseFiltering]
+    [UseSorting]
     public IQueryable<User> GetUsers([Service] IUserService userService) => userService.GetAllUsers();
 
     [UseProjection]
