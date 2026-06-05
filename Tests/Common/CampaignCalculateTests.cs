@@ -14,12 +14,11 @@ namespace Tests.Common;
 
 public class CampaignCalculateTests
 {
-    private static CampaignInput CreateInput(int broadcasterId, bool inCash) => new()
+    private static CampaignInput CreateInput(int broadcasterId) => new()
     {
         ClientId = 1,
         BroadcasterId = broadcasterId,
         Campaign = "Test",
-        InCash = inCash,
         Services = [],
         CountryCode = "UY"
     };
@@ -128,26 +127,6 @@ public class CampaignCalculateTests
 
         Assert.True(result.IsSuccess);
         Assert.Equal(6500, result.Value.Total); // 5000 + 3000 - (3000 * 0.50)
-    }
-
-    [Fact]
-    public async Task Calculate_InCash_AppliesAdjustment()
-    {
-        var adjustments = new List<PriceAdjustment>
-        {
-            new() { Key = "in_cash", Type = PriceAdjustmentType.Percentage, Amount = 0.90m, Name = "Pago en efectivo" }
-        };
-        var services = new List<BaseCampaignService>
-        {
-            CreateMockService(ServiceType.TvGeneric, 5000)
-        };
-        var campaign = new Campaign("Test", services);
-
-        Result<PriceBreakdown> result = await campaign.Calculate(
-            CreateInput(1, true), CreatePriceTable(adjustments: adjustments), CreateUnitOfWork(2));
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(4500, result.Value.Total); // 5000 - (5000 * 0.10)
     }
 
     [Fact]

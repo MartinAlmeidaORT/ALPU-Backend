@@ -8,7 +8,6 @@ public record CampaignInput
 
     public required string Campaign { get; init; }
 
-    public required bool InCash { get; init; }
 
     public required string CountryCode { get; init; }
 

@@ -52,11 +52,6 @@ public class Campaign
             await breakdown.ApplyPriceAdjustment("new_broadcaster", priceTable);
         }
 
-        if (input.InCash)
-        {
-            await breakdown.ApplyPriceAdjustment("in_cash", priceTable);
-        }
-
         return breakdown;
     }
 
