@@ -15,7 +15,7 @@ public class Contract : Entity
         {
             ClientId = clientId,
             BroadcasterId = broadcasterId,
-            Date = new DateOnly(),
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
             DueDate = campaign.GetExpireDate(),
             Campaigns = [campaign],
             CountryCode = countryCode,
