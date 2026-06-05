@@ -102,7 +102,7 @@ public class CampaignCalculateTests
         var campaign = new Campaign("Test", services);
 
         Result<PriceBreakdown> result = await campaign.Calculate(
-            CreateInput(1, false), CreatePriceTable(), CreateUnitOfWork(2));
+            CreateInput(1), CreatePriceTable(), CreateUnitOfWork(2));
 
         Assert.True(result.IsSuccess);
         Assert.Equal(5000, result.Value.Total);
@@ -123,7 +123,7 @@ public class CampaignCalculateTests
         var campaign = new Campaign("Test", services);
 
         Result<PriceBreakdown> result = await campaign.Calculate(
-            CreateInput(1, false), CreatePriceTable(multiDiscounts: multiDiscounts), CreateUnitOfWork(2));
+            CreateInput(1), CreatePriceTable(multiDiscounts: multiDiscounts), CreateUnitOfWork(2));
 
         Assert.True(result.IsSuccess);
         Assert.Equal(6500, result.Value.Total); // 5000 + 3000 - (3000 * 0.50)
@@ -143,7 +143,7 @@ public class CampaignCalculateTests
         var campaign = new Campaign("Test", services);
 
         Result<PriceBreakdown> result = await campaign.Calculate(
-            CreateInput(1, false), CreatePriceTable(adjustments: adjustments), CreateUnitOfWork(1));
+            CreateInput(1), CreatePriceTable(adjustments: adjustments), CreateUnitOfWork(1));
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2500, result.Value.Total); // 5000 - (5000 * 0.20)
@@ -162,7 +162,7 @@ public class CampaignCalculateTests
         var campaign = new Campaign("Test", [service]);
 
         Result<PriceBreakdown> result = await campaign.Calculate(
-            CreateInput(1, false), CreatePriceTable(), CreateUnitOfWork(2));
+            CreateInput(1), CreatePriceTable(), CreateUnitOfWork(2));
 
         Assert.True(result.IsFailed);
         Assert.Contains("Error en el servicio", result.Errors[0].Message);

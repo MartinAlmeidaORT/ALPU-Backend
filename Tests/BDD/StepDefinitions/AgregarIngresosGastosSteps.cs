@@ -188,7 +188,7 @@ public class RegistrarFacturaSteps
                 throw new UnauthorizedAccessException();
 
             var contrato = await _contractServiceMock
-                .GetContractByIdAsync(_input.ContractId) ?? throw new Exception("El contrato no existe");
+                .GetContractByIdAsync((int)_input.ContractId) ?? throw new Exception("El contrato no existe");
 
             await _billServiceMock.RegisterBillAsync(_input);
         }
