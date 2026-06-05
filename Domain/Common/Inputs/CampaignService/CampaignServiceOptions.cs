@@ -22,9 +22,12 @@ public record IvrCampaignServiceOptions : BaseCampaignServiceOptions
 {
     public string MessageText { get; set; } = null!;
     public int AdditionalMessages { get; set; }
+    public int Updates { get; set; }
     public bool CanUpdate { get; set; }
     public bool IsInterior { get; set; }
     public decimal? PriceOverride { get; set; }
+
+    
 }
 
 public record EventCampaignServiceOptions : BaseCampaignServiceOptions

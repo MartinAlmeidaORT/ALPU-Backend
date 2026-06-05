@@ -48,9 +48,12 @@ public class IvrCampaignService : BaseCampaignService
         breakdown.BeforeDiscount = CalculateSubTotal();
         decimal subtotal = breakdown.BeforeDiscount;
 
-        if (Options.CanUpdate)
+        if (Options.Updates > 0)
         {
-            await breakdown.ApplyPriceAdjustment(nameof(Options.CanUpdate).ToSnakeCase(), _priceTable);
+            for (int i = 0; i < Options.Updates; i++)
+            {
+                await breakdown.ApplyPriceAdjustment(nameof(Options.Updates).ToSnakeCase(), _priceTable);
+            }
         }
 
         if (Options.IsInterior)
@@ -58,7 +61,7 @@ public class IvrCampaignService : BaseCampaignService
             await breakdown.ApplyPriceAdjustment(nameof(Options.IsInterior).ToSnakeCase(), _priceTable);
         }
 
-        breakdown.SubTotal = subtotal;
+        breakdown.SubTotal += subtotal;
         return breakdown;
     }
 
