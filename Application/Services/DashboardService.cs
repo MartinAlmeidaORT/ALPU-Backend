@@ -34,6 +34,28 @@ public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
                     User = b,
                     Contracts = b.Contracts.Count
                 })
+                .ToArrayAsync(),
+            TopClientsByPaidContracts = await _unitOfWork.Clients.GetAllClients()
+                .Select(client => new
+                {
+                    Client = client,
+                    // Count how many contracts for this client are fully paid
+                    PaidContractsCount = client.Contracts.Count(contract =>
+                        contract.Bills
+                            .Where(bill => bill.Type == BillType.Income)
+                            .Sum(bill => bill.Amount) >= contract.TotalPrice)
+                })
+                // Filter out clients who don't have any fully paid contracts (optional)
+                .Where(x => x.PaidContractsCount > 0)
+                // Order by the count of paid contracts
+                .OrderByDescending(x => x.PaidContractsCount)
+                .Take(AMOUNT_TO_TAKE)
+                // Project into your final payload
+                .Select(x => new UserPayload
+                {
+                    User = x.Client,
+                    Contracts = x.PaidContractsCount
+                })
                 .ToArrayAsync()
         };
     }

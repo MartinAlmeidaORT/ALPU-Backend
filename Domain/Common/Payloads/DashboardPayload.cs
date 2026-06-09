@@ -11,6 +11,8 @@ public record DashboardPayload
     public required UserPayload[] TopClientsByContracts { get; init; }
 
     public required UserPayload[] TopBroadcasterByContracts { get; init; }
+
+    public required UserPayload[] TopClientsByPaidContracts { get; init; }
 }
 
 public record UserPayload
