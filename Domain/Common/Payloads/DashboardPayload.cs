@@ -15,6 +15,8 @@ public record DashboardPayload
     public required PaidContractsPayload[] TopClientsByPaidContracts { get; init; }
 
     public required MonthlyTrendGroup[] MonthlyPaidGroup { get; init; }
+
+    public required MonthlyDelinquentGroup[] MonthlyDelinquentsGroup { get; init; }
 }
 
 public record UserPayload
@@ -45,4 +47,19 @@ public record PaidContractsPayload
     public required int Month { get; init; }
 
     public required int Year { get; init; }
+}
+
+public record MonthlyDelinquentGroup
+{
+    public required string Month { get; init; }
+    public required DelinquentClientPayload[] Clients { get; init; }
+}
+
+public record DelinquentClientPayload
+{
+    public required int ClientId { get; init; }
+    public required string FirstName { get; init; }
+    public required string LastName { get; init; }
+    public required string Email { get; init; }
+    public required int LateContracts { get; init; }
 }

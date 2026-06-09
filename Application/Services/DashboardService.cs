@@ -22,6 +22,7 @@ public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
         var topClientsByContractsTask = await GetTopClientsByContracts().ToArrayAsync();
         var topBroadcasterByContractsTask = await GetTopBroadcastersByContracts().ToArrayAsync();
         var topClientsByPaidContractsTask = await GetTopClientsByPaidContracts(calendarCutoff).ToArrayAsync();
+        var monthlyDelinquentTrend = await GetMonthlyDelinquentClientsAsync(calendarCutoff);
 
         var monthlyTopClientsTrend = topClientsByPaidContractsTask
             .GroupBy(x => $"{x.Month:D2}-{x.Year}")
@@ -52,7 +53,8 @@ public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
             TopClientsByContracts = topClientsByContractsTask,
             TopBroadcasterByContracts = topBroadcasterByContractsTask,
             TopClientsByPaidContracts = topClientsByPaidContractsTask,
-            MonthlyPaidGroup = monthlyTopClientsTrend
+            MonthlyPaidGroup = monthlyTopClientsTrend,
+            MonthlyDelinquentsGroup = monthlyDelinquentTrend
         };
     }
 
@@ -118,5 +120,94 @@ public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
                 Month = group.Key.Month,
                 Year = group.Key.Year
             });
+    }
+
+    private async Task<MonthlyDelinquentGroup[]> GetMonthlyDelinquentClientsAsync(DateOnly calendarCutoff)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var monthsTimeline = Enumerable.Range(0, 12)
+            .Select(i => today.AddMonths(-i))
+            .Select(d => new { d.Month, d.Year })
+            .ToList();
+
+        var activeClientsData = await _unitOfWork.Clients.GetAllClients()
+            .Where(client => client.Contracts.Any())
+            .Select(client => new
+            {
+                client.UserId,
+                client.FirstName,
+                client.LastName,
+                client.Email,
+                Contracts = client.Contracts.Select(contract => new
+                {
+                    contract.ContractId,
+                    contract.Date,
+                    IncomeBills = contract.Bills
+                        .Where(b => b.Type == BillType.Income)
+                        .Select(b => new { b.Date.Month, b.Date.Year })
+                })
+            })
+            .ToArrayAsync();
+
+        var delinquentGroups = monthsTimeline
+            .Select(time =>
+            {
+                var stringMonth = $"{time.Month:D2}-{time.Year}";
+                var endOfTargetMonth = new DateOnly(time.Year, time.Month, DateTime.DaysInMonth(time.Year, time.Month));
+
+                var lateClients = activeClientsData
+                    .Select(client =>
+                    {
+                        var activeContracts = client.Contracts.Where(c =>
+                            c.Date <= endOfTargetMonth).ToList();
+
+                        int lateContractsCount = 0;
+
+                        foreach (var contract in activeContracts)
+                        {
+                            var lastPaymentBeforeThisMonth = contract.IncomeBills
+                                .Where(b => new DateOnly(b.Year, b.Month, 1) <= endOfTargetMonth)
+                                .Select(b => (DateOnly?)new DateOnly(b.Year, b.Month, 1))
+                                .Max();
+
+                            var baseTrackingDate = lastPaymentBeforeThisMonth ?? contract.Date;
+
+                            int monthsPassed = ((endOfTargetMonth.Year - baseTrackingDate.Year) * 12) +
+                                                (endOfTargetMonth.Month - baseTrackingDate.Month);
+
+                            if (monthsPassed > 1)
+                            {
+                                lateContractsCount++;
+                            }
+                        }
+
+                        return new
+                        {
+                            Client = client,
+                            LateCount = lateContractsCount
+                        };
+                    })
+                    .Where(x => x.LateCount > 0)
+                    .Select(x => new DelinquentClientPayload
+                    {
+                        ClientId = x.Client.UserId,
+                        FirstName = x.Client.FirstName,
+                        LastName = x.Client.LastName,
+                        Email = x.Client.Email,
+                        LateContracts = x.LateCount
+                    })
+                    .OrderByDescending(c => c.LateContracts)
+                    .ToArray();
+
+                return new MonthlyDelinquentGroup
+                {
+                    Month = stringMonth,
+                    Clients = lateClients
+                };
+            })
+            .OrderBy(g => g.Month)
+            .ToArray();
+
+        return delinquentGroups;
     }
 }
