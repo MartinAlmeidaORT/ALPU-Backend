@@ -17,32 +17,27 @@ public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
         DateOnly _today = DateOnly.FromDateTime(DateTime.UtcNow);
         DateOnly calendarCutoff = _today.AddMonths(-12);
 
+        var masterTimeline = Enumerable.Range(0, 12)
+            .Select(i => _today.AddMonths(-i))
+            .OrderBy(d => d)
+            .Select(d => new { d.Month, d.Year, Key = $"{d.Month:D2}-{d.Year}" })
+            .ToList();
+
         var totalIncomeTask = await GetTotalIncome().SumAsync();
         var totalExpenseTask = await GetTotalExpense().SumAsync();
         var topClientsByContractsTask = await GetTopClientsByContracts().ToArrayAsync();
         var topBroadcasterByContractsTask = await GetTopBroadcastersByContracts().ToArrayAsync();
         var topClientsByPaidContractsTask = await GetTopClientsByPaidContracts(calendarCutoff).ToArrayAsync();
+        var monthlyPaidData = await GetPaidContractsByMonth(calendarCutoff).ToArrayAsync();
         var monthlyDelinquentTrend = await GetMonthlyDelinquentClientsAsync(calendarCutoff);
 
-        var monthlyTopClientsTrend = topClientsByPaidContractsTask
-            .GroupBy(x => $"{x.Month:D2}-{x.Year}")
-            .OrderBy(monthGroup => monthGroup.Key)
-            .Select(monthGroup => new MonthlyTrendGroup
+        var monthlyTopClientsTrend = masterTimeline
+            .Select(timeline => new MonthlyTrendGroup
             {
-                Month = monthGroup.Key,
-                Clients = monthGroup
-                    .Select(x => new PaidContractsPayload
-                    {
-                        ClientId = x.ClientId,
-                        FirstName = x.FirstName,
-                        LastName = x.LastName,
-                        Email = x.Email,
-                        PaidContracts = x.PaidContracts,
-                        Year = x.Year,
-                        Month = x.Month
-                    })
-                    .OrderByDescending(c => c.PaidContracts)
-                    .ToArray()
+                Month = timeline.Key,
+                Clients = [.. monthlyPaidData
+                    .Where(x => x.Year == timeline.Year && x.Month == timeline.Month)
+                    .OrderByDescending(c => c.PaidContracts)]
             })
             .ToArray();
 
@@ -86,7 +81,7 @@ public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
             });
     }
 
-    private IQueryable<PaidContractsPayload> GetTopClientsByPaidContracts(DateOnly? calendarCutoff)
+    private IQueryable<PaidContractsPayload> GetPaidContractsByMonth(DateOnly? calendarCutoff)
     {
         return _unitOfWork.Clients.GetAllClients()
             .SelectMany(client => client.Contracts.Select(contract => new
@@ -122,11 +117,37 @@ public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
             });
     }
 
+    private IQueryable<PaidContractsPayload> GetTopClientsByPaidContracts(DateOnly? calendarCutoff)
+    {
+        return _unitOfWork.Clients.GetAllClients()
+            .Select(client => new
+            {
+                User = client,
+                PaidContractsCount = client.Contracts.Count(contract =>
+                    contract.Bills.Where(b => b.Type == BillType.Income).Sum(b => b.Amount) >= contract.TotalPrice &&
+                    contract.Bills.Where(b => b.Type == BillType.Income).Max(b => (DateOnly?)b.Date) >= calendarCutoff)
+            })
+            .Where(x => x.PaidContractsCount > 0)
+            .OrderByDescending(x => x.PaidContractsCount)
+            .Take(_amountToTake)
+            .Select(x => new PaidContractsPayload
+            {
+                ClientId = x.User.UserId,
+                FirstName = x.User.FirstName,
+                LastName = x.User.LastName,
+                Email = x.User.Email,
+                PaidContracts = x.PaidContractsCount,
+                Year = DateTime.UtcNow.Year,
+                Month = DateTime.UtcNow.Month
+            });
+    }
+
     private async Task<MonthlyDelinquentGroup[]> GetMonthlyDelinquentClientsAsync(DateOnly calendarCutoff)
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var monthsTimeline = Enumerable.Range(0, 12)
             .Select(i => today.AddMonths(-i))
+            .OrderBy(d => d)
             .Select(d => new { d.Month, d.Year })
             .ToList();
 
@@ -205,7 +226,6 @@ public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
                     Clients = lateClients
                 };
             })
-            .OrderBy(g => g.Month)
             .ToArray();
 
         return delinquentGroups;
