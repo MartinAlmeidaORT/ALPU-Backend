@@ -16,7 +16,7 @@ public class Query
 {
     [GraphQLDescription("Healthcheck")]
     public string Ping() => "Pong";
-    [UsePaging (IncludeTotalCount = true)]
+    [UsePaging(IncludeTotalCount = true)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
@@ -121,5 +121,11 @@ public class Query
         {
             AmazonS3Url = billService.GetBillProofDownloadUrl(bill)
         };
+    }
+
+    [Authorize(Roles = ["Administrator", "Supervisor", "Accountant"])]
+    public async Task<DashboardPayload> GetDashboard([Service] IDashboardService dashboardService)
+    {
+        return await dashboardService.GetDashboardDataAsync();
     }
 }

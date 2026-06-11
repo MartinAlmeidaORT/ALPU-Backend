@@ -65,6 +65,7 @@ public static class ServiceCollectionExtensions
             return new AmazonS3Client(credentials, region);
         });
         services.AddSingleton<AmazonS3Service>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IAlpuService, AlpuService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
