@@ -1,6 +1,6 @@
 namespace GraphQL.Common;
 
-public class AuthPayload
+public class SocketAuthPayload
 {
     public string? Authorization { get; set; }
 }

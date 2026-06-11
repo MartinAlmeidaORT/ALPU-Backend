@@ -30,7 +30,7 @@ public class AuthSocketInterceptor : DefaultSocketSessionInterceptor
         IOperationMessagePayload connectionInitMessage,
         CancellationToken ct)
     {
-        var payload = connectionInitMessage.As<AuthPayload>();
+        var payload = connectionInitMessage.As<SocketAuthPayload>();
         if (payload?.Authorization is null)
         {
             return ConnectionStatus.Reject();
