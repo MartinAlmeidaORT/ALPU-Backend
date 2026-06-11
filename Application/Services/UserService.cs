@@ -1,8 +1,9 @@
 using Domain.Models;
-using Application.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Common.Inputs;
 using FluentResults;
+using Domain.Interfaces.Public.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
 
@@ -61,5 +62,19 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
         unitOfWork.Users.DeleteUser(user);
         await unitOfWork.SaveChangesAsync();
         return user;
+    }
+
+    public IQueryable<Notification> GetUserNotifications(int userId)
+    {
+        var user = unitOfWork.Users.GetAllUsers()
+            .Include(u => u.Notifications)
+            .SingleOrDefault(u => u.UserId == userId);
+
+        if (user?.Notifications == null)
+        {
+            return Enumerable.Empty<Notification>().AsQueryable();
+        }
+
+        return user.Notifications.AsQueryable();
     }
 }

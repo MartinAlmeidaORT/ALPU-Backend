@@ -128,4 +128,13 @@ public class Query
     {
         return await dashboardService.GetDashboardDataAsync();
     }
+
+    [Authorize]
+    public async Task<IQueryable<Notification>> GetNotifications([Service] IUserService userService, IHttpContextAccessor httpContextAccessor)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        int userId = int.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+
+        return userService.GetUserNotifications(userId);
+    }
 }
