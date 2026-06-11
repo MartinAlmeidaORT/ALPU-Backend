@@ -95,6 +95,7 @@ public static class ServiceCollectionExtensions
         .AddType<AddressType>()
         .AddType<CountryType>()
         .AddType<AgencyType>()
+        .AddType<NotificationType>()
         .AddType<ServiceInterfaceType>()
         .AddType<ServiceIvrType>()
         .AddType<ServicePeriodType>()
