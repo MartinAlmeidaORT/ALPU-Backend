@@ -124,7 +124,9 @@ public static class ServiceCollectionExtensions
         .AddType<ServiceFlagsType>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
+        .AddSubscriptionType<Subscription>()
         .AddType<AnyType>()           // Allow JSON
+        .AddInMemorySubscriptions()
         .AddProjections()             // Optimizes SQL queries
         .AddFiltering()               // Allow users to filter results
         .AddSorting()                 // Allow users to sort results

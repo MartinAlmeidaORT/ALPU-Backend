@@ -26,4 +26,6 @@ app.UseAuthorization();
 
 app.MapGraphQL(); // Default endpoint is /graphql
 
+app.UseWebSockets();
+
 await app.RunAsync();

@@ -21,4 +21,6 @@ public interface IUserService
     Task<User> DeleteUserAsync(int id);
 
     IQueryable<Notification> GetUserNotifications(int id);
+
+    Task AddNotificationAsync(User user, string title, string description);
 }

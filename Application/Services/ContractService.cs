@@ -7,6 +7,7 @@ using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Enums;
 using Domain.Interfaces.Public.Repositories;
+using Domain.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Singletons;
 using Domain.Models;
 using Domain.Models.Campaign;
@@ -20,12 +21,14 @@ public class ContractService(
     ICampaignService campaignService,
     IPriceTable priceTable,
     IUnitOfWork unitOfWork,
-    AmazonS3Service amazonS3Service) : IContractService
+    AmazonS3Service amazonS3Service,
+    IUserService userService) : IContractService
 {
     private readonly ICampaignService _campaignService = campaignService;
     private readonly IPriceTable _priceTable = priceTable;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
+    private readonly IUserService _userService = userService;
 
     public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
     {
@@ -72,6 +75,11 @@ public class ContractService(
             Contract = contract,
             PdfAmazonS3Url = url
         };
+
+        await Task.WhenAll(
+            _userService.AddNotificationAsync(contract.Broadcaster, "Nuevo contrato", $"Se genero un contrato con el usuario {contract.Broadcaster.FullName}. Espera que el locutor revise y apruebe el contrato."),
+            _userService.AddNotificationAsync(contract.Client, "Nuevo contrato", $"Se genero un contrato con el usuario {contract.Client.FullName}. Espera que el cliente revise y apruebe el contrato.")
+        );
 
         return payload;
     }
