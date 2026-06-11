@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using HotChocolate.AspNetCore;
 using HotChocolate.AspNetCore.Subscriptions;
@@ -40,7 +41,6 @@ public class AuthSocketInterceptor : DefaultSocketSessionInterceptor
         {
             var token = payload.Authorization.Replace("Bearer ", "");
             var principal = _tokenHandler.ValidateToken(token, _validationParams, out _);
-
             session.Connection.HttpContext.User = principal;
 
             return ConnectionStatus.Accept();

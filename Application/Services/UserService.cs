@@ -91,7 +91,6 @@ public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender) : IUs
             Console.WriteLine(notification.Errors);
             return;
         }
-
         await _sender.SendAsync($"{user.UserId}", notification.Value);
     }
 }

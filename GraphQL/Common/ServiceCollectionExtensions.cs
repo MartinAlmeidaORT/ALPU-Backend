@@ -128,6 +128,7 @@ public static class ServiceCollectionExtensions
         .AddSubscriptionType<Subscription>()
         .AddType<AnyType>()           // Allow JSON
         .AddInMemorySubscriptions()
+        .AddSocketSessionInterceptor<AuthSocketInterceptor>()
         .AddProjections()             // Optimizes SQL queries
         .AddFiltering()               // Allow users to filter results
         .AddSorting()                 // Allow users to sort results

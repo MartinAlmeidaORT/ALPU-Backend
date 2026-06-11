@@ -68,7 +68,6 @@ public class ContractService(
         var document = new ContractDocument(contract);
         contract.PdfAmazonS3Key = await _amazonS3Service.SaveContractAsync(document.GeneratePdf(), contract.ContractId);
         var url = _amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key);
-        await _unitOfWork.SaveChangesAsync();
 
         var payload = new GenerateContractPayload()
         {
@@ -81,6 +80,7 @@ public class ContractService(
             _userService.AddNotificationAsync(contract.Client, "Nuevo contrato", $"Se genero un contrato con el usuario {contract.Client.FullName}. Espera que el cliente revise y apruebe el contrato.")
         );
 
+        await _unitOfWork.SaveChangesAsync();
         return payload;
     }
 
