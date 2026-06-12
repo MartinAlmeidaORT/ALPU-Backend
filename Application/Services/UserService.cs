@@ -109,4 +109,20 @@ public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender) : IUs
         }
         return result;
     }
+
+    public async Task<Result<Notification[]>> DeleteAllNotificationsAsync(int userId)
+    {
+        User? user = await unitOfWork.Users.GetAllUsers().Include(u => u.Notifications).SingleOrDefaultAsync(u => u.UserId == userId);
+        if (user == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(userId));
+        }
+
+        Result<Notification[]> result = user.ClearNotifications();
+        if (result.IsSuccess)
+        {
+            await unitOfWork.SaveChangesAsync();
+        }
+        return result;
+    }
 }

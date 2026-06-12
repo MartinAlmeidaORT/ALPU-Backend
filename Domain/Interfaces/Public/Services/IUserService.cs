@@ -25,4 +25,6 @@ public interface IUserService
     Task AddNotificationAsync(User user, string title, string description);
 
     Task<Result<Notification>> DeleteNotificationAsync(int userId, int notificationId);
+
+    Task<Result<Notification[]>> DeleteAllNotificationsAsync(int userId);
 }

@@ -243,6 +243,13 @@ public abstract class User : Entity
         Notifications.Remove(notificationToDelete);
         return Result.Ok(notificationToDelete);
     }
+
+    public Notification[] ClearNotifications()
+    {
+        Notification[] notificationsCleared = [.. Notifications];
+        Notifications.Clear();
+        return notificationsCleared;
+    }
 }
 
 public static class UserErrors
