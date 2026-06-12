@@ -5,6 +5,7 @@ using Domain.Interfaces.Public.Repositories;
 using Domain.Interfaces.Public.Services;
 using Domain.Models;
 using FluentResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
 
@@ -24,7 +25,10 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
         Contract? contract = null;
         if (input.ContractId != null)
         {
-            contract = await _unitOfWork.Contracts.GetByIdAsync((int)input.ContractId);
+            contract = _unitOfWork.Contracts.GetAllContracts()
+                .Include(c => c.Client)
+                .Include(c => c.Broadcaster)
+                .SingleOrDefault(c => c.ContractId == (int)input.ContractId);
 
             if (contract == null)
             {

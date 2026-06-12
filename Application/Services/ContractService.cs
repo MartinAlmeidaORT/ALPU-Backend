@@ -115,6 +115,8 @@ public class ContractService(
         Contract? contract = _unitOfWork.Contracts
             .GetAllContracts()
             .Where(c => (c.ClientId == userId || c.BroadcasterId == userId) && c.ContractId == input.ContractId)
+            .Include(c => c.Client)
+            .Include(c => c.Broadcaster)
             .SingleOrDefault();
 
         if (contract == null)
@@ -130,7 +132,7 @@ public class ContractService(
         contract.State = input.NewState;
         if (contract.State == ContractState.Canceled)
         {
-            await _amazonS3Service.MoveContractToCancelledAsync(contract.PdfAmazonS3Key);
+            await _amazonS3Service.MoveContractToCancelledAsync(contract.ContractId);
             if (contract.Client.UserId != userId)
             {
                 await _userService.AddNotificationAsync(contract.Client, $"Cancelado el contrato: {contract.ContractId}", $"");
@@ -149,6 +151,8 @@ public class ContractService(
     {
         Contract? contract = _unitOfWork.Contracts.GetAllContracts()
             .Where(c => c.ContractId == contractId)
+            .Include(c => c.Client)
+            .Include(c => c.Broadcaster)
             .SingleOrDefault();
 
         if (contract == null)
