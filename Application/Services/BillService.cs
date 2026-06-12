@@ -8,10 +8,11 @@ using FluentResults;
 
 namespace Application.Services;
 
-public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service) : IBillService
+public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service, IUserService userService) : IBillService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
+    private readonly IUserService _userService = userService;
 
     public IQueryable<Bill> GetAllBills()
     {
@@ -38,6 +39,19 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
         {
             newBill.Value.ProofFile = amazonS3.Value.Item1;
             _unitOfWork.Bills.CreateBill(newBill.Value);
+            if (newBill.Value.Contract != null)
+            {
+                await _userService.AddNotificationAsync(
+                    newBill.Value.Contract.Client,
+                    $"Pago del contrato: {newBill.Value.Contract.ContractId}",
+                    $"Se registro el pago con la suma de {newBill.Value.Amount}."
+                );
+                await _userService.AddNotificationAsync(
+                    newBill.Value.Contract.Broadcaster,
+                    $"Pago del contrato: {newBill.Value.Contract.ContractId}",
+                    $"Cliente {newBill.Value.Contract.Client.FullName} pago la suma de {newBill.Value.Amount}."
+                );
+            }
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -62,7 +76,7 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
         }
 
         _unitOfWork.Bills.DeleteBill(bill);
-        _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
         return bill;
     }
 }
