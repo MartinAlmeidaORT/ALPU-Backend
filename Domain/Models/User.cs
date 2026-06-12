@@ -230,6 +230,19 @@ public abstract class User : Entity
         Notifications.Add(result.Value);
         return Result.Ok(result.Value);
     }
+
+    public Result<Notification> RemoveNotification(int notificationId)
+    {
+        Notification? notificationToDelete = Notifications.SingleOrDefault(n => n.NotificationId == notificationId);
+
+        if (notificationToDelete == null)
+        {
+            return Result.Fail(NotificationErrors.NotificationNotFound(notificationId));
+        }
+
+        Notifications.Remove(notificationToDelete);
+        return Result.Ok(notificationToDelete);
+    }
 }
 
 public static class UserErrors

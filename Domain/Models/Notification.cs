@@ -46,7 +46,11 @@ public class Notification : Entity
 
 public static class NotificationErrors
 {
+    public class NotificationNotFoundError(string msg) : NotFoundError(msg);
+
     public class TitleIsRequiredError(string msg) : ValidationError(msg);
+
+    public static NotificationNotFoundError NotificationNotFound(int id) => new($"Notificación con {id} no encontrada.");
 
     public static TitleIsRequiredError TitleIsRequired() => new("Las notificaciones necesitan tener un titulo.");
 }

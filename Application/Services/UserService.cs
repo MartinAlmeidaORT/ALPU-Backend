@@ -93,4 +93,20 @@ public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender) : IUs
         }
         await _sender.SendAsync($"{user.UserId}", notification.Value);
     }
+
+    public async Task<Result<Notification>> DeleteNotificationAsync(int userId, int notificationId)
+    {
+        User? user = await unitOfWork.Users.GetAllUsers().Include(u => u.Notifications).SingleOrDefaultAsync(u => u.UserId == userId);
+        if (user == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(userId));
+        }
+
+        Result<Notification> result = user.RemoveNotification(notificationId);
+        if (result.IsSuccess)
+        {
+            await unitOfWork.SaveChangesAsync();
+        }
+        return result;
+    }
 }

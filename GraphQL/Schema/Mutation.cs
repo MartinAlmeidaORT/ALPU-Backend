@@ -125,4 +125,19 @@ public class Mutation
         FluentResults.Result<Bill> result = await billService.DeleteBillAsync(billId);
         return result.UnwrapOrThrow();
     }
+
+    [Authorize]
+    [UseSingleOrDefault]
+    [UseProjection]
+    public async Task<Notification> DeleteNotification(
+        int notificationId,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+
+        FluentResults.Result<Notification> result = await userService.DeleteNotificationAsync(int.Parse(userId), notificationId);
+        return result.UnwrapOrThrow();
+    }
 }
