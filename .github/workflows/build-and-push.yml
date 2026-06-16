@@ -1,13 +1,9 @@
-name: Build and Push Image (ECR)
+name: Build and Push Image (Docker Hub)
 
 on:
   push:
     branches: ["main"]
   workflow_dispatch: {}
-
-env:
-  IMAGE_NAME: alpu-api
-  AWS_REGION: us-east-1
 
 jobs:
   build-and-push:
@@ -20,31 +16,17 @@ jobs:
       - name: Install Podman
         run: sudo apt-get update && sudo apt-get install -y podman
 
-      # AWS Academy: las credenciales son temporales y no permiten asumir roles via OIDC.
-      # Se cargan como Secrets del repo y se rotan manualmente cuando expira el lab.
-      - name: Configure AWS credentials (AWS Academy)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | podman login docker.io -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Login to Amazon ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build image with Podman
-        env:
-          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+      - name: Build image
         run: |
-          podman build -t ${REGISTRY}/${IMAGE_NAME}:${{ github.sha }} \
-                        -t ${REGISTRY}/${IMAGE_NAME}:latest \
-                        -f Containerfile .
+          podman build \
+            -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/alpu-api:${{ github.sha }} \
+            -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/alpu-api:latest \
+            -f Containerfile .
 
-      - name: Push image to ECR
-        env:
-          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+      - name: Push image
         run: |
-          podman push ${REGISTRY}/${IMAGE_NAME}:${{ github.sha }}
-          podman push ${REGISTRY}/${IMAGE_NAME}:latest
+          podman push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/alpu-api:${{ github.sha }}
+          podman push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/alpu-api:latest
