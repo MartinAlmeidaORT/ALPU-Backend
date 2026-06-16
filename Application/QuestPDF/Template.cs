@@ -29,20 +29,20 @@ public class ContractDocument(Contract model) : IDocument
                     // Encabezado
                     column.Item().Row(row =>
                     {
-                        row.RelativeItem().Text(t => 
-                        { 
-                            t.Span("CTO N°.").Bold(); 
-                            t.Span(Model.ContractId.ToString() ?? "______"); 
+                        row.RelativeItem().Text(t =>
+                        {
+                            t.Span("CTO N°.").Bold();
+                            t.Span(Model.ContractId.ToString() ?? "______");
                         });
-                        row.RelativeItem().Text(t => 
-                        { 
-                            t.Span("OC.N° ").Bold(); 
-                            t.Span("_____________"); 
+                        row.RelativeItem().Text(t =>
+                        {
+                            t.Span("OC.N° ").Bold();
+                            t.Span("_____________");
                         });
-                        row.RelativeItem().AlignRight().Text(t => 
-                        { 
-                            t.Span("Fecha ").Bold(); 
-                            t.Span($"{Model.Date:dd/MM/yy}"); 
+                        row.RelativeItem().AlignRight().Text(t =>
+                        {
+                            t.Span("Fecha ").Bold();
+                            t.Span($"{Model.Date:dd/MM/yy}");
                         });
                     });
 
@@ -75,7 +75,7 @@ public class ContractDocument(Contract model) : IDocument
                         .SelectMany(s => s.Pieces ?? Enumerable.Empty<Piece>())
                         .Select(p => p.Name)
                         .ToList();
-                    
+
                     var medios = Model.Campaigns?
                         .SelectMany(c => c.Services ?? Enumerable.Empty<BaseCampaignService>())
                         .Select(s => s.Service?.Name)
@@ -92,7 +92,7 @@ public class ContractDocument(Contract model) : IDocument
                         text.Span("para su utilización de la siguiente forma (medios): ").Bold();
                         text.Span($"{mediosStr} .- ");
                         text.Span("Plazo: ").Bold();
-                        text.Span($"{Model.DueDate:dd/MM/yy}"); 
+                        text.Span($"{Model.DueDate:dd/MM/yy}");
                     });
 
                     column.Item().PaddingBottom(5).Text(text =>

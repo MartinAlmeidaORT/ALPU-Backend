@@ -27,7 +27,7 @@ public record IvrCampaignServiceOptions : BaseCampaignServiceOptions
     public bool IsInterior { get; set; }
     public decimal? PriceOverride { get; set; }
 
-    
+
 }
 
 public record EventCampaignServiceOptions : BaseCampaignServiceOptions
