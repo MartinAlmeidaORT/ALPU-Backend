@@ -1,0 +1,50 @@
+name: Build and Push Image (ECR)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+env:
+  IMAGE_NAME: alpu-api
+  AWS_REGION: us-east-1
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Podman
+        run: sudo apt-get update && sudo apt-get install -y podman
+
+      # AWS Academy: las credenciales son temporales y no permiten asumir roles via OIDC.
+      # Se cargan como Secrets del repo y se rotan manualmente cuando expira el lab.
+      - name: Configure AWS credentials (AWS Academy)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build image with Podman
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: |
+          podman build -t ${REGISTRY}/${IMAGE_NAME}:${{ github.sha }} \
+                        -t ${REGISTRY}/${IMAGE_NAME}:latest \
+                        -f Containerfile .
+
+      - name: Push image to ECR
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: |
+          podman push ${REGISTRY}/${IMAGE_NAME}:${{ github.sha }}
+          podman push ${REGISTRY}/${IMAGE_NAME}:latest
