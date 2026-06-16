@@ -54,15 +54,21 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPriceTable, PriceTable>();
         services.AddSingleton<IAmazonS3>(_ =>
         {
-            var credentials = new SessionAWSCredentials(
-                   configuration["AWS:AccessKeyId"],
-                   configuration["AWS:SecretAccessKey"],
-                   configuration["AWS:SessionToken"]
-               );
-
             var region = RegionEndpoint.GetBySystemName(configuration["AWS:Region"]);
 
-            return new AmazonS3Client(credentials, region);
+            var accessKey = configuration["AWS:AccessKeyId"];
+            var secretKey = configuration["AWS:SecretAccessKey"];
+            var sessionToken = configuration["AWS:SessionToken"];
+
+            if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey) && !string.IsNullOrEmpty(sessionToken))
+            {
+                // Desarrollo local: usa credenciales del .env
+                var credentials = new SessionAWSCredentials(accessKey, secretKey, sessionToken);
+                return new AmazonS3Client(credentials, region);
+            }
+
+            // EC2 con LabRole: toma credenciales del instance profile automáticamente
+            return new AmazonS3Client(region);
         });
         services.AddSingleton<AmazonS3Service>();
         services.AddScoped<IDashboardService, DashboardService>();
