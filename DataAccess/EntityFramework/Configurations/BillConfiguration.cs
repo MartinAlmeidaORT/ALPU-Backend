@@ -40,7 +40,7 @@ public class BillConfiguration : IEntityTypeConfiguration<Bill>
             .HasColumnName("amount");
 
         builder.Property(b => b.ProofFile)
-            .HasColumnName("proof_file")
+            .HasColumnName("pdf_amazon_s3_key")
             .HasMaxLength(200)
             .IsRequired();
 

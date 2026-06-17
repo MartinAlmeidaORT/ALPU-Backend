@@ -2,7 +2,7 @@ using Domain.Common.Inputs;
 using Domain.Models;
 using FluentResults;
 
-namespace Application.Interfaces.Public.Services;
+namespace Domain.Interfaces.Public.Services;
 
 public interface IUserService
 {
@@ -19,4 +19,12 @@ public interface IUserService
     Task<Result> ApproveUser(UpdateUserStateInput input);
 
     Task<User> DeleteUserAsync(int id);
+
+    IQueryable<Notification> GetUserNotifications(int id);
+
+    Task AddNotificationAsync(User user, string title, string description);
+
+    Task<Result<Notification>> DeleteNotificationAsync(int userId, int notificationId);
+
+    Task<Result<Notification[]>> DeleteAllNotificationsAsync(int userId);
 }

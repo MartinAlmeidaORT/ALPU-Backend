@@ -218,6 +218,38 @@ public abstract class User : Entity
     public virtual ICollection<Notification> Notifications { get; set; } = [];
 
     public string FullName => $"{FirstName} {LastName}";
+
+    public Result<Notification> AddNotification(string title, string description)
+    {
+        var result = Notification.CreateNotification(title, description);
+        if (result.IsFailed)
+        {
+            return result;
+        }
+
+        Notifications.Add(result.Value);
+        return Result.Ok(result.Value);
+    }
+
+    public Result<Notification> RemoveNotification(int notificationId)
+    {
+        Notification? notificationToDelete = Notifications.SingleOrDefault(n => n.NotificationId == notificationId);
+
+        if (notificationToDelete == null)
+        {
+            return Result.Fail(NotificationErrors.NotificationNotFound(notificationId));
+        }
+
+        Notifications.Remove(notificationToDelete);
+        return Result.Ok(notificationToDelete);
+    }
+
+    public Notification[] ClearNotifications()
+    {
+        Notification[] notificationsCleared = [.. Notifications];
+        Notifications.Clear();
+        return notificationsCleared;
+    }
 }
 
 public static class UserErrors

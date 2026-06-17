@@ -7,6 +7,7 @@ using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Enums;
 using Domain.Interfaces.Public.Repositories;
+using Domain.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Singletons;
 using Domain.Models;
 using Domain.Models.Campaign;
@@ -20,12 +21,14 @@ public class ContractService(
     ICampaignService campaignService,
     IPriceTable priceTable,
     IUnitOfWork unitOfWork,
-    AmazonS3Service amazonS3Service) : IContractService
+    AmazonS3Service amazonS3Service,
+    IUserService userService) : IContractService
 {
     private readonly ICampaignService _campaignService = campaignService;
     private readonly IPriceTable _priceTable = priceTable;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
+    private readonly IUserService _userService = userService;
 
     public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
     {
@@ -65,7 +68,6 @@ public class ContractService(
         var document = new ContractDocument(contract);
         contract.PdfAmazonS3Key = await _amazonS3Service.SaveContractAsync(document.GeneratePdf(), contract.ContractId);
         var url = _amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key);
-        await _unitOfWork.SaveChangesAsync();
 
         var payload = new GenerateContractPayload()
         {
@@ -73,6 +75,12 @@ public class ContractService(
             PdfAmazonS3Url = url
         };
 
+        await Task.WhenAll(
+            _userService.AddNotificationAsync(contract.Broadcaster, "Nuevo contrato", $"Se genero un contrato con el usuario {contract.Broadcaster.FullName}. Espera que el locutor revise y apruebe el contrato."),
+            _userService.AddNotificationAsync(contract.Client, "Nuevo contrato", $"Se genero un contrato con el usuario {contract.Client.FullName}. Espera que el cliente revise y apruebe el contrato.")
+        );
+
+        await _unitOfWork.SaveChangesAsync();
         return payload;
     }
 
@@ -107,6 +115,8 @@ public class ContractService(
         Contract? contract = _unitOfWork.Contracts
             .GetAllContracts()
             .Where(c => (c.ClientId == userId || c.BroadcasterId == userId) && c.ContractId == input.ContractId)
+            .Include(c => c.Client)
+            .Include(c => c.Broadcaster)
             .SingleOrDefault();
 
         if (contract == null)
@@ -122,7 +132,15 @@ public class ContractService(
         contract.State = input.NewState;
         if (contract.State == ContractState.Canceled)
         {
-            await _amazonS3Service.MoveContractToCancelledAsync(contract.PdfAmazonS3Key);
+            await _amazonS3Service.MoveContractToCancelledAsync(contract.ContractId);
+            if (contract.Client.UserId != userId)
+            {
+                await _userService.AddNotificationAsync(contract.Client, $"Cancelado el contrato: {contract.ContractId}", $"");
+            }
+            if (contract.Broadcaster.UserId != userId)
+            {
+                await _userService.AddNotificationAsync(contract.Broadcaster, $"Cancelado el contrato: {contract.ContractId}", $"");
+            }
         }
 
         await _unitOfWork.SaveChangesAsync();
@@ -133,6 +151,8 @@ public class ContractService(
     {
         Contract? contract = _unitOfWork.Contracts.GetAllContracts()
             .Where(c => c.ContractId == contractId)
+            .Include(c => c.Client)
+            .Include(c => c.Broadcaster)
             .SingleOrDefault();
 
         if (contract == null)
@@ -148,14 +168,18 @@ public class ContractService(
         if (contract.ClientId == userId)
         {
             contract.ClientApproved = true;
+            await _userService.AddNotificationAsync(contract.Broadcaster, $"Actualizacion contrato: {contract.ContractId}", $"Cliente {contract.Client.FullName} aprobo el contrato.");
         }
         else
         {
             contract.BroadcasterApproved = true;
+            await _userService.AddNotificationAsync(contract.Client, $"Actualizacion contrato: {contract.ContractId}", $"Locutor {contract.Broadcaster.FullName} aprobo el contrato.");
         }
 
         if (contract.BroadcasterApproved && contract.ClientApproved)
         {
+            await _userService.AddNotificationAsync(contract.Client, $"El contrato: {contract.ContractId} fue aprobado y esta activo", $"El contrato tiene vigencia hasta el {contract.DueDate}");
+            await _userService.AddNotificationAsync(contract.Broadcaster, $"El contrato: {contract.ContractId} fue aprobado y esta activo", $"El contrato tiene vigencia hasta el {contract.DueDate}");
             contract.State = ContractState.Active;
         }
 

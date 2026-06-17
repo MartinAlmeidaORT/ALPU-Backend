@@ -77,11 +77,10 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
         return _s3Client.GetPreSignedURL(request);
     }
 
-    public async Task MoveContractToCancelledAsync(string contractId)
+    public async Task MoveContractToCancelledAsync(int contractId)
     {
         var sourceKey = $"contracts/{contractId}.pdf";
         var destinationKey = $"contracts/cancelled/{contractId}.pdf";
-
         // Copy to cancelled folder
         var copyRequest = new CopyObjectRequest
         {

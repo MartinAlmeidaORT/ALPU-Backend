@@ -6,7 +6,10 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddDatabase(builder.Configuration);
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 builder.Services.AddServiceGraphQL();
+
 
 builder.Services.AddExternalServices(builder.Configuration);
 
@@ -23,6 +26,8 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseWebSockets();
 
 app.MapGraphQL(); // Default endpoint is /graphql
 
