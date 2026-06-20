@@ -39,12 +39,13 @@ public class EventCampaignService : CampaignServiceDate
 
         decimal subtotal = breakdown.BeforeDiscount;
 
+        breakdown.SubTotal = subtotal;
+        
         if (Options.ForMassBroadcast)
         {
             await breakdown.ApplyPriceAdjustment(nameof(Options.ForMassBroadcast).ToSnakeCase(), _priceTable);
         }
 
-        breakdown.SubTotal = subtotal;
         return breakdown;
     }
 
