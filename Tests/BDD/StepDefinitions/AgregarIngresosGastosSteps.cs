@@ -21,7 +21,7 @@ public class RegistrarFacturaSteps
     private readonly ScenarioContext _scenarioContext;
     private readonly IBillService _billServiceMock;
     private readonly IContractService _contractServiceMock;
-    private readonly INotificationService _notificationServiceMock;
+    private readonly IUserService _userServiceMock;
 
     private BillInput _input = new();
     private Bill? _registroGuardado;
@@ -33,7 +33,11 @@ public class RegistrarFacturaSteps
         _scenarioContext = scenarioContext;
         _billServiceMock = Substitute.For<IBillService>();
         _contractServiceMock = Substitute.For<IContractService>();
-        _notificationServiceMock = Substitute.For<INotificationService>();
+        _userServiceMock = Substitute.For<IUserService>();
+
+        _userServiceMock
+            .GetUserByIdAsync(Arg.Any<int>())
+            .Returns(new Broadcaster { UserId = 1 });
 
         _billServiceMock
             .RegisterBillAsync(Arg.Any<BillInput>())
@@ -124,14 +128,6 @@ public class RegistrarFacturaSteps
         };
 
         await EjecutarRegistro();
-
-        if (_registroGuardado?.ContractId != null)
-        {
-            _notificationServiceMock
-                .NotifyContractChangeAsync(
-                    (int)_registroGuardado.ContractId,
-                    Arg.Any<string>());
-        }
     }
 
     [When(@"se envía una solicitud para registrar una factura con un contrato inexistente")]
@@ -162,9 +158,10 @@ public class RegistrarFacturaSteps
     public void ThenFacturaGuardadaConNotificacion()
     {
         _registroGuardado.Should().NotBeNull();
-        _notificationServiceMock.Received(1)
-            .NotifyContractChangeAsync(
-                (int)_registroGuardado.ContractId,
+        _userServiceMock.Received(1)
+            .AddNotificationAsync(
+                Arg.Any<User>(),
+                Arg.Any<string>(),
                 Arg.Any<string>());
     }
 
@@ -187,10 +184,23 @@ public class RegistrarFacturaSteps
             if (rol is not ("administrador" or "contador" or "supervisor"))
                 throw new UnauthorizedAccessException();
 
-            var contrato = await _contractServiceMock
-                .GetContractByIdAsync((int)_input.ContractId) ?? throw new Exception("El contrato no existe");
+            if (_input.ContractId.HasValue)
+            {
+                var contrato = await _contractServiceMock
+                    .GetContractByIdAsync(_input.ContractId.Value)
+                    ?? throw new Exception("El contrato no existe");
+            }
 
             await _billServiceMock.RegisterBillAsync(_input);
+
+            if (_registroGuardado?.ContractId != null)
+            {
+                var user = await _userServiceMock.GetUserByIdAsync(1);
+                await _userServiceMock.AddNotificationAsync(
+                    user!,
+                    "Pago de contrato registrado",
+                    $"Se registró un pago para el contrato {_registroGuardado.ContractId}");
+            }
         }
         catch (Exception ex)
         {
