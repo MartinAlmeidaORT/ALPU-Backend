@@ -10,7 +10,7 @@ public record BaseCampaignServiceOptions
 
 public record NarrativeCampaignServiceOptions : BaseCampaignServiceOptions
 {
-    public int ExtraMinutes { get; set; }
+    public int Minutes { get; set; }
     public int ExtraRoles { get; set; }
     public bool IsNonCommercial { get; set; }
     public bool HasLipSync { get; set; }

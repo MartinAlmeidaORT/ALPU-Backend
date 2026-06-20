@@ -38,7 +38,7 @@ public class NarrativeCampaignServiceTests
     public void CalculateSubTotal_NoExtraMinutes_ReturnsBasePrice()
     {
         var service = CreateService(6800, 700, 2050);
-        var options = new NarrativeCampaignServiceOptions { ExtraMinutes = 0, ExtraRoles = 0 };
+        var options = new NarrativeCampaignServiceOptions { Minutes = 0, ExtraRoles = 0 };
         var campaignService = CreateCampaignService(service, options);
 
         decimal result = campaignService.CalculateSubTotal();
@@ -50,7 +50,7 @@ public class NarrativeCampaignServiceTests
     public void CalculateSubTotal_WithExtraMinutes_AddsExtraPrice()
     {
         var service = CreateService(6800, 700, 2050);
-        var options = new NarrativeCampaignServiceOptions { ExtraMinutes = 3, ExtraRoles = 0 };
+        var options = new NarrativeCampaignServiceOptions { Minutes = 3, ExtraRoles = 0 };
         var campaignService = CreateCampaignService(service, options);
 
         decimal result = campaignService.CalculateSubTotal();
@@ -63,7 +63,7 @@ public class NarrativeCampaignServiceTests
     {
         var service = CreateService(6800, 700, 2050);
         service.BasePrice = null;
-        var options = new NarrativeCampaignServiceOptions { ExtraMinutes = 0, ExtraRoles = 0 };
+        var options = new NarrativeCampaignServiceOptions { Minutes = 0, ExtraRoles = 0 };
         var campaignService = CreateCampaignService(service, options);
 
         Assert.Throws<NullReferenceException>(() => campaignService.CalculateSubTotal());
@@ -74,7 +74,7 @@ public class NarrativeCampaignServiceTests
     {
         var service = CreateService(6800, 700, 2050);
         service.ExtraPrice = null;
-        var options = new NarrativeCampaignServiceOptions { ExtraMinutes = 3, ExtraRoles = 0 };
+        var options = new NarrativeCampaignServiceOptions { Minutes = 3, ExtraRoles = 0 };
         var campaignService = CreateCampaignService(service, options);
 
         Assert.Throws<NullReferenceException>(() => campaignService.CalculateSubTotal());
@@ -84,7 +84,7 @@ public class NarrativeCampaignServiceTests
     public async Task Calculate_WithExtraRoles_AddsRolePrice()
     {
         var service = CreateService(6800, 700, 2050);
-        var options = new NarrativeCampaignServiceOptions { ExtraMinutes = 0, ExtraRoles = 2 };
+        var options = new NarrativeCampaignServiceOptions { Minutes = 0, ExtraRoles = 2 };
         var campaignService = CreateCampaignService(service, options);
 
         Result<ServiceBreakdown> result = await campaignService.Calculate();
@@ -99,7 +99,7 @@ public class NarrativeCampaignServiceTests
         var service = CreateService(6800, 700, 2050);
         var options = new NarrativeCampaignServiceOptions
         {
-            ExtraMinutes = 5,
+            Minutes = 5,
             ExtraRoles = 3,
             PriceOverride = 9999
         };

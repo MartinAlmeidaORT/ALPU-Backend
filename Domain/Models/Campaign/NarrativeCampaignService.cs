@@ -48,7 +48,7 @@ public class NarrativeCampaignService : BaseCampaignService
         breakdown.BeforeDiscount = CalculateSubTotal();
         breakdown.SubTotal = breakdown.BeforeDiscount;
 
-        VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Options.ExtraMinutes);
+        VolumeDiscount? volumeDiscount = await _priceTable.GetVolumeDiscountAsync(Service.Type, Options.Minutes);
         if (volumeDiscount != null)
         {
             ApplyVolumeDiscount(ref breakdown, volumeDiscount);
@@ -84,7 +84,11 @@ public class NarrativeCampaignService : BaseCampaignService
 
         decimal subtotal = (decimal)Service.BasePrice;
 
-        subtotal += (decimal)Service.ExtraPrice * Options.ExtraMinutes;
+        if (Options.Minutes > 3)
+        {
+            Options.Minutes -= 3;
+            subtotal += (decimal)Service.ExtraPrice * Options.Minutes;
+        }
 
         return subtotal;
     }
