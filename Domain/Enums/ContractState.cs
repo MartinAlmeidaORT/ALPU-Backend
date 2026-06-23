@@ -5,5 +5,6 @@ public enum ContractState
     Pending,
     Active,
     Completed,
-    Canceled
+    Canceled,
+    Paid
 }
