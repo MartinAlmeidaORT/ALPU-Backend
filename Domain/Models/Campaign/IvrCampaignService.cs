@@ -23,7 +23,7 @@ public class IvrCampaignService : BaseCampaignService
 
     private readonly new IvrCampaignServiceOptions Options;
 
-    public async override Task<Result<ServiceBreakdown>> Calculate()
+    public async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
     {
         if (Service.BasePrice == null) throw new NullReferenceException();
 

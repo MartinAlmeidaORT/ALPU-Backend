@@ -23,7 +23,7 @@ public class EventCampaignService : CampaignServiceDate
 
     private readonly new EventCampaignServiceOptions Options;
 
-    public override async Task<Result<ServiceBreakdown>> Calculate()
+    public override async Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
     {
         if (Service.BasePrice == null) throw new NullReferenceException();
 

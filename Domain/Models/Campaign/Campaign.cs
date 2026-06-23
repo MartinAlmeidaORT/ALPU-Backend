@@ -37,7 +37,7 @@ public class Campaign
         foreach (BaseCampaignService campaignService in Services)
         {
             serviceTypes.Add(campaignService.Service.Type);
-            Result<ServiceBreakdown> serviceBreakdown = await campaignService.Calculate();
+            Result<ServiceBreakdown> serviceBreakdown = await campaignService.Calculate(input);
             if (serviceBreakdown.IsFailed) return Result.Fail(serviceBreakdown.Errors);
             breakdown.Services.Add(serviceBreakdown.Value);
             breakdown.BeforeDiscount += serviceBreakdown.Value.SubTotal;
