@@ -1,6 +1,7 @@
 using DataAccess.ExternalServices;
 using Domain.Common.Inputs;
 using Domain.Common.Payloads;
+using Domain.Enums;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Interfaces.Public.Services;
 using Domain.Models;
@@ -28,6 +29,7 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
             contract = _unitOfWork.Contracts.GetAllContracts()
                 .Include(c => c.Client)
                 .Include(c => c.Broadcaster)
+                .Include(c => c.Bills)
                 .SingleOrDefault(c => c.ContractId == (int)input.ContractId);
 
             if (contract == null)
@@ -45,6 +47,10 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
             _unitOfWork.Bills.CreateBill(newBill.Value);
             if (newBill.Value.Contract != null)
             {
+                if (newBill.Value.Contract.State == ContractState.Pending || newBill.Value.Contract.State == ContractState.Canceled)
+                {
+                    return Result.Fail(ContractErrors.ContractNotActive(newBill.Value.Contract.ContractId));
+                }
                 await _userService.AddNotificationAsync(
                     newBill.Value.Contract.Client,
                     $"Pago del contrato: {newBill.Value.Contract.ContractId}",
@@ -55,6 +61,21 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
                     $"Pago del contrato: {newBill.Value.Contract.ContractId}",
                     $"Cliente {newBill.Value.Contract.Client.FullName} pago la suma de {newBill.Value.Amount}."
                 );
+                decimal totalAmount = newBill.Value.Contract.Bills.Sum(b => b.Amount);
+                if (totalAmount >= newBill.Value.Contract.TotalPrice)
+                {
+                    await _userService.AddNotificationAsync(
+                        newBill.Value.Contract.Client,
+                        $"Contrato {newBill.Value.Contract.ContractId} completado",
+                        $"Se registro el pago final del contrato."
+                    );
+                    await _userService.AddNotificationAsync(
+                        newBill.Value.Contract.Broadcaster,
+                        $"Contrato {newBill.Value.Contract.ContractId} completado",
+                        $"Cliente {newBill.Value.Contract.Client.FullName} completo el pago del contrato."
+                    );
+                    newBill.Value.Contract.State = ContractState.Paid;
+                }
             }
             await _unitOfWork.SaveChangesAsync();
         }

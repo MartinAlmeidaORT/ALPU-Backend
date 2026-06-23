@@ -27,7 +27,7 @@ public class NarrativeCampaignService : BaseCampaignService
 
     private readonly new NarrativeCampaignServiceOptions Options;
 
-    public override async Task<Result<ServiceBreakdown>> Calculate()
+    public override async Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
     {
         ServiceBreakdown breakdown = new()
         {

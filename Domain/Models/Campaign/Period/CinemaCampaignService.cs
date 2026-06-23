@@ -23,9 +23,9 @@ public class CinemaCampaignService : PeriodCampaignService
 
     private readonly new CinemaCampaignServiceOptions Options;
 
-    public async override Task<Result<ServiceBreakdown>> Calculate()
+    public async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
     {
-        Result<ServiceBreakdown> result = await base.Calculate();
+        Result<ServiceBreakdown> result = await base.Calculate(campaign);
 
         if (Options.IsInterior)
         {

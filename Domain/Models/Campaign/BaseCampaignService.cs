@@ -39,7 +39,7 @@ public abstract class BaseCampaignService
 
     public decimal? BasePriceOverride { get; set; }
 
-    public virtual async Task<Result<ServiceBreakdown>> Calculate()
+    public virtual async Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
     {
         if (Service.BasePrice == null) throw new NullReferenceException();
 

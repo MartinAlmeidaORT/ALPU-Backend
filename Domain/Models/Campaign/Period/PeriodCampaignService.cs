@@ -22,12 +22,21 @@ public abstract class PeriodCampaignService : BaseCampaignService
 
     protected readonly new PeriodCampaignServiceOptions Options;
 
-    public async override Task<Result<ServiceBreakdown>> Calculate()
+    public async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
     {
         Services.Period? interval = null;
+
         if (Service is PeriodService ps)
         {
-            interval = ps.Periods.FirstOrDefault(p => p.Interval == Options.Period);
+            if (Service.Type == ServiceType.TvHost && campaign.Services.Any(s => s.ServiceId == 3))
+            {
+                PeriodService TvService = await _priceTable.GetServiceById(3) as PeriodService;
+                interval = TvService?.Periods.FirstOrDefault(p => p.Interval == Options.Period);
+                interval.BasePrice = (decimal)interval.ExtraPrice;
+            } else
+            {
+                interval = ps.Periods.FirstOrDefault(p => p.Interval == Options.Period);
+            }
         }
 
         if (interval == null)
