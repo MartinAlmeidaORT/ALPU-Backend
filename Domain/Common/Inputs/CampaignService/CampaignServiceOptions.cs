@@ -16,6 +16,7 @@ public record NarrativeCampaignServiceOptions : BaseCampaignServiceOptions
     public bool HasLipSync { get; set; }
     public bool OnInternet { get; set; }
     public decimal? PriceOverride { get; set; }
+    public DateOnly Date { get; set; }
 }
 
 public record IvrCampaignServiceOptions : BaseCampaignServiceOptions
@@ -26,6 +27,7 @@ public record IvrCampaignServiceOptions : BaseCampaignServiceOptions
     public bool CanUpdate { get; set; }
     public bool IsInterior { get; set; }
     public decimal? PriceOverride { get; set; }
+    public DateOnly Date { get; set; }
 }
 
 public record EventCampaignServiceOptions : BaseCampaignServiceOptions

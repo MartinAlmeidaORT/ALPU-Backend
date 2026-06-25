@@ -8,7 +8,7 @@ using FluentResults;
 
 namespace Domain.Models.Campaign;
 
-public class IvrCampaignService : BaseCampaignService
+public class IvrCampaignService : CampaignServiceDate
 {
     internal protected IvrCampaignService()
     {
@@ -16,7 +16,7 @@ public class IvrCampaignService : BaseCampaignService
     }
 
     public IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTable priceTable, IvrCampaignServiceOptions options)
-        : base(service, pieces, priceTable)
+        : base(service, pieces, priceTable, options.Date)
     {
         Options = options;
     }
