@@ -92,10 +92,4 @@ public class NarrativeCampaignService : CampaignServiceDate
 
         return subtotal;
     }
-
-    public override DateOnly GetExpireDate()
-    {
-        Console.WriteLine("GetExpireDate en Narrative no implementado.");
-        return new DateOnly();
-    }
 }

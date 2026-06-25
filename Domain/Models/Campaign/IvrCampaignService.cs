@@ -86,12 +86,6 @@ public class IvrCampaignService : CampaignServiceDate
         return subtotal;
     }
 
-    public override DateOnly GetExpireDate()
-    {
-        Console.WriteLine("GetExpireDate en IVR no implementado.");
-        return new DateOnly();
-    }
-
     private int CountWords(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
