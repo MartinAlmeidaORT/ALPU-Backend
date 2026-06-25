@@ -96,14 +96,11 @@ public class Campaign
 
     public DateOnly GetExpireDate()
     {
-        DateOnly lastExpireDate = Services[0].GetExpireDate();
-        foreach (BaseCampaignService service in Services)
+        if (Services == null || !Services.Any())
         {
-            if (service.GetExpireDate() > lastExpireDate)
-            {
-                lastExpireDate = service.GetExpireDate();
-            }
+            throw new InvalidOperationException("No hay servicios disponibles para calcular la fecha de expiración.");
         }
-        return lastExpireDate;
+
+        return Services.Max(service => service.GetExpireDate());
     }
 }

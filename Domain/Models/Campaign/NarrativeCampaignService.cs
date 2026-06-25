@@ -8,7 +8,7 @@ using FluentResults;
 
 namespace Domain.Models.Campaign;
 
-public class NarrativeCampaignService : BaseCampaignService
+public class NarrativeCampaignService : CampaignServiceDate
 {
     internal protected NarrativeCampaignService()
     {
@@ -17,7 +17,7 @@ public class NarrativeCampaignService : BaseCampaignService
     }
 
     public NarrativeCampaignService(NarrativeService service, List<Piece> pieces, IPriceTable priceTable, NarrativeCampaignServiceOptions options)
-        : base(service, pieces, priceTable)
+        : base(service, pieces, priceTable, options.Date)
     {
         Service = service;
         Options = options;
@@ -91,11 +91,5 @@ public class NarrativeCampaignService : BaseCampaignService
         }
 
         return subtotal;
-    }
-
-    public override DateOnly GetExpireDate()
-    {
-        Console.WriteLine("GetExpireDate en Narrative no implementado.");
-        return new DateOnly();
     }
 }
