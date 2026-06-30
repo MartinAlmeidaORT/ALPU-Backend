@@ -55,7 +55,7 @@ public class EmailService : IEmailService
             int.Parse(section["SmtpPort"]!),
             SecureSocketOptions.StartTls);
         await client.AuthenticateAsync(
-            section["SenderEmail"],
+            section["SmtpUsername"],
             section["AppPassword"]);
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
