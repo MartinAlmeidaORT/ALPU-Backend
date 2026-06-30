@@ -62,7 +62,7 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
                     $"Cliente {newBill.Value.Contract.Client.FullName} pago la suma de {newBill.Value.Amount}."
                 );
                 decimal totalAmount = newBill.Value.Contract.Bills.Sum(b => b.Amount);
-                if (totalAmount >= newBill.Value.Contract.TotalPrice)
+                if (totalAmount >= newBill.Value.Contract.TotalPricePostTax)
                 {
                     await _userService.AddNotificationAsync(
                         newBill.Value.Contract.Client,
