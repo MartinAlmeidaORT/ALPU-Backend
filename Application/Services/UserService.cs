@@ -5,12 +5,15 @@ using FluentResults;
 using Domain.Interfaces.Public.Services;
 using Microsoft.EntityFrameworkCore;
 using HotChocolate.Subscriptions;
+using Domain.Interfaces.Private;
 
 namespace Application.Services;
 
-public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender) : IUserService
+public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender, IEmailService emailService) : IUserService
 {
     private readonly ITopicEventSender _sender = sender;
+
+    private readonly IEmailService _emailService = emailService;
 
     public IQueryable<User> GetAllUsers() => unitOfWork.Users.GetAllUsers();
 
@@ -56,6 +59,7 @@ public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender) : IUs
 
         user.UserState = input.NewState;
         await unitOfWork.SaveChangesAsync();
+        await _emailService.SendAccountApprovedAsync(user.Email, user.FullName);
         return Result.Ok();
     }
 

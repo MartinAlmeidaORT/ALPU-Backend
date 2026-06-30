@@ -83,6 +83,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICampaignServiceFactory, CampaignServiceFactory>();
         services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+        services.AddScoped<IEmailService, EmailService>();
         return services;
     }
 
