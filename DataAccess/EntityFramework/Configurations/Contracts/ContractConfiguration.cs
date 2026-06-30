@@ -42,6 +42,9 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.Property(c => c.TotalPrice)
             .HasColumnName("total_price");
 
+        builder.Property(c => c.TotalPricePostTax)
+            .HasColumnName("total_price_post_tax");
+
         builder.Property(c => c.State)
             .HasColumnName("state");
 

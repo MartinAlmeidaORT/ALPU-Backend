@@ -11,6 +11,7 @@ using Domain.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Singletons;
 using Domain.Models;
 using Domain.Models.Campaign;
+using Domain.Models.Services;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
@@ -30,6 +31,7 @@ public class ContractService(
     private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
     private readonly IUserService _userService = userService;
 
+
     public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
     {
         Country? country = await _unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
@@ -41,12 +43,17 @@ public class ContractService(
         Result<PriceBreakdown> price = await campaign.Value.Calculate(input, _priceTable, _unitOfWork);
         if (price.IsFailed) return Result.Fail(price.Errors);
 
+        PriceAdjustment alpu_commission = await _priceTable.GetPriceAdjustmentAsync("alpu_commission");
+        PriceAdjustment accountant_commission = await _priceTable.GetPriceAdjustmentAsync("accountant_commission");
+
+
         Contract contract = Contract.CreateContract(
             input.ClientId,
             input.BroadcasterId,
             campaign.Value,
             price.Value.Total,
-            country.CountryCode
+            country.CountryCode,
+            price.Value.Total - (price.Value.Total * (alpu_commission.Amount + accountant_commission.Amount))
         );
 
         foreach (var cs in campaign.Value.Services)
@@ -76,11 +83,17 @@ public class ContractService(
         };
 
         await Task.WhenAll(
-            _userService.AddNotificationAsync(contract.Broadcaster, "Nuevo contrato", $"Se genero un contrato con el usuario {contract.Broadcaster.FullName}. Espera que el locutor revise y apruebe el contrato."),
-            _userService.AddNotificationAsync(contract.Client, "Nuevo contrato", $"Se genero un contrato con el usuario {contract.Client.FullName}. Espera que el cliente revise y apruebe el contrato.")
+            _userService.AddNotificationAsync(contract.Broadcaster, "Nuevo contrato", $"Se genero un contrato con el cliente {contract.Client.FullName}. Espera que lo revise y apruebe el contrato."),
+            _userService.AddNotificationAsync(contract.Client, "Nuevo contrato", $"Se genero un contrato con el locutor {contract.Broadcaster.FullName}. Espera que lo revise y apruebe el contrato.")
         );
 
         await _unitOfWork.SaveChangesAsync();
+        if (contract.Broadcaster.Contracts.Count() > 3)
+        {
+            await _userService.AddNotificationAsync(contract.Broadcaster, "Llegaste a 4 contratos", $"Felicitaciones! Llegaste a 4 contratos. Dejaste de ser un locutor novel y ahora eres un locutor profesional.");
+            contract.Broadcaster.CategoryId = 2;
+            await _unitOfWork.SaveChangesAsync();
+        }
         return payload;
     }
 

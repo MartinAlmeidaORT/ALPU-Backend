@@ -1,4 +1,4 @@
-﻿using Domain.Common;
+using Domain.Common;
 using Domain.Common.Errors;
 using Domain.Enums;
 using Domain.Models.Campaign;
@@ -9,7 +9,7 @@ public class Contract : Entity
 {
     internal Contract() { }
 
-    public static Contract CreateContract(int clientId, int broadcasterId, Campaign.Campaign campaign, decimal price, string countryCode)
+    public static Contract CreateContract(int clientId, int broadcasterId, Campaign.Campaign campaign, decimal price, string countryCode, decimal totalPricePostTax)
     {
         return new()
         {
@@ -19,7 +19,8 @@ public class Contract : Entity
             DueDate = campaign.GetExpireDate(),
             Campaigns = [campaign],
             CountryCode = countryCode,
-            TotalPrice = price
+            TotalPrice = price,
+            TotalPricePostTax = totalPricePostTax
         };
     }
 
@@ -56,8 +57,10 @@ public class Contract : Entity
     public string CountryCode { get; set; } = null!;
 
     public virtual Country Country { get; set; } = null!;
-}
 
+    public decimal TotalPricePostTax { get; set; }
+
+}
 public static class ContractErrors
 {
     public class ContractNotFoundError(string msg) : NotFoundError(msg);

@@ -14,9 +14,16 @@ using FluentResults;
 
 namespace Application.Services;
 
-public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration configuration, IGoogleAuthService googleAuthService) : IAuthService
+public class AuthService(
+    IHasher hasher,
+    IUnitOfWork unitOfWork,
+    IConfiguration configuration,
+    IGoogleAuthService googleAuthService,
+    IEmailService emailService) : IAuthService
 {
     private readonly IConfiguration _config = configuration;
+
+    private readonly IEmailService _emailService = emailService;
 
     public async Task<Result<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
     {
@@ -45,6 +52,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         unitOfWork.Broadcasters.CreateBroadcaster(result.Value);
         await unitOfWork.SaveChangesAsync();
+        await _emailService.SendAccountPendingAsync(result.Value.Email, result.Value.FullName);
 
         return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
     }
@@ -75,6 +83,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         unitOfWork.Clients.CreateClient(result.Value);
         await unitOfWork.SaveChangesAsync();
+        await _emailService.SendAccountPendingAsync(result.Value.Email, result.Value.FullName);
 
         return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
     }
@@ -146,6 +155,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         unitOfWork.Broadcasters.CreateBroadcaster(result.Value);
         await unitOfWork.SaveChangesAsync();
+        await _emailService.SendAccountPendingAsync(result.Value.Email, result.Value.FullName);
 
         return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
     }
@@ -175,6 +185,7 @@ public class AuthService(IHasher hasher, IUnitOfWork unitOfWork, IConfiguration 
 
         unitOfWork.Clients.CreateClient(result.Value);
         await unitOfWork.SaveChangesAsync();
+        await _emailService.SendAccountPendingAsync(result.Value.Email, result.Value.FullName);
 
         return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
     }
