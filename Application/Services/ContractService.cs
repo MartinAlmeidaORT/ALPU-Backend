@@ -70,6 +70,7 @@ public class ContractService(
             .Include(c => c.Client.Address.Department)
             .Include(c => c.Broadcaster.Address.Country)
             .Include(c => c.Broadcaster.Address.Department)
+            .Include(c => c.Broadcaster.Contracts)
             .Single();
 
         var document = new ContractDocument(contract);
@@ -87,13 +88,17 @@ public class ContractService(
             _userService.AddNotificationAsync(contract.Client, "Nuevo contrato", $"Se genero un contrato con el locutor {contract.Broadcaster.FullName}. Espera que lo revise y apruebe el contrato.")
         );
 
-        await _unitOfWork.SaveChangesAsync();
-        if (contract.Broadcaster.Contracts.Count() > 3)
+        if (contract.Broadcaster.Contracts.Count > 3)
         {
+            _unitOfWork.Attach(contract.Broadcaster);
             await _userService.AddNotificationAsync(contract.Broadcaster, "Llegaste a 4 contratos", $"Felicitaciones! Llegaste a 4 contratos. Dejaste de ser un locutor novel y ahora eres un locutor profesional.");
-            contract.Broadcaster.CategoryId = 2;
-            await _unitOfWork.SaveChangesAsync();
+            contract.Broadcaster.Category = await _unitOfWork.Broadcasters.GetCategoryByIdAsync(2);
+            _unitOfWork.Broadcasters.UpdateBroadcaster(contract.Broadcaster);
         }
+
+        await _unitOfWork.SaveChangesAsync();
+
+
         return payload;
     }
 
