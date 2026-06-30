@@ -70,13 +70,14 @@ public abstract class PeriodCampaignService : BaseCampaignService
 
     public override DateOnly GetExpireDate()
     {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Now);
         return Options.Period switch
         {
-            Interval.OneWeek => new DateOnly().AddDays(7),
-            Interval.OneMonth => new DateOnly().AddMonths(1),
-            Interval.ThreeMonths => new DateOnly().AddMonths(1),
-            Interval.SixMonths => new DateOnly().AddMonths(1),
-            Interval.OneYear => new DateOnly().AddYears(1),
+            Interval.OneWeek => today.AddDays(7),
+            Interval.OneMonth => today.AddMonths(1),
+            Interval.ThreeMonths => today.AddMonths(3),
+            Interval.SixMonths => today.AddMonths(6),
+            Interval.OneYear => today.AddYears(1),
             _ => throw new NotImplementedException(),
         };
     }

@@ -24,8 +24,8 @@ public class ContractDocument(Contract model) : IDocument
                 page.Margin(40);
                 page.DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.Arial));
 
-                page.Foreground().StopPaging().AlignCenter().Text("ALPU")
-                    .FontSize(64)
+                page.Background().StopPaging().AlignMiddle().AlignCenter().Text("ALPU")
+                    .FontSize(120)
                     .Bold()
                     .FontColor(Colors.Grey.Lighten2);
 

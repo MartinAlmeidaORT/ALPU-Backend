@@ -15,7 +15,7 @@ public class Address : Entity
         Country = country;
         DepartmentId = department.DepartmentId;
         Department = department;
-        City = city;
+        City = city.Trim();
         Street = street;
     }
 
@@ -25,7 +25,7 @@ public class Address : Entity
         Country = country ?? Country;
         DepartmentId = input?.DepartmentId ?? DepartmentId;
         Department = department ?? Department;
-        City = input?.City ?? City;
+        City = input?.City ?? City.Trim();
         Street = input?.Street ?? Street;
     }
 
@@ -46,7 +46,7 @@ public class Address : Entity
 
         if (City.Length < 4) errors.WithError(AddressErrors.CityMinLength(City));
         if (City.Length > 50) errors.WithError(AddressErrors.CityMaxLength(City));
-        if (!City.All(char.IsLetter)) errors.WithError(AddressErrors.CityIsLettersOnly(City));
+        if (!City.All(c => char.IsLetter(c) || char.IsWhiteSpace(c))) errors.WithError(AddressErrors.CityIsLettersOnly(City));
 
         return errors.IsSuccess ? Result.Ok() : errors;
     }
