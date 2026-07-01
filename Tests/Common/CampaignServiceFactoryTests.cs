@@ -115,7 +115,7 @@ public class CampaignServiceFactoryTests
         var factory = new CampaignServiceFactory(CreatePriceTable(service));
 
         Result<BaseCampaignService> result = await factory.Create(
-            CreateInput(2, """{ "extraMinutes": 0, "extraRoles": 0 }"""));
+            CreateInput(2, """{ "minutes": 3, "extraRoles": 0 }"""));
 
         Assert.True(result.IsSuccess);
         Assert.IsType<NarrativeCampaignService>(result.Value);
