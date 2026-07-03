@@ -26,7 +26,7 @@ public class Contract : Entity
 
     public int ContractId { get; set; }
 
-    public string ContractSerial { get; set; }
+    public string? ContractSerial { get; set; }
 
     public int ClientId { get; set; }
 
