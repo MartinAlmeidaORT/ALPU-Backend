@@ -16,6 +16,10 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.Property(c => c.ContractId)
             .HasColumnName("contract_id");
 
+        builder.Property(c => c.ContractSerial)
+            .HasColumnName("contract_serial")
+            .HasMaxLength(1000);
+
         builder.Property(c => c.ClientId)
             .HasColumnName("client_id");
 

@@ -9,4 +9,6 @@ public interface IContractRepository
     public IQueryable<Contract> GetAllContracts();
 
     public Task<Contract?> GetByIdAsync(int id);
+
+    public Task<Contract> GetContractWithFullDetailsAsync(int id);
 }
