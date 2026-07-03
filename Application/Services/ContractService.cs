@@ -41,8 +41,8 @@ public class ContractService(
 
         Contract contract = await PersistNewContractAsync(input, pricing.Value, country.CountryCode);
 
-        var pdf = await GenerateAndUploadContractPdfAsync(contract);
-        contract.PdfAmazonS3Key = pdf.PdfKey;
+        var (PdfKey, Url) = await GenerateAndUploadContractPdfAsync(contract);
+        contract.PdfAmazonS3Key = PdfKey;
 
         await NotifyContractCreatedAsync(contract);
         await PromoteBroadcasterIfEligibleAsync(contract.Broadcaster);
@@ -52,7 +52,7 @@ public class ContractService(
         return new GenerateContractPayload()
         {
             Contract = contract,
-            PdfAmazonS3Url = pdf.Url
+            PdfAmazonS3Url = Url
         };
     }
 
