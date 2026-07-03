@@ -68,7 +68,7 @@ public static class ContractErrors
     public class UnauthorizedUserError(string msg) : AuthError(msg);
 
     public class ContractNotActiveError(string msg) : ValidationError(msg);
-    
+
     public static UnauthorizedUserError UnauthorizedUser(int userId) => new($"El usuario con id {userId} no tiene acceso a este contrato.");
 
     public static ContractNotFoundError ContractNotFound(int contractId) => new($"El contrato con id {contractId} no existe.");

@@ -33,7 +33,8 @@ public abstract class PeriodCampaignService : BaseCampaignService
                 PeriodService TvService = await _priceTable.GetServiceById(3) as PeriodService;
                 interval = TvService?.Periods.FirstOrDefault(p => p.Interval == Options.Period);
                 interval.BasePrice = (decimal)interval.ExtraPrice;
-            } else
+            }
+            else
             {
                 interval = ps.Periods.FirstOrDefault(p => p.Interval == Options.Period);
             }

@@ -20,6 +20,7 @@ public class AuthServiceTests
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly IConfiguration _config = Substitute.For<IConfiguration>();
     private readonly IGoogleAuthService _googleAuthService = Substitute.For<IGoogleAuthService>();
+    private readonly IEmailService _emailService = Substitute.For<IEmailService>();
 
     private readonly AuthService _sut;
 
@@ -28,7 +29,7 @@ public class AuthServiceTests
         // JWT config mínima para que GenerateJWT no explote
         _config["JWT:Secret"].Returns("super-secret-key-for-testing-purposes-only-32chars");
 
-        _sut = new AuthService(_hasher, _unitOfWork, _config, _googleAuthService);
+        _sut = new AuthService(_hasher, _unitOfWork, _config, _googleAuthService, _emailService);
     }
 
     // ---------------------------------------------------------------
@@ -50,6 +51,7 @@ public class AuthServiceTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.HasError<CountryErrors.CountryNotFoundError>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -66,6 +68,7 @@ public class AuthServiceTests
 
         // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -82,6 +85,8 @@ public class AuthServiceTests
         // Act
         var result = await _sut.RegisterBroadcasterAsync(input);
 
+        await _emailService.SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
+
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Token.Should().NotBeNullOrEmpty();
@@ -89,6 +94,7 @@ public class AuthServiceTests
         // Verify persistence
         _unitOfWork.Broadcasters.Received(1).CreateBroadcaster(Arg.Any<Broadcaster>());
         await _unitOfWork.Received(1).SaveChangesAsync();
+        await _emailService.Received(1).SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     //Verificar que el email no esté repetido
@@ -110,6 +116,7 @@ public class AuthServiceTests
         // Assert
         result.IsFailed.Should().BeTrue();
         result.HasError<UserErrors.DuplicatedEmailError>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     // ---------------------------------------------------------------
@@ -126,6 +133,7 @@ public class AuthServiceTests
 
         result.IsSuccess.Should().BeFalse();
         result.HasError<CountryErrors.CountryNotFoundError>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -146,6 +154,7 @@ public class AuthServiceTests
         result.IsSuccess.Should().BeTrue();
         _unitOfWork.Clients.Received(1).CreateClient(
             Arg.Is<Client>(c => c.Agency.Name == input.AgencyName));
+        await _emailService.Received(1).SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -176,6 +185,7 @@ public class AuthServiceTests
         result.IsSuccess.Should().BeTrue();
         _unitOfWork.Clients.Received(1).CreateClient(
             Arg.Is<Client>(c => c.Agency.AgencyId == 42));
+        await _emailService.SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -196,6 +206,7 @@ public class AuthServiceTests
         // Assert
         result.IsFailed.Should().BeTrue();
         result.HasError<UserErrors.DuplicatedEmailError>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -217,6 +228,7 @@ public class AuthServiceTests
         // Assert
         result.IsFailed.Should().BeTrue();
         result.HasError<UserErrors.DuplicatedEmailError>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     // ---------------------------------------------------------------
@@ -270,6 +282,7 @@ public class AuthServiceTests
 
         result.IsFailed.Should().BeTrue();
         result.HasError<UserErrors.GoogleUserTryNormalLoginError>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -283,6 +296,7 @@ public class AuthServiceTests
 
         result.IsFailed.Should().BeTrue();
         result.HasError<UserErrors.UserNotFoundError>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
     // ---------------------------------------------------------------
@@ -406,5 +420,6 @@ public class AuthServiceTests
         // Assert
         result.IsFailed.Should().BeTrue();
         result.HasError<UserErrors.DuplicatedRutError>();
+        await _emailService.DidNotReceive().SendAccountPendingAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 }

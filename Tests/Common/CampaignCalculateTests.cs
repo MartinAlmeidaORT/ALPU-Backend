@@ -34,7 +34,7 @@ public class CampaignCalculateTests
         var campaignService = Substitute.For<BaseCampaignService>(
             service, new List<Piece> { new() { Name = "Pieza 1" } }, priceTable);
 
-        campaignService.Calculate().Returns(Result.Ok(new ServiceBreakdown
+        campaignService.Calculate(Arg.Any<CampaignInput>()).Returns(Result.Ok(new ServiceBreakdown
         {
             ServiceName = service.Name,
             ServiceType = type,
@@ -157,7 +157,7 @@ public class CampaignCalculateTests
             new GenericService(1, "Test", ServiceType.TvGeneric, 1000),
             new List<Piece>(),
             priceTable);
-        service.Calculate().Returns(Result.Fail("Error en el servicio"));
+        service.Calculate(Arg.Any<CampaignInput>()).Returns(Result.Fail("Error en el servicio"));
 
         var campaign = new Campaign("Test", [service]);
 

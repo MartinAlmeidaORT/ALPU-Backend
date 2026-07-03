@@ -14,7 +14,7 @@ public class NarrativeCampaignServiceTests
     private static NarrativeService CreateService(
         decimal basePrice,
         decimal extraPrice,
-        decimal rolePrice) => new NarrativeService
+        decimal rolePrice) => new()
         {
             ServiceId = 1,
             Name = "Narrative Test",
@@ -23,6 +23,15 @@ public class NarrativeCampaignServiceTests
             ExtraPrice = extraPrice,
             RolePrice = rolePrice,
         };
+
+    private static CampaignInput CreateInput() => new()
+    {
+        ClientId = 1,
+        BroadcasterId = 1,
+        Campaign = "Test",
+        Services = [],
+        CountryCode = "UY"
+    };
 
     private static NarrativeCampaignService CreateCampaignService(
         NarrativeService service,
@@ -50,7 +59,7 @@ public class NarrativeCampaignServiceTests
     public void CalculateSubTotal_WithExtraMinutes_AddsExtraPrice()
     {
         var service = CreateService(6800, 700, 2050);
-        var options = new NarrativeCampaignServiceOptions { Minutes = 3, ExtraRoles = 0 };
+        var options = new NarrativeCampaignServiceOptions { Minutes = 6, ExtraRoles = 0 };
         var campaignService = CreateCampaignService(service, options);
 
         decimal result = campaignService.CalculateSubTotal();
@@ -87,7 +96,7 @@ public class NarrativeCampaignServiceTests
         var options = new NarrativeCampaignServiceOptions { Minutes = 0, ExtraRoles = 2 };
         var campaignService = CreateCampaignService(service, options);
 
-        Result<ServiceBreakdown> result = await campaignService.Calculate();
+        Result<ServiceBreakdown> result = await campaignService.Calculate(CreateInput());
 
         Assert.True(result.IsSuccess);
         Assert.Equal(6800 + 2 * 2050, result.Value.SubTotal); // 6800 + 4100
@@ -105,7 +114,7 @@ public class NarrativeCampaignServiceTests
         };
         var campaignService = CreateCampaignService(service, options);
 
-        Result<ServiceBreakdown> result = await campaignService.Calculate();
+        Result<ServiceBreakdown> result = await campaignService.Calculate(CreateInput());
 
         Assert.True(result.IsSuccess);
         Assert.Equal(9999, result.Value.SubTotal);
