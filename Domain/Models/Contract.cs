@@ -62,9 +62,9 @@ public class Contract : Entity
 
     public decimal TotalPricePostTax { get; set; }
 
-    public void AssignSerial(string broadcasterFirstName, string broadcasterLastName)
+    public void AssignSerial(string broadcasterFirstName, string broadcasterLastName, string? contractSerial = null)
     {
-        ContractSerial = ContractSerialGenerator.Generate(BroadcasterId, broadcasterFirstName, broadcasterLastName, ContractId);
+        ContractSerial = ContractSerialGenerator.Generate(BroadcasterId, broadcasterFirstName, broadcasterLastName, ContractId, contractSerial);
     }
 }
 public static class ContractErrors

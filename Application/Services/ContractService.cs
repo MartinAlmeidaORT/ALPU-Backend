@@ -199,7 +199,7 @@ public class ContractService(
         await _unitOfWork.SaveChangesAsync();
 
         contract = await _unitOfWork.Contracts.GetContractWithFullDetailsAsync(contract.ContractId);
-        contract.AssignSerial(contract.Broadcaster.FirstName, contract.Broadcaster.LastName);
+        //contract.AssignSerial(contract.Broadcaster.FirstName, contract.Broadcaster.LastName, input.ContractSerial);
 
         return contract;
     }
