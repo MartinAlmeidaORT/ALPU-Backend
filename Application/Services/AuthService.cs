@@ -203,9 +203,10 @@ public class AuthService(
         {
             new Claim(JwtRegisteredClaimNames.Sub,   user.UserId.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Name,               $"{user.FirstName} {user.LastName}"),
-            new Claim(ClaimTypes.Role,               user.GetType().Name), // "Client", "Broadcaster"
-            new Claim(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString())
+            new Claim("first_name",                  user.FirstName),
+            new Claim("last_name",                   user.LastName),
+            new Claim("account_state",               user.UserState.ToString()),
+            new Claim("account_role",                user.GetType().Name),
         };
 
         var token = new JwtSecurityToken(
