@@ -1,10 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Interfaces.Public.Services;
+using Domain.Common;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
+using Domain.Interfaces.Private;
 using Domain.Interfaces.Public.Services;
 using Domain.Models;
 using FluentResults;
@@ -63,13 +65,13 @@ public class Mutation
     public async Task<IQueryable<Contract>> UpdateContractState(
         UpdateContractStateInput input,
         [Service] IContractService contractService,
-        [Service] IHttpContextAccessor httpContextAccessor)
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
     {
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        string role = user.FindFirstValue(ClaimTypes.Role)!;
-        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
 
-        Result result = await contractService.UpdateContractAsync(input, int.Parse(userId));
+        Result result = await contractService.UpdateContractAsync(input, claims.UserId);
         result.UnwrapOrThrow();
         return contractService.GetAllContracts().Where(c => c.ContractId == input.ContractId);
     }
@@ -86,12 +88,16 @@ public class Mutation
     [Authorize]
     [UseSingleOrDefault]
     [UseProjection]
-    public async Task<IQueryable<Contract>> ApproveContract(int contractId, [Service] IContractService contractService, [Service] IHttpContextAccessor httpContextAccessor)
+    public async Task<IQueryable<Contract>> ApproveContract(
+        int contractId,
+        [Service] IContractService contractService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
     {
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
 
-        FluentResults.Result<string> result = await contractService.ApproveContractAsync(int.Parse(userId), contractId);
+        FluentResults.Result<string> result = await contractService.ApproveContractAsync(claims.UserId, contractId);
         result.UnwrapOrThrow();
         return contractService.GetAllContracts().Where(c => c.ContractId == contractId);
     }
@@ -132,12 +138,13 @@ public class Mutation
     public async Task<Notification> DeleteNotification(
         int notificationId,
         [Service] IUserService userService,
-        [Service] IHttpContextAccessor httpContextAccessor)
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
     {
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
 
-        FluentResults.Result<Notification> result = await userService.DeleteNotificationAsync(int.Parse(userId), notificationId);
+        FluentResults.Result<Notification> result = await userService.DeleteNotificationAsync(claims.UserId, notificationId);
         return result.UnwrapOrThrow();
     }
 
@@ -146,12 +153,13 @@ public class Mutation
     [UseProjection]
     public async Task<Notification[]> ClearNotifications(
         [Service] IUserService userService,
-        [Service] IHttpContextAccessor httpContextAccessor)
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
     {
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
 
-        FluentResults.Result<Notification[]> result = await userService.DeleteAllNotificationsAsync(int.Parse(userId));
+        FluentResults.Result<Notification[]> result = await userService.DeleteAllNotificationsAsync(claims.UserId);
         return result.UnwrapOrThrow();
     }
 }

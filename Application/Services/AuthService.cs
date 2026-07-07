@@ -1,12 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Application.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Common;
 using Domain.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Domain.Interfaces.Private;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
@@ -17,11 +12,11 @@ namespace Application.Services;
 public class AuthService(
     IHasher hasher,
     IUnitOfWork unitOfWork,
-    IConfiguration configuration,
+    IJwtService jwtService,
     IGoogleAuthService googleAuthService,
     IEmailService emailService) : IAuthService
 {
-    private readonly IConfiguration _config = configuration;
+    private readonly IJwtService _jwtService = jwtService;
 
     private readonly IEmailService _emailService = emailService;
 
@@ -54,7 +49,7 @@ public class AuthService(
         await unitOfWork.SaveChangesAsync();
         await _emailService.SendAccountPendingAsync(result.Value.Email, result.Value.FullName);
 
-        return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
+        return Result.Ok(new AuthPayload(_jwtService.GenerateJWT(result.Value), result.Value));
     }
 
     public async Task<Result<AuthPayload>> RegisterClientAsync(RegisterClientInput input)
@@ -85,7 +80,7 @@ public class AuthService(
         await unitOfWork.SaveChangesAsync();
         await _emailService.SendAccountPendingAsync(result.Value.Email, result.Value.FullName);
 
-        return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
+        return Result.Ok(new AuthPayload(_jwtService.GenerateJWT(result.Value), result.Value));
     }
 
     public async Task<Result<AuthPayload>> LoginAsync(UserLoginInput input)
@@ -98,7 +93,7 @@ public class AuthService(
 
         if (!hasher.Verify(input.Password, user.Password)) return UserErrors.LoginFailed();
 
-        return Result.Ok(new AuthPayload(GenerateJWT(user), user));
+        return Result.Ok(new AuthPayload(_jwtService.GenerateJWT(user), user));
     }
 
     public async Task<Result<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input)
@@ -119,7 +114,7 @@ public class AuthService(
 
         return Result.Ok(new GoogleAuthPayload
         {
-            Token = user is not null ? GenerateJWT(user) : null,
+            Token = user is not null ? _jwtService.GenerateJWT(user) : null,
             RequiresRegistration = user is null,
             Subject = payload.Subject,
             Email = payload.Email,
@@ -157,7 +152,7 @@ public class AuthService(
         await unitOfWork.SaveChangesAsync();
         await _emailService.SendAccountPendingAsync(result.Value.Email, result.Value.FullName);
 
-        return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
+        return Result.Ok(new AuthPayload(_jwtService.GenerateJWT(result.Value), result.Value));
     }
 
     public async Task<Result<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
@@ -187,34 +182,6 @@ public class AuthService(
         await unitOfWork.SaveChangesAsync();
         await _emailService.SendAccountPendingAsync(result.Value.Email, result.Value.FullName);
 
-        return Result.Ok(new AuthPayload(GenerateJWT(result.Value), result.Value));
-    }
-
-    private string GenerateJWT(User user)
-    {
-        var key = Environment.GetEnvironmentVariable("JWT_KEY") ??
-            configuration["JWT:Secret"] ??
-            throw new ApplicationException("JWT key is not configured.");
-
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub,   user.UserId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim("first_name",                  user.FirstName),
-            new Claim("last_name",                   user.LastName),
-            new Claim("account_state",               user.UserState.ToString()),
-            new Claim("account_role",                user.GetType().Name),
-        };
-
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return Result.Ok(new AuthPayload(_jwtService.GenerateJWT(result.Value), result.Value));
     }
 }

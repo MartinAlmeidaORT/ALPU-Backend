@@ -1,8 +1,9 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Interfaces.Public.Services;
+using Domain.Common;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
+using Domain.Interfaces.Private;
 using Domain.Interfaces.Public.Services;
 using Domain.Models;
 using Domain.Models.Services;
@@ -53,33 +54,32 @@ public class Query
     [UseSorting]
     public IQueryable<Contract> GetContracts(
         [Service] IContractService contractService,
-        [Service] IHttpContextAccessor httpContextAccessor)
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
     {
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        string role = user.FindFirstValue(ClaimTypes.Role)!;
-        string userId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
-
-        return contractService.GetAllContracts(int.Parse(userId), role);
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+        return contractService.GetAllContracts(claims.UserId, claims.Role);
     }
 
     [Authorize]
     public async Task<ContractUrlPayload> GetContractPdfDownloadUrl(
         [Service] IContractService contractService,
         [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService,
         IResolverContext resolverContext,
         int contractId)
     {
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        string role = user.FindFirstValue(ClaimTypes.Role)!;
-        int userId = int.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
 
-        Contract? contract = contractService.GetAllContracts(userId, role)
-            .Where(c => c.ContractId == contractId && (role == "Administrator" || role == "Supervisor" || role == "Accountant" || c.ClientId == userId || c.BroadcasterId == userId))
+        Contract? contract = contractService.GetAllContracts(claims.UserId, claims.Role)
+            .Where(c => c.ContractId == contractId && (claims.Role == "Administrator" || claims.Role == "Supervisor" || claims.Role == "Accountant" || c.ClientId == claims.UserId || c.BroadcasterId == claims.UserId))
             .SingleOrDefault();
 
         if (contract == null)
         {
-            var error = ContractErrors.UnauthorizedUser(userId);
+            var error = ContractErrors.UnauthorizedUser(claims.UserId);
             resolverContext.ReportError(ErrorBuilder.New()
                         .SetMessage(error.Message)
                         .SetCode(error.GetType().Name)
@@ -105,16 +105,15 @@ public class Query
     public async Task<BillUrlPayload> GetBillProofDownloadUrl(
         [Service] IBillService billService,
         [Service] IHttpContextAccessor httpContextAccessor,
-        IResolverContext resolverContext,
+        [Service] IJwtService jwtService,
         int billId)
     {
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        string role = user.FindFirstValue(ClaimTypes.Role)!;
-        int userId = int.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
 
         Bill? bill = billService.GetAllBills()
             .Where(b => b.BillId == billId &&
-                (role == "Administrator" || role == "Supervisor" || role == "Accountant" || b.Contract.ClientId == userId || b.Contract.BroadcasterId == userId))
+                (claims.Role == "Administrator" || claims.Role == "Supervisor" || claims.Role == "Accountant" || b.Contract.ClientId == claims.UserId || b.Contract.BroadcasterId == claims.UserId))
             .SingleOrDefault();
 
         return new()
@@ -130,11 +129,14 @@ public class Query
     }
 
     [Authorize]
-    public async Task<IQueryable<Notification>> GetNotifications([Service] IUserService userService, IHttpContextAccessor httpContextAccessor)
+    public async Task<IQueryable<Notification>> GetNotifications(
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
     {
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
-        int userId = int.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
 
-        return userService.GetUserNotifications(userId);
+        return userService.GetUserNotifications(claims.UserId);
     }
 }
