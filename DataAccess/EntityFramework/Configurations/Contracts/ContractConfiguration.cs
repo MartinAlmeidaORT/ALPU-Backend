@@ -1,5 +1,6 @@
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DataAccess.EntityFramework.Configurations.Contracts;
@@ -13,8 +14,14 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
         builder.HasKey(c => c.ContractId)
             .HasName("contract_pkey");
 
-        builder.Property(c => c.ContractId)
-            .HasColumnName("contract_id");
+        builder
+            .Property(c => c.ContractId)
+            .ValueGeneratedOnAdd();
+
+        builder
+            .Property(c => c.ContractSerial)
+            .ValueGeneratedOnAdd()
+            .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore); 
 
         builder.Property(c => c.ClientId)
             .HasColumnName("client_id");

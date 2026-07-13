@@ -9,6 +9,7 @@ public class ContractType : ObjectType<Contract>
         descriptor.Name("Contract");
         descriptor.BindFieldsExplicitly();
         descriptor.Field(x => x.ContractId);
+        descriptor.Field(x => x.ContractSerial);
         descriptor.Field(x => x.Client);
         descriptor.Field(x => x.Broadcaster);
         descriptor.Field(x => x.CountryCode);

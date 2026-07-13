@@ -26,6 +26,8 @@ public class Contract : Entity
 
     public int ContractId { get; set; }
 
+    public string? ContractSerial { get; set; }
+
     public int ClientId { get; set; }
 
     public virtual Client Client { get; set; } = null!;
@@ -60,6 +62,10 @@ public class Contract : Entity
 
     public decimal TotalPricePostTax { get; set; }
 
+    public void AssignSerial(string broadcasterFirstName, string broadcasterLastName, string? contractSerial = null)
+    {
+        ContractSerial = ContractSerialGenerator.Generate(BroadcasterId, broadcasterFirstName, broadcasterLastName, ContractId, contractSerial);
+    }
 }
 public static class ContractErrors
 {

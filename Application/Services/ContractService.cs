@@ -31,75 +31,29 @@ public class ContractService(
     private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
     private readonly IUserService _userService = userService;
 
-
     public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
     {
         Country? country = await _unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         if (country == null) return Result.Fail(CountryErrors.CountryNotFound(input.CountryCode));
 
-        Result<Campaign> campaign = await _campaignService.CreateCampaign(input);
-        if (campaign.IsFailed) return Result.Fail(campaign.Errors);
+        Result<(Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax)> pricing = await BuildCampaignWithPricingAsync(input);
+        if (pricing.IsFailed) return Result.Fail(pricing.Errors);
 
-        Result<PriceBreakdown> price = await campaign.Value.Calculate(input, _priceTable, _unitOfWork);
-        if (price.IsFailed) return Result.Fail(price.Errors);
+        Contract contract = await PersistNewContractAsync(input, pricing.Value, country.CountryCode);
 
-        PriceAdjustment alpu_commission = await _priceTable.GetPriceAdjustmentAsync("alpu_commission");
-        PriceAdjustment accountant_commission = await _priceTable.GetPriceAdjustmentAsync("accountant_commission");
+        var (PdfKey, Url) = await GenerateAndUploadContractPdfAsync(contract);
+        contract.PdfAmazonS3Key = PdfKey;
 
+        await NotifyContractCreatedAsync(contract);
+        await PromoteBroadcasterIfEligibleAsync(contract.Broadcaster);
 
-        Contract contract = Contract.CreateContract(
-            input.ClientId,
-            input.BroadcasterId,
-            campaign.Value,
-            price.Value.Total,
-            country.CountryCode,
-            price.Value.Total - (price.Value.Total * (alpu_commission.Amount + accountant_commission.Amount))
-        );
-
-        foreach (var cs in campaign.Value.Services)
-        {
-            _unitOfWork.Attach(cs.Service);
-        }
-
-        contract = _unitOfWork.Contracts.CreateContract(contract);
         await _unitOfWork.SaveChangesAsync();
-        contract = _unitOfWork.Contracts.GetAllContracts()
-            .Where(c => c.ContractId == contract.ContractId)
-            .Include(c => c.Client.Agency)
-            .Include(c => c.Client.Address.Country)
-            .Include(c => c.Client.Address.Department)
-            .Include(c => c.Broadcaster.Address.Country)
-            .Include(c => c.Broadcaster.Address.Department)
-            .Include(c => c.Broadcaster.Contracts)
-            .Single();
 
-        var document = new ContractDocument(contract);
-        contract.PdfAmazonS3Key = await _amazonS3Service.SaveContractAsync(document.GeneratePdf(), contract.ContractId);
-        var url = _amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key);
-
-        var payload = new GenerateContractPayload()
+        return new GenerateContractPayload()
         {
             Contract = contract,
-            PdfAmazonS3Url = url
+            PdfAmazonS3Url = Url
         };
-
-        await Task.WhenAll(
-            _userService.AddNotificationAsync(contract.Broadcaster, "Nuevo contrato", $"Se genero un contrato con el cliente {contract.Client.FullName}. Espera que lo revise y apruebe el contrato."),
-            _userService.AddNotificationAsync(contract.Client, "Nuevo contrato", $"Se genero un contrato con el locutor {contract.Broadcaster.FullName}. Espera que lo revise y apruebe el contrato.")
-        );
-
-        if (contract.Broadcaster.Contracts.Count > 3)
-        {
-            _unitOfWork.Attach(contract.Broadcaster);
-            await _userService.AddNotificationAsync(contract.Broadcaster, "Llegaste a 4 contratos", $"Felicitaciones! Llegaste a 4 contratos. Dejaste de ser un locutor novel y ahora eres un locutor profesional.");
-            contract.Broadcaster.Category = await _unitOfWork.Broadcasters.GetCategoryByIdAsync(2);
-            _unitOfWork.Broadcasters.UpdateBroadcaster(contract.Broadcaster);
-        }
-
-        await _unitOfWork.SaveChangesAsync();
-
-
-        return payload;
     }
 
     public Task<Contract> DeleteContractAsync(int id)
@@ -208,5 +162,68 @@ public class ContractService(
     public async Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(Contract contract)
     {
         return new ContractUrlPayload(_amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key));
+    }
+
+    private async Task<Result<(Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax)>> BuildCampaignWithPricingAsync(CampaignInput input)
+    {
+        Result<Campaign> campaign = await _campaignService.CreateCampaign(input);
+        if (campaign.IsFailed) return Result.Fail(campaign.Errors);
+
+        Result<PriceBreakdown> price = await campaign.Value.Calculate(input, _priceTable, _unitOfWork);
+        if (price.IsFailed) return Result.Fail(price.Errors);
+
+        PriceAdjustment alpuCommission = await _priceTable.GetPriceAdjustmentAsync("alpu_commission");
+        PriceAdjustment accountantCommission = await _priceTable.GetPriceAdjustmentAsync("accountant_commission");
+        decimal totalPricePostTax = price.Value.Total - (price.Value.Total * (alpuCommission.Amount + accountantCommission.Amount));
+
+        return (campaign.Value, price.Value.Total, totalPricePostTax);
+    }
+
+    private async Task<Contract> PersistNewContractAsync(CampaignInput input, (Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax) pricing, string countryCode)
+    {
+        Contract contract = Contract.CreateContract(
+            input.ClientId,
+            input.BroadcasterId,
+            pricing.Campaign,
+            pricing.TotalPrice,
+            countryCode,
+            pricing.TotalPricePostTax
+        );
+
+        foreach (var cs in pricing.Campaign.Services)
+        {
+            _unitOfWork.Attach(cs.Service);
+        }
+
+        _unitOfWork.Contracts.CreateContract(contract);
+        await _unitOfWork.SaveChangesAsync();
+
+        contract = await _unitOfWork.Contracts.GetContractWithFullDetailsAsync(contract.ContractId);
+        //contract.AssignSerial(contract.Broadcaster.FirstName, contract.Broadcaster.LastName, input.ContractSerial);
+
+        return contract;
+    }
+
+    private async Task<(string PdfKey, string Url)> GenerateAndUploadContractPdfAsync(Contract contract)
+    {
+        var document = new ContractDocument(contract);
+        string pdfKey = await _amazonS3Service.SaveContractAsync(document.GeneratePdf(), contract.ContractId);
+        return (pdfKey, _amazonS3Service.GetDownloadUrl(pdfKey));
+    }
+
+    private Task NotifyContractCreatedAsync(Contract contract) =>
+        Task.WhenAll(
+            _userService.AddNotificationAsync(contract.Broadcaster, "Nuevo contrato", $"Se genero un contrato con el cliente {contract.Client.FullName}. Espera que lo revise y apruebe el contrato."),
+            _userService.AddNotificationAsync(contract.Client, "Nuevo contrato", $"Se genero un contrato con el locutor {contract.Broadcaster.FullName}. Espera que lo revise y apruebe el contrato.")
+        );
+
+    private async Task PromoteBroadcasterIfEligibleAsync(Broadcaster broadcaster)
+    {
+        if (broadcaster.Contracts.Where(c => (c.State == ContractState.Active || c.State == ContractState.Paid || c.State == ContractState.Completed)).Count() <= 3) return;
+
+        _unitOfWork.Attach(broadcaster);
+        await _userService.AddNotificationAsync(broadcaster, "Llegaste a 4 contratos", "Felicitaciones! Llegaste a 4 contratos. Dejaste de ser un locutor novel y ahora eres un locutor profesional.");
+        broadcaster.Category = await _unitOfWork.Broadcasters.GetCategoryByIdAsync(2);
+        _unitOfWork.Broadcasters.UpdateBroadcaster(broadcaster);
     }
 }
