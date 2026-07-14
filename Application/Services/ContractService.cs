@@ -182,6 +182,8 @@ public class ContractService(
     private async Task<Contract> PersistNewContractAsync(CampaignInput input, (Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax) pricing, string countryCode)
     {
         Contract contract = Contract.CreateContract(
+            input.ContractId,
+            input.ContractSerial,
             input.ClientId,
             input.BroadcasterId,
             pricing.Campaign,

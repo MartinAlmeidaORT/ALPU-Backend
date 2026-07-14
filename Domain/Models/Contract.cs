@@ -9,10 +9,12 @@ public class Contract : Entity
 {
     internal Contract() { }
 
-    public static Contract CreateContract(int clientId, int broadcasterId, Campaign.Campaign campaign, decimal price, string countryCode, decimal totalPricePostTax)
+    public static Contract CreateContract(int? contractId, string? contractSerial, int clientId, int broadcasterId, Campaign.Campaign campaign, decimal price, string countryCode, decimal totalPricePostTax)
     {
         return new()
         {
+            ContractId = contractId ?? 0,
+            ContractSerial = contractSerial,
             ClientId = clientId,
             BroadcasterId = broadcasterId,
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
