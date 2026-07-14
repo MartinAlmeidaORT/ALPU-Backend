@@ -10,8 +10,6 @@ public record CampaignInput
 
     public int? ContractId { get; init; }
 
-    public string? ContractSerial { get; set; }
-
     public required string CountryCode { get; init; }
 
     public required CampaignServiceInput[] Services { get; init; }

@@ -26,4 +26,7 @@ public class ContractRepository(DatabaseContext context) : RepositoryBase<Contra
             .Include(c => c.Broadcaster.Contracts)
             .SingleAsync();
     }
+
+    public async Task<int> CountByRootIdAsync(int rootContractId) =>
+        await GetAll().CountAsync(c => c.RootContractId == rootContractId);
 }

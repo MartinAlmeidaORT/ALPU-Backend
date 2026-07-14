@@ -1,4 +1,3 @@
-
 using Application.Interfaces.Public.Services;
 using Application.QuestPDF;
 using DataAccess.ExternalServices;
@@ -14,6 +13,7 @@ using Domain.Models.Campaign;
 using Domain.Models.Services;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using QuestPDF.Fluent;
 
 namespace Application.Services;
@@ -25,6 +25,8 @@ public class ContractService(
     AmazonS3Service amazonS3Service,
     IUserService userService) : IContractService
 {
+    private const int MaxSerialAssignAttempts = 3;
+
     private readonly ICampaignService _campaignService = campaignService;
     private readonly IPriceTable _priceTable = priceTable;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -33,13 +35,25 @@ public class ContractService(
 
     public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
     {
+        Contract? original = null;
+
+        if (input.ContractId is int replacesContractId)
+        {
+            Result<Contract> cancelResult = await CancelContractForReplacementAsync(replacesContractId);
+            if (cancelResult.IsFailed) return Result.Fail(cancelResult.Errors);
+            original = cancelResult.Value;
+        }
+
         Country? country = await _unitOfWork.Countries.GetByCodeAsync(input.CountryCode);
         if (country == null) return Result.Fail(CountryErrors.CountryNotFound(input.CountryCode));
 
         Result<(Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax)> pricing = await BuildCampaignWithPricingAsync(input);
         if (pricing.IsFailed) return Result.Fail(pricing.Errors);
 
-        Contract contract = await PersistNewContractAsync(input, pricing.Value, country.CountryCode);
+        Result<Contract> persisted = await PersistNewContractAsync(input, pricing.Value, country.CountryCode, original);
+        if (persisted.IsFailed) return Result.Fail(persisted.Errors);
+
+        Contract contract = persisted.Value;
 
         var (PdfKey, Url) = await GenerateAndUploadContractPdfAsync(contract);
         contract.PdfAmazonS3Key = PdfKey;
@@ -164,6 +178,29 @@ public class ContractService(
         return new ContractUrlPayload(_amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key));
     }
 
+    private async Task<Result<Contract>> CancelContractForReplacementAsync(int contractId)
+    {
+        Contract? original = _unitOfWork.Contracts.GetAllContracts()
+            .Where(c => c.ContractId == contractId)
+            .Include(c => c.Client)
+            .Include(c => c.Broadcaster)
+            .SingleOrDefault();
+
+        if (original == null) return Result.Fail(ContractErrors.ContractNotFound(contractId));
+
+        bool alreadyReplaced = await _unitOfWork.Contracts.GetAllContracts()
+            .AnyAsync(c => c.ReplacesContractId == contractId);
+        if (alreadyReplaced) return Result.Fail(ContractErrors.ContractAlreadyReplaced(contractId));
+
+        original.State = ContractState.Canceled;
+        await _amazonS3Service.MoveContractToCancelledAsync(original.ContractId);
+
+        await _userService.AddNotificationAsync(original.Client, $"Contrato reemplazado: {original.ContractId}", "Se genero un nuevo contrato en su lugar.");
+        await _userService.AddNotificationAsync(original.Broadcaster, $"Contrato reemplazado: {original.ContractId}", "Se genero un nuevo contrato en su lugar.");
+
+        return Result.Ok(original);
+    }
+
     private async Task<Result<(Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax)>> BuildCampaignWithPricingAsync(CampaignInput input)
     {
         Result<Campaign> campaign = await _campaignService.CreateCampaign(input);
@@ -179,17 +216,16 @@ public class ContractService(
         return (campaign.Value, price.Value.Total, totalPricePostTax);
     }
 
-    private async Task<Contract> PersistNewContractAsync(CampaignInput input, (Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax) pricing, string countryCode)
+    private async Task<Result<Contract>> PersistNewContractAsync(CampaignInput input, (Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax) pricing, string countryCode, Contract? original)
     {
         Contract contract = Contract.CreateContract(
-            input.ContractId,
-            input.ContractSerial,
             input.ClientId,
             input.BroadcasterId,
             pricing.Campaign,
             pricing.TotalPrice,
             countryCode,
-            pricing.TotalPricePostTax
+            pricing.TotalPricePostTax,
+            original?.ContractId
         );
 
         foreach (var cs in pricing.Campaign.Services)
@@ -201,10 +237,31 @@ public class ContractService(
         await _unitOfWork.SaveChangesAsync();
 
         contract = await _unitOfWork.Contracts.GetContractWithFullDetailsAsync(contract.ContractId);
-        //contract.AssignSerial(contract.Broadcaster.FirstName, contract.Broadcaster.LastName, input.ContractSerial);
 
-        return contract;
+        int? replacedRootId = original?.RootContractId;
+
+        for (int attempt = 1; attempt <= MaxSerialAssignAttempts; attempt++)
+        {
+            int replacementCount = await _unitOfWork.Contracts.CountByRootIdAsync(replacedRootId ?? contract.ContractId);
+
+            contract.AssignSerial(contract.Broadcaster.FirstName, contract.Broadcaster.LastName, replacedRootId, replacementCount);
+
+            try
+            {
+                await _unitOfWork.SaveChangesAsync();
+                return Result.Ok(contract);
+            }
+            catch (DbUpdateException ex) when (IsUniqueSerialViolation(ex) && attempt < MaxSerialAssignAttempts)
+            {
+                // Another reissue took this letter first — loop and recompute with a fresh count.
+            }
+        }
+
+        return Result.Fail(ContractErrors.SerialGenerationConflict(contract.ContractId));
     }
+
+    private static bool IsUniqueSerialViolation(DbUpdateException ex) =>
+        ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "uq_contract_serial" };
 
     private async Task<(string PdfKey, string Url)> GenerateAndUploadContractPdfAsync(Contract contract)
     {
