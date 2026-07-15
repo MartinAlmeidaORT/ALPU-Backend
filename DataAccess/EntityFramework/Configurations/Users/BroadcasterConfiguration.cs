@@ -32,6 +32,12 @@ public class BroadcasterConfiguration : IEntityTypeConfiguration<Broadcaster>
             .WithOne(d => d.Broadcaster)
             .HasForeignKey(d => d.BroadcasterId);
 
+        builder.HasMany(b => b.Skills)
+            .WithMany();
+
+        builder.HasMany(b => b.Languages)
+            .WithMany();
+
         builder.HasMany(b => b.Memberships)
             .WithOne(m => m.Broadcaster)
             .HasForeignKey(m => m.BroadcasterId);

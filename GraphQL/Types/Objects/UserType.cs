@@ -14,6 +14,7 @@ public class UserInterfaceType : InterfaceType<User>
         descriptor.Field(x => x.LastName);
         descriptor.Field(x => x.RUT);
         descriptor.Field(x => x.UserState);
+        descriptor.Field(x => x.Photo);
         descriptor.Field(x => x.Address).Type<AddressType>();
     }
 }
@@ -26,6 +27,8 @@ public class BroadcasterType : ObjectType<Broadcaster>
         descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
         descriptor.Field(x => x.Category);
+        descriptor.Field(x => x.Skills);
+        descriptor.Field(x => x.Languages);
     }
 }
 

@@ -35,6 +35,12 @@ public class Query
     public IQueryable<Country> GetCountries([Service] ICountryService countryService) => countryService.GetAllCountries();
 
     [UseProjection]
+    public IQueryable<Skill> GetSkills([Service] ISkillService skillService) => skillService.GetAllSkills();
+
+    [UseProjection]
+    public IQueryable<Language> GetLanguages([Service] ILanguageService languageService) => languageService.GetAllLanguages();
+
+    [UseProjection]
     [UseFiltering]
     public IQueryable<Department> GetDepartments([Service] IDepartmentService departmentService) => departmentService.GetAllDepartments();
 
