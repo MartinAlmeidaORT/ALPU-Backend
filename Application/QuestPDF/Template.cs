@@ -36,13 +36,8 @@ public class ContractDocument(Contract model) : IDocument
                     {
                         row.RelativeItem().Text(t =>
                         {
-                            t.Span("CTO N°.").Bold();
-                            t.Span(Model.ContractId.ToString() ?? "______");
-                        });
-                        row.RelativeItem().Text(t =>
-                        {
-                            t.Span("OC.N° ").Bold();
-                            t.Span("_____________");
+                            t.Span("CTO N°: ").Bold();
+                            t.Span(Model.ContractSerial.ToString() ?? "______");
                         });
                         row.RelativeItem().AlignRight().Text(t =>
                         {

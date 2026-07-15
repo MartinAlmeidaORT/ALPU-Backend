@@ -20,7 +20,8 @@ public class Contract : Entity
             CountryCode = countryCode,
             TotalPrice = price,
             TotalPricePostTax = totalPricePostTax,
-            ReplacesContractId = replacesContractId
+            ReplacesContractId = replacesContractId,
+            RootContractId = replacesContractId is not null ? replacesContractId : null
         };
     }
 
@@ -28,7 +29,7 @@ public class Contract : Entity
 
     public string? ContractSerial { get; set; }
 
-    public int RootContractId { get; set; }
+    public int? RootContractId { get; set; } = null;
 
     public int? ReplacesContractId { get; set; }
 
@@ -70,7 +71,7 @@ public class Contract : Entity
 
     public void AssignSerial(string broadcasterFirstName, string broadcasterLastName, int? replacedRootContractId, int replacementCount)
     {
-        RootContractId = replacedRootContractId ?? ContractId;
+        int RootContractId = replacedRootContractId ?? ContractId;
         ContractSerial = ContractSerialGenerator.Generate(broadcasterFirstName, broadcasterLastName, BroadcasterId, RootContractId, replacementCount);
     }
 }

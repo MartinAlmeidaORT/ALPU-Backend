@@ -238,13 +238,12 @@ public class ContractService(
 
         contract = await _unitOfWork.Contracts.GetContractWithFullDetailsAsync(contract.ContractId);
 
-        int? replacedRootId = original?.RootContractId;
 
         for (int attempt = 1; attempt <= MaxSerialAssignAttempts; attempt++)
         {
-            int replacementCount = await _unitOfWork.Contracts.CountByRootIdAsync(replacedRootId ?? contract.ContractId);
+            int replacementCount = await _unitOfWork.Contracts.CountByRootIdAsync(contract.RootContractId ?? contract.ContractId);
 
-            contract.AssignSerial(contract.Broadcaster.FirstName, contract.Broadcaster.LastName, replacedRootId, replacementCount);
+            contract.AssignSerial(contract.Broadcaster.FirstName, contract.Broadcaster.LastName, contract.RootContractId, replacementCount);
 
             try
             {
