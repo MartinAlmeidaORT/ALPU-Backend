@@ -11,4 +11,6 @@ public interface IContractRepository
     public Task<Contract?> GetByIdAsync(int id);
 
     public Task<Contract> GetContractWithFullDetailsAsync(int id);
+
+    public Task<int> CountByRootIdAsync(int rootContractId);
 }

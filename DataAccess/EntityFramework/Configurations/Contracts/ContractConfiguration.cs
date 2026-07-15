@@ -1,6 +1,5 @@
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DataAccess.EntityFramework.Configurations.Contracts;
@@ -18,10 +17,25 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
             .Property(c => c.ContractId)
             .ValueGeneratedOnAdd();
 
-        builder
-            .Property(c => c.ContractSerial)
-            .ValueGeneratedOnAdd()
-            .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore); 
+        builder.Property(c => c.ContractSerial)
+            .HasColumnName("contract_serial")
+            .HasMaxLength(50);
+
+        builder.HasIndex(c => c.ContractSerial)
+            .IsUnique()
+            .HasDatabaseName("uq_contract_serial");
+
+        builder.Property(c => c.RootContractId)
+            .HasColumnName("root_contract_id");
+
+        builder.Property(c => c.ReplacesContractId)
+            .HasColumnName("replaces_contract_id");
+
+        builder.HasOne(c => c.ReplacesContract)
+            .WithMany()
+            .HasForeignKey(c => c.ReplacesContractId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("contract_replaces_contract_id_fkey");
 
         builder.Property(c => c.ClientId)
             .HasColumnName("client_id");

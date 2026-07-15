@@ -2,22 +2,23 @@ namespace Domain.Common;
 
 public static class ContractSerialGenerator
 {
-    public static string Generate(int broadcasterId, string broadcasterFirstName, string broadcasterLastName, int contractId, string? contractSerial = null)
+    public static string Generate(string broadcasterFirstName, string broadcasterLastName, int broadcasterId, int rootContractId, int replacementCount)
     {
-    string initials = "";
-    if (!string.IsNullOrWhiteSpace(broadcasterFirstName) && !string.IsNullOrWhiteSpace(broadcasterLastName))
-    {
-        initials = $"{broadcasterFirstName[0]}{broadcasterLastName[0]}".ToUpperInvariant();
+        if (replacementCount < 0)
+            throw new ArgumentOutOfRangeException(nameof(replacementCount), "El contador de reemplazos no puede ser negativo.");
+
+        if (replacementCount > 25)
+            throw new InvalidOperationException("Se alcanzo el limite de reemplazos (A-Z) para este contrato.");
+
+        string initials = GetInitials(broadcasterFirstName, broadcasterLastName);
+        char letter = (char)('A' + replacementCount);
+
+        return $"{initials}{broadcasterId}-{rootContractId}{letter}";
     }
 
-    if (string.IsNullOrWhiteSpace(contractSerial))
+    private static string GetInitials(string firstName, string lastName)
     {
-        return $"{broadcasterId}{initials}{contractId}A";
-    }
-
-    char lastLetter = contractSerial.Last();
-    lastLetter = (char)(lastLetter + 1);
-
-    return $"{broadcasterId}{initials}{contractId}{lastLetter}";
+        if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName)) return "";
+        return $"{firstName[0]}{lastName[0]}".ToUpperInvariant();
     }
 }

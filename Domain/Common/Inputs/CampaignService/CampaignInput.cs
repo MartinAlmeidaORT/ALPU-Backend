@@ -8,7 +8,7 @@ public record CampaignInput
 
     public required string Campaign { get; init; }
 
-    public string? ContractSerial { get; set; }
+    public int? ContractId { get; init; }
 
     public required string CountryCode { get; init; }
 
