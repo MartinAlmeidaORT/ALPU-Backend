@@ -8,7 +8,7 @@ public class Contract : Entity
 {
     internal Contract() { }
 
-    public static Contract CreateContract(int clientId, int broadcasterId, Campaign.Campaign campaign, decimal price, string countryCode, decimal totalPricePostTax, int? replacesContractId = null)
+    public static Contract CreateContract(int clientId, int broadcasterId, Campaign.Campaign campaign, decimal price, string countryCode, decimal totalPricePostTax, Contract? replacesContract = null)
     {
         return new()
         {
@@ -20,8 +20,8 @@ public class Contract : Entity
             CountryCode = countryCode,
             TotalPrice = price,
             TotalPricePostTax = totalPricePostTax,
-            ReplacesContractId = replacesContractId,
-            RootContractId = replacesContractId is not null ? replacesContractId : null
+            ReplacesContractId = replacesContract?.ContractId,
+            RootContractId = replacesContract?.RootContractId ?? replacesContract?.ContractId
         };
     }
 

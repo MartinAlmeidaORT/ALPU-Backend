@@ -225,7 +225,7 @@ public class ContractService(
             pricing.TotalPrice,
             countryCode,
             pricing.TotalPricePostTax,
-            original?.ContractId
+            original
         );
 
         foreach (var cs in pricing.Campaign.Services)

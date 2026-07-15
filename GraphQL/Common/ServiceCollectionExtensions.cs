@@ -187,7 +187,8 @@ public static class ServiceCollectionExtensions
                     IssuerSigningKey = securityKey,
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    ValidateLifetime = true
+                    ValidateLifetime = true,
+                    RoleClaimType = "account_role"
                 };
             });
         services.AddAuthorization();
