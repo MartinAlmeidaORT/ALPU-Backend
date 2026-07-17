@@ -132,6 +132,8 @@ public static class ServiceCollectionExtensions
         .AddType<DemoType>()
         .AddType<ServiceFlagsInputType>()
         .AddType<ServiceFlagsType>()
+        .AddType<SkillType>()
+        .AddType<LanguageType>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddSubscriptionType<Subscription>()
@@ -141,6 +143,11 @@ public static class ServiceCollectionExtensions
         .AddProjections()             // Optimizes SQL queries
         .AddFiltering()               // Allow users to filter results
         .AddSorting()                 // Allow users to sort results
+        .ModifyCostOptions(options =>
+        {
+            options.MaxFieldCost = 20_000;
+            options.MaxTypeCost = 20_000;
+        })
         .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
         return services;
     }

@@ -27,13 +27,13 @@ public class Query
     [UseFiltering]
     public IQueryable<Client> GetClients([Service] IUserService userService) => userService.GetAllClients();
 
-    [UseProjection]
-    [UseFiltering]
+   // [UseProjection]
+    [UseFiltering(typeof(Types.Filters.BroadcasterFilterInputType))]
     public IQueryable<Broadcaster> GetBroadcasters([Service] IUserService userService) => userService.GetAllBroadcasters();
 
     [UsePaging(IncludeTotalCount = true)]
-    [UseProjection]
-    [UseFiltering]
+   // [UseProjection]
+    [UseFiltering(typeof(Types.Filters.BroadcasterFilterInputType))]
     public IQueryable<Broadcaster> GetBroadcastersPaged([Service] IUserService userService) => userService.GetAllBroadcasters();
 
     [UseProjection]
