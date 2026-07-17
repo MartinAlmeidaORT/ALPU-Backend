@@ -29,6 +29,8 @@ public class BroadcasterType : ObjectType<Broadcaster>
         descriptor.Field(x => x.Category);
         descriptor.Field(x => x.Skills);
         descriptor.Field(x => x.Languages);
+        descriptor.Field(x => x.Demos);
+
     }
 }
 
@@ -85,6 +87,7 @@ public static class UserTypeExtensions
         descriptor.Field(x => x.LastName);
         descriptor.Field(x => x.RUT);
         descriptor.Field(x => x.UserState);
+        descriptor.Field(x => x.Photo);
         descriptor.Field(x => x.Address).Type<AddressType>();
     }
 }

@@ -33,10 +33,41 @@ public class BroadcasterConfiguration : IEntityTypeConfiguration<Broadcaster>
             .HasForeignKey(d => d.BroadcasterId);
 
         builder.HasMany(b => b.Skills)
-            .WithMany();
+        .WithMany()
+        .UsingEntity<Dictionary<string, object>>(
+            "broadcaster_skills",
+            j => j.HasOne<Skill>()
+                .WithMany()
+                .HasForeignKey("skill_id")
+                .HasConstraintName("broadcaster_skills_skill_id_fkey"),
+            j => j.HasOne<Broadcaster>()
+                .WithMany()
+                .HasForeignKey("broadcaster_id")
+                .HasConstraintName("broadcaster_skills_broadcaster_id_fkey"),
+            j =>
+            {
+                j.HasKey("broadcaster_id", "skill_id");
+                j.ToTable("broadcaster_skills");
+            });
+        
 
         builder.HasMany(b => b.Languages)
-            .WithMany();
+        .WithMany()
+        .UsingEntity<Dictionary<string, object>>(
+        "broadcaster_languages",
+        j => j.HasOne<Language>()
+              .WithMany()
+              .HasForeignKey("language_id")
+              .HasConstraintName("broadcaster_languages_language_id_fkey"),
+        j => j.HasOne<Broadcaster>()
+              .WithMany()
+              .HasForeignKey("broadcaster_id")
+              .HasConstraintName("broadcaster_languages_broadcaster_id_fkey"),
+        j =>
+        {
+            j.HasKey("broadcaster_id", "language_id");
+            j.ToTable("broadcaster_languages");
+        });
 
         builder.HasMany(b => b.Memberships)
             .WithOne(m => m.Broadcaster)

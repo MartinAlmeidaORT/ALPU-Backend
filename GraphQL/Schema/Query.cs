@@ -31,6 +31,11 @@ public class Query
     [UseFiltering]
     public IQueryable<Broadcaster> GetBroadcasters([Service] IUserService userService) => userService.GetAllBroadcasters();
 
+    [UsePaging(IncludeTotalCount = true)]
+    [UseProjection]
+    [UseFiltering]
+    public IQueryable<Broadcaster> GetBroadcastersPaged([Service] IUserService userService) => userService.GetAllBroadcasters();
+
     [UseProjection]
     public IQueryable<Country> GetCountries([Service] ICountryService countryService) => countryService.GetAllCountries();
 

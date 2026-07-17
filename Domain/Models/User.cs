@@ -213,7 +213,7 @@ public abstract class User : Entity
 
     public int AddressId { get; set; }
 
-    public string Photo { get; set; } = null!;
+    public string? Photo { get; set; } = null!;
 
     public virtual Address Address { get; set; } = null!;
 

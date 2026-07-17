@@ -79,6 +79,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDepartmentService, DepartmentService>();
         services.AddScoped<IContractService, ContractService>();
         services.AddScoped<ICampaignService, CampaignService>();
+        services.AddScoped<ISkillService, SkillService>();
+        services.AddScoped<ILanguageService, LanguageService>();
         services.AddScoped<IBillService, BillService>();
         services.AddScoped<ICampaignServiceFactory, CampaignServiceFactory>();
         services.AddScoped<IHasher, Hasher>();

@@ -23,13 +23,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasDatabaseName("user_rut_key")
             .IsUnique();
 
-        builder.HasIndex(u => u.Photo)
-            .HasDatabaseName("photo_amazon_s3_key")
-            .IsUnique();
-
         builder.HasIndex(u => u.GoogleId)
             .HasDatabaseName("user_google_id_key")
             .IsUnique();
+
+        builder.Property(u => u.Photo)
+            .HasColumnName("photo_amazon_s3_key");
 
         builder.Property(u => u.UserId)
             .HasColumnName("user_id")
