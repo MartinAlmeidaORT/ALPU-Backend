@@ -27,12 +27,23 @@ public class Query
     [UseFiltering]
     public IQueryable<Client> GetClients([Service] IUserService userService) => userService.GetAllClients();
 
-    [UseProjection]
-    [UseFiltering]
+   // [UseProjection]
+    [UseFiltering(typeof(Types.Filters.BroadcasterFilterInputType))]
     public IQueryable<Broadcaster> GetBroadcasters([Service] IUserService userService) => userService.GetAllBroadcasters();
+
+    [UsePaging(IncludeTotalCount = true)]
+   // [UseProjection]
+    [UseFiltering(typeof(Types.Filters.BroadcasterFilterInputType))]
+    public IQueryable<Broadcaster> GetBroadcastersPaged([Service] IUserService userService) => userService.GetAllBroadcasters();
 
     [UseProjection]
     public IQueryable<Country> GetCountries([Service] ICountryService countryService) => countryService.GetAllCountries();
+
+    [UseProjection]
+    public IQueryable<Skill> GetSkills([Service] ISkillService skillService) => skillService.GetAllSkills();
+
+    [UseProjection]
+    public IQueryable<Language> GetLanguages([Service] ILanguageService languageService) => languageService.GetAllLanguages();
 
     [UseProjection]
     [UseFiltering]

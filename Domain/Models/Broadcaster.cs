@@ -40,11 +40,15 @@ public class Broadcaster : User
 
     public int CategoryId { get; set; }
 
-    public virtual BroadcasterCategory Category { get; set; } = null!;
+    public BroadcasterCategory Category { get; set; } = null!;
 
-    public virtual ICollection<Contract> Contracts { get; set; } = [];
+    public ICollection<Contract> Contracts { get; set; } = [];
 
-    public virtual ICollection<Demo> Demos { get; set; } = [];
+    public ICollection<Demo> Demos { get; set; } = [];
 
-    public virtual ICollection<Membership> Memberships { get; set; } = [];
+    public ICollection<Membership> Memberships { get; set; } = [];
+
+    public ICollection<Skill> Skills { get; set; } = [];
+
+    public ICollection<Language> Languages { get; set; } = [];
 }

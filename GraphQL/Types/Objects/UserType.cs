@@ -1,3 +1,4 @@
+using DataAccess.ExternalServices;
 using Domain.Models;
 
 namespace GraphQL.Types.Objects;
@@ -14,6 +15,7 @@ public class UserInterfaceType : InterfaceType<User>
         descriptor.Field(x => x.LastName);
         descriptor.Field(x => x.RUT);
         descriptor.Field(x => x.UserState);
+        descriptor.Field(x => x.Photo);
         descriptor.Field(x => x.Address).Type<AddressType>();
     }
 }
@@ -26,6 +28,25 @@ public class BroadcasterType : ObjectType<Broadcaster>
         descriptor.BindFieldsExplicitly();
         descriptor.Implements<UserInterfaceType>();
         descriptor.Field(x => x.Category);
+        descriptor.Field(x => x.Skills).ListSize(assumedSize: 10);
+        descriptor.Field(x => x.Languages).ListSize(assumedSize: 10);
+        descriptor.Field(x => x.Demos).ListSize(assumedSize: 10);
+
+        // profilePictureUrl: pre-signed GET url computed on the fly from the stored S3 key (Photo).
+        // Keeping .Field(x => x.Photo) as the member expression (rather than a plain .Field("profilePictureUrl"))
+        // lets HotChocolate's projection middleware know it still needs to select the Photo column,
+        // even though the resolver below overrides what actually gets returned.
+        descriptor.Field(x => x.Photo)
+            .Name("profilePictureUrl")
+            .Type<StringType>()
+            .Resolve(ctx =>
+            {
+                Broadcaster broadcaster = ctx.Parent<Broadcaster>();
+                if (string.IsNullOrEmpty(broadcaster.Photo)) return null;
+
+                var s3Service = ctx.Service<AmazonS3Service>();
+                return s3Service.GetProfilePictureUrl(broadcaster.Photo);
+            });
     }
 }
 
@@ -82,6 +103,7 @@ public static class UserTypeExtensions
         descriptor.Field(x => x.LastName);
         descriptor.Field(x => x.RUT);
         descriptor.Field(x => x.UserState);
+        descriptor.Field(x => x.Photo);
         descriptor.Field(x => x.Address).Type<AddressType>();
     }
 }

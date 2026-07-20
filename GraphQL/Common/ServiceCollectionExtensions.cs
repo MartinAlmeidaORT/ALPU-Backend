@@ -79,6 +79,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDepartmentService, DepartmentService>();
         services.AddScoped<IContractService, ContractService>();
         services.AddScoped<ICampaignService, CampaignService>();
+        services.AddScoped<ISkillService, SkillService>();
+        services.AddScoped<ILanguageService, LanguageService>();
         services.AddScoped<IBillService, BillService>();
         services.AddScoped<ICampaignServiceFactory, CampaignServiceFactory>();
         services.AddScoped<IHasher, Hasher>();
@@ -118,7 +120,6 @@ public static class ServiceCollectionExtensions
         .AddType<CompleteGoogleClientSignUpInputType>()
         .AddType<CampaignInputType>()
         .AddType<CampaignServiceInputType>()
-        .AddType<CampaignType>()
         .AddType<EventCampaignServiceType>()
         .AddType<NarrativeCampaignServiceType>()
         .AddType<IvrCampaignServiceType>()
@@ -128,9 +129,11 @@ public static class ServiceCollectionExtensions
         .AddType<CameraCampaignServiceType>()
         .AddType<OtherMediaCampaignServiceType>()
         .AddType<CampaignType>()
-        .AddType<CampaignType>()
+        .AddType<DemoType>()
         .AddType<ServiceFlagsInputType>()
         .AddType<ServiceFlagsType>()
+        .AddType<SkillType>()
+        .AddType<LanguageType>()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddSubscriptionType<Subscription>()
@@ -140,6 +143,11 @@ public static class ServiceCollectionExtensions
         .AddProjections()             // Optimizes SQL queries
         .AddFiltering()               // Allow users to filter results
         .AddSorting()                 // Allow users to sort results
+        .ModifyCostOptions(options =>
+        {
+            options.MaxFieldCost = 20_000;
+            options.MaxTypeCost = 20_000;
+        })
         .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true);
         return services;
     }
