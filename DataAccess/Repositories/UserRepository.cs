@@ -11,7 +11,8 @@ public class UserRepository(DatabaseContext context) : RepositoryBase<User>(cont
     public IQueryable<User> GetAllUsers() => GetAll();
 
     public IQueryable<Client> GetAllClients() => context.Clients;
-    public IQueryable<Broadcaster> GetAllBroadcasters() => context.Broadcasters;
+    public IQueryable<Broadcaster> GetAllBroadcasters() => context.Broadcasters.Include(b => b.Skills).Include(b => b.Languages).Include(b => b.Demos)
+        .Include(b => b.Address).ThenInclude(a => a.Department).Include(b => b.Address).ThenInclude(a => a.Country).Include(b => b.Category);
     public async Task<User?> GetUserByIdAsync(int id) => await Get(id);
 
     public User DeleteUser(User entity) => Delete(entity);
