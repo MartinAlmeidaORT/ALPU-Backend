@@ -51,4 +51,13 @@ public class Broadcaster : User
     public ICollection<Skill> Skills { get; set; } = [];
 
     public ICollection<Language> Languages { get; set; } = [];
+
+    public Result<Demo> AddDemo(string fileKey)
+    {
+        Result<Demo> result = Demo.CreateDemo(UserId, fileKey);
+        if (result.IsFailed) return result;
+
+        Demos.Add(result.Value);
+        return result;
+    }
 }

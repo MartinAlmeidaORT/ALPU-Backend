@@ -6,14 +6,18 @@ using Domain.Interfaces.Public.Services;
 using Microsoft.EntityFrameworkCore;
 using HotChocolate.Subscriptions;
 using Domain.Interfaces.Private;
+using DataAccess.ExternalServices;
+using Domain.Common.Payloads;
 
 namespace Application.Services;
 
-public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender, IEmailService emailService) : IUserService
+public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender, IEmailService emailService, AmazonS3Service amazonS3Service) : IUserService
 {
     private readonly ITopicEventSender _sender = sender;
 
     private readonly IEmailService _emailService = emailService;
+
+    private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
 
     public IQueryable<User> GetAllUsers() => unitOfWork.Users.GetAllUsers();
 
@@ -127,6 +131,88 @@ public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender, IEmai
         {
             await unitOfWork.SaveChangesAsync();
         }
+        return result;
+    }
+
+    public async Task<Result<ProfilePictureUploadPayload>> RequestProfilePictureUploadUrlAsync(int userId, string fileName)
+    {
+        User? user = await unitOfWork.Users.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(userId));
+        }
+
+        Result<(string Key, string UploadUrl)> upload = _amazonS3Service.SaveProfilePictureAsync(fileName, userId);
+        if (upload.IsFailed)
+        {
+            return Result.Fail(upload.Errors);
+        }
+
+        return new ProfilePictureUploadPayload
+        {
+            Key = upload.Value.Key,
+            UploadUrl = upload.Value.UploadUrl
+        };
+    }
+
+    public async Task<Result<User>> ConfirmProfilePictureUploadAsync(int userId, string key)
+    {
+        User? user = await unitOfWork.Users.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(userId));
+        }
+
+        string? previousPhoto = user.Photo;
+        user.Photo = key;
+        await unitOfWork.SaveChangesAsync();
+
+        // SaveProfilePictureAsync uses a fixed per-user key, so this only differs (and needs cleanup)
+        // if the file extension changed between uploads (e.g. a .png replaced by a .jpg).
+        if (!string.IsNullOrEmpty(previousPhoto) && previousPhoto != key)
+        {
+            await _amazonS3Service.DeleteProfilePictureAsync(previousPhoto);
+        }
+
+        return user;
+    }
+
+    public async Task<Result<DemoUploadPayload>> RequestDemoUploadUrlAsync(int broadcasterId, string fileName)
+    {
+        Broadcaster? broadcaster = await unitOfWork.Broadcasters.GetBroadcasterByIdAsync(broadcasterId);
+        if (broadcaster == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(broadcasterId));
+        }
+
+        Result<(string Key, string UploadUrl)> upload = _amazonS3Service.SaveDemoAsync(fileName, broadcasterId);
+        if (upload.IsFailed)
+        {
+            return Result.Fail(upload.Errors);
+        }
+
+        return new DemoUploadPayload
+        {
+            Key = upload.Value.Key,
+            UploadUrl = upload.Value.UploadUrl
+        };
+    }
+
+    public async Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key)
+    {
+        Broadcaster? broadcaster = await unitOfWork.Broadcasters.GetBroadcasterByIdAsync(broadcasterId);
+        if (broadcaster == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(broadcasterId));
+        }
+
+        Result<Demo> result = broadcaster.AddDemo(key);
+        if (result.IsFailed)
+        {
+            return result;
+        }
+
+        await unitOfWork.SaveChangesAsync();
         return result;
     }
 }

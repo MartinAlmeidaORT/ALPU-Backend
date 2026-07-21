@@ -1,4 +1,5 @@
 using Domain.Common.Inputs;
+using Domain.Common.Payloads;
 using Domain.Models;
 using FluentResults;
 
@@ -27,4 +28,13 @@ public interface IUserService
     Task<Result<Notification>> DeleteNotificationAsync(int userId, int notificationId);
 
     Task<Result<Notification[]>> DeleteAllNotificationsAsync(int userId);
+
+    Task<Result<ProfilePictureUploadPayload>> RequestProfilePictureUploadUrlAsync(int userId, string fileName);
+
+    Task<Result<User>> ConfirmProfilePictureUploadAsync(int userId, string key);
+
+    Task<Result<DemoUploadPayload>> RequestDemoUploadUrlAsync(int broadcasterId, string fileName);
+
+    Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key);
+
 }
