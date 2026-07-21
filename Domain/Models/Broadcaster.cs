@@ -42,6 +42,12 @@ public class Broadcaster : User
 
     public BroadcasterCategory Category { get; set; } = null!;
 
+    public string? PhoneNumber { get; set; }
+
+    public string? Website { get; set; }
+
+    public string? Description { get; set; }
+
     public ICollection<Contract> Contracts { get; set; } = [];
 
     public ICollection<Demo> Demos { get; set; } = [];
@@ -59,5 +65,16 @@ public class Broadcaster : User
 
         Demos.Add(result.Value);
         return result;
+    }
+
+    public void UpdateSkills(ICollection<Skill> skills) => Skills = skills;
+
+    public void UpdateLanguages(ICollection<Language> languages) => Languages = languages;
+
+    public void UpdateProfile(string? phoneNumber, string? website, string? description)
+    {
+        PhoneNumber = phoneNumber ?? PhoneNumber;
+        Website = website ?? Website;
+        Description = description ?? Description;
     }
 }

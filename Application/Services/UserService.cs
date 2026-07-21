@@ -8,16 +8,27 @@ using HotChocolate.Subscriptions;
 using Domain.Interfaces.Private;
 using DataAccess.ExternalServices;
 using Domain.Common.Payloads;
+using Application.Interfaces.Public.Services;
 
 namespace Application.Services;
 
-public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender, IEmailService emailService, AmazonS3Service amazonS3Service) : IUserService
+public class UserService(
+    IUnitOfWork unitOfWork,
+    ITopicEventSender sender,
+    IEmailService emailService,
+    AmazonS3Service amazonS3Service,
+    ILanguageService languageService,
+    ISkillService skillService) : IUserService
 {
     private readonly ITopicEventSender _sender = sender;
 
     private readonly IEmailService _emailService = emailService;
 
     private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
+
+    private readonly ILanguageService _languageService = languageService;
+
+    private readonly ISkillService _skillService = skillService;
 
     public IQueryable<User> GetAllUsers() => unitOfWork.Users.GetAllUsers();
 
@@ -214,5 +225,101 @@ public class UserService(IUnitOfWork unitOfWork, ITopicEventSender sender, IEmai
 
         await unitOfWork.SaveChangesAsync();
         return result;
+    }
+
+    public async Task<Result<Broadcaster>> UpdateBroadcasterProfileAsync(int broadcasterId, UpdateBroadcasterProfileInput input)
+    {
+        Broadcaster? broadcaster = await unitOfWork.Broadcasters.GetBroadcasterWithSkillsAndLanguagesAsync(broadcasterId);
+        if (broadcaster == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(broadcasterId));
+        }
+
+        Country? country = null;
+        if (input.Address?.CountryCode != null)
+        {
+            country = await unitOfWork.Countries.GetByCodeAsync(input.Address.CountryCode);
+            if (country == null)
+            {
+                return Result.Fail(CountryErrors.CountryNotFound(input.Address.CountryCode));
+            }
+        }
+
+        Department? department = null;
+        if (input.Address?.DepartmentId != null)
+        {
+            int departmentId = (int)input.Address.DepartmentId;
+            department = await unitOfWork.Departments.GetByIdAsync(departmentId);
+            if (department == null)
+            {
+                return Result.Fail(DepartmentErrors.DepartmentNotFound(departmentId));
+            }
+        }
+
+        if (input.Email != null && !input.Email.Equals(broadcaster.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            User? existingEmailOwner = await unitOfWork.Users.GetUserByEmailAsync(input.Email);
+            if (existingEmailOwner != null)
+            {
+                return Result.Fail(UserErrors.DuplicatedEmail(input.Email));
+            }
+        }
+
+        if (input.Email != null && !input.Email.Equals(broadcaster.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            User? existingEmailOwner = await unitOfWork.Users.GetUserByEmailAsync(input.Email);
+            if (existingEmailOwner != null)
+            {
+                return Result.Fail(UserErrors.DuplicatedEmail(input.Email));
+            }
+        }
+
+        // RUT is deliberately left out here — it's a fiscal identifier, not something RF18's
+        // profile screen exposes for self-editing.
+        UpdateUserInput baseUpdateInput = new()
+        {
+            Email = input.Email,
+            FirstName = input.FirstName,
+            LastName = input.LastName,
+            Address = input.Address
+        };
+        broadcaster.Update(baseUpdateInput, country, department);
+        broadcaster.UpdateProfile(input.PhoneNumber, input.Website, input.Description);
+
+        if (input.SkillIds != null)
+        {
+            List<int> distinctSkillIds = [.. input.SkillIds.Distinct()];
+            List<Skill> skills = await _skillService.GetAllSkills()
+                .Where(s => distinctSkillIds.Contains(s.SkillId))
+                .ToListAsync();
+
+            if (skills.Count != distinctSkillIds.Count)
+            {
+                int missingSkillId = distinctSkillIds.Except(skills.Select(s => s.SkillId)).First();
+                return Result.Fail(SkillErrors.SkillNotFound(missingSkillId));
+            }
+
+            broadcaster.UpdateSkills(skills);
+        }
+
+        if (input.LanguageIds != null)
+        {
+            List<int> distinctLanguageIds = [.. input.LanguageIds.Distinct()];
+            List<Language> languages = await _languageService.GetAllLanguages()
+                .Where(l => distinctLanguageIds.Contains(l.LanguageId))
+                .ToListAsync();
+
+            if (languages.Count != distinctLanguageIds.Count)
+            {
+                int missingLanguageId = distinctLanguageIds.Except(languages.Select(l => l.LanguageId)).First();
+                return Result.Fail(LanguageErrors.LanguageNotFound(missingLanguageId));
+            }
+
+            broadcaster.UpdateLanguages(languages);
+        }
+
+        await unitOfWork.SaveChangesAsync();
+
+        return broadcaster;
     }
 }

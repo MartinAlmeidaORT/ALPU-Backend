@@ -2,6 +2,7 @@ using DataAccess.EntityFramework;
 using Domain.Common.Abstracts;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories;
 
@@ -12,6 +13,14 @@ public class BroadcasterRepository(DatabaseContext context) : RepositoryBase<Bro
     public IQueryable<Broadcaster> GetAllBroadcasters() => GetAll();
 
     public async Task<Broadcaster?> GetBroadcasterByIdAsync(int id) => await Get(id);
+
+    public async Task<Broadcaster?> GetBroadcasterWithSkillsAndLanguagesAsync(int id) =>
+        await GetAll()
+            .Include(b => b.Skills)
+            .Include(b => b.Languages)
+            .Include(b => b.Demos)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(b => b.UserId == id);
 
     public async Task<BroadcasterCategory?> GetCategoryByIdAsync(int id) => await context.BroadcasterCategories.FindAsync(id);
 

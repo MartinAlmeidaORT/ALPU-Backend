@@ -220,4 +220,18 @@ public class Mutation
         FluentResults.Result<Demo> result = await userService.ConfirmDemoUploadAsync(claims.UserId, key);
         return result.UnwrapOrThrow();
     }
+
+    [Authorize(Roles = ["Broadcaster"])]
+    public async Task<Broadcaster> UpdateBroadcasterProfile(
+        UpdateBroadcasterProfileInput input,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+
+        FluentResults.Result<Broadcaster> result = await userService.UpdateBroadcasterProfileAsync(claims.UserId, input);
+        return result.UnwrapOrThrow();
+    }
 }

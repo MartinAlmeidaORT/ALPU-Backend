@@ -10,6 +10,8 @@ public interface IBroadcasterRepository
 
     public Task<Broadcaster?> GetBroadcasterByIdAsync(int id);
 
+    public Task<Broadcaster?> GetBroadcasterWithSkillsAndLanguagesAsync(int id);
+
     public Task<BroadcasterCategory?> GetCategoryByIdAsync(int id);
 
     public Broadcaster UpdateBroadcaster(Broadcaster entity);
