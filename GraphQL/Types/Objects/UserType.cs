@@ -31,6 +31,9 @@ public class BroadcasterType : ObjectType<Broadcaster>
         descriptor.Field(x => x.Skills).ListSize(assumedSize: 10);
         descriptor.Field(x => x.Languages).ListSize(assumedSize: 10);
         descriptor.Field(x => x.Demos).ListSize(assumedSize: 10);
+        descriptor.Field(x => x.PhoneNumber);
+        descriptor.Field(x => x.Website);
+        descriptor.Field(x => x.Description);
 
         // profilePictureUrl: pre-signed GET url computed on the fly from the stored S3 key (Photo).
         // Keeping .Field(x => x.Photo) as the member expression (rather than a plain .Field("profilePictureUrl"))

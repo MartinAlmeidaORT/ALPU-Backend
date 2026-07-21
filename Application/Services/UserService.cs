@@ -265,15 +265,6 @@ public class UserService(
             }
         }
 
-        if (input.Email != null && !input.Email.Equals(broadcaster.Email, StringComparison.OrdinalIgnoreCase))
-        {
-            User? existingEmailOwner = await unitOfWork.Users.GetUserByEmailAsync(input.Email);
-            if (existingEmailOwner != null)
-            {
-                return Result.Fail(UserErrors.DuplicatedEmail(input.Email));
-            }
-        }
-
         // RUT is deliberately left out here — it's a fiscal identifier, not something RF18's
         // profile screen exposes for self-editing.
         UpdateUserInput baseUpdateInput = new()

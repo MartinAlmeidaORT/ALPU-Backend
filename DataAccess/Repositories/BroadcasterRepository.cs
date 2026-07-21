@@ -19,6 +19,8 @@ public class BroadcasterRepository(DatabaseContext context) : RepositoryBase<Bro
             .Include(b => b.Skills)
             .Include(b => b.Languages)
             .Include(b => b.Demos)
+            .Include(b => b.Address)
+            .Include(b => b.Category)
             .AsSplitQuery()
             .SingleOrDefaultAsync(b => b.UserId == id);
 
