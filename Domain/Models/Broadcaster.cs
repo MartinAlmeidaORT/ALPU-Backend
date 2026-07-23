@@ -67,6 +67,18 @@ public class Broadcaster : User
         return result;
     }
 
+    public Result<Demo> RemoveDemo(string key)
+    {
+        Demo? demo = Demos.SingleOrDefault(d => d.FileName == key);
+        if (demo == null)
+        {
+            return Result.Fail(DemoErrors.DemoNotFound(key));
+        }
+
+        Demos.Remove(demo);
+        return Result.Ok(demo);
+    }
+
     public void UpdateSkills(ICollection<Skill> skills) => Skills = skills;
 
     public void UpdateLanguages(ICollection<Language> languages) => Languages = languages;

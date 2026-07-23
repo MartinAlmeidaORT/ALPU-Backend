@@ -227,6 +227,34 @@ public class UserService(
         return result;
     }
 
+    public async Task<Result<Demo>> DeleteDemoAsync(int broadcasterId, string key)
+    {
+        Broadcaster? broadcaster = await unitOfWork.Broadcasters.GetBroadcasterWithSkillsAndLanguagesAsync(broadcasterId);
+        if (broadcaster == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(broadcasterId));
+        }
+
+        Result<Demo> result = broadcaster.RemoveDemo(key);
+        if (result.IsFailed)
+        {
+            return result;
+        }
+
+        await unitOfWork.SaveChangesAsync();
+
+        try
+        {
+            await _amazonS3Service.DeleteDemoAsync(key);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"No se pudo borrar el archivo de audio {key} en S3.\n{ex}");
+        }
+
+        return result;
+    }
+
     public async Task<Result<Broadcaster>> UpdateBroadcasterProfileAsync(int broadcasterId, UpdateBroadcasterProfileInput input)
     {
         Broadcaster? broadcaster = await unitOfWork.Broadcasters.GetBroadcasterWithSkillsAndLanguagesAsync(broadcasterId);

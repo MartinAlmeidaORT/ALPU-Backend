@@ -37,5 +37,7 @@ public interface IUserService
 
     Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key);
 
+    Task<Result<Demo>> DeleteDemoAsync(int broadcasterId, string key);
+
     Task<Result<Broadcaster>> UpdateBroadcasterProfileAsync(int broadcasterId, UpdateBroadcasterProfileInput input);
 }

@@ -222,6 +222,20 @@ public class Mutation
     }
 
     [Authorize(Roles = ["Broadcaster"])]
+    public async Task<Demo> DeleteDemo(
+        string key,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+
+        FluentResults.Result<Demo> result = await userService.DeleteDemoAsync(claims.UserId, key);
+        return result.UnwrapOrThrow();
+    }
+
+    [Authorize(Roles = ["Broadcaster"])]
     public async Task<Broadcaster> UpdateBroadcasterProfile(
         UpdateBroadcasterProfileInput input,
         [Service] IUserService userService,
