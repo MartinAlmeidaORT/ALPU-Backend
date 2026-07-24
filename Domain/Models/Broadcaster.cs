@@ -6,7 +6,7 @@ using FluentResults;
 
 namespace Domain.Models;
 
-public class Broadcaster : User
+public partial class Broadcaster : User
 {
     internal Broadcaster() { }
 
@@ -96,7 +96,13 @@ public class Broadcaster : User
 
     public override Result ValidateUpdate()
     {
-        return base.ValidateUpdate();
+        Result baseResult = base.ValidateUpdate();
+        return Result.Merge(
+            baseResult,
+            ValidatePhoneNumber(),
+            ValidateWebsite(),
+            ValidateDescription()
+        );
     }
 
     public Result ValidatePhoneNumber()
@@ -140,7 +146,7 @@ public class Broadcaster : User
 
         if (Description.Length > 250)
         {
-            return Result.Fail(BroadcasterErrors.DescriptionMinLength());
+            return Result.Fail(BroadcasterErrors.DescriptionMaxLength());
         }
 
         return Result.Ok();
