@@ -67,6 +67,17 @@ public abstract class User : Entity
         );
     }
 
+    public virtual Result ValidateUpdate()
+    {
+        return Result.Merge(
+            ValidateEmail(),
+            ValidateFirstName(),
+            ValidateLastName(),
+            ValidateRUT(),
+            Address.ValidateAddress()
+        );
+    }
+
     public Result ValidateEmail()
     {
         if (Email == null) return UserErrors.EmailIsRequired();

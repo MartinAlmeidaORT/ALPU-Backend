@@ -1,3 +1,4 @@
+using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;
 using FluentResults;
 
@@ -79,14 +80,21 @@ public class Broadcaster : User
         return Result.Ok(demo);
     }
 
-    public void UpdateSkills(ICollection<Skill> skills) => Skills = skills;
-
-    public void UpdateLanguages(ICollection<Language> languages) => Languages = languages;
-
-    public void UpdateProfile(string? phoneNumber, string? website, string? description)
+    public Result Update(UpdateUserInput input, Country? country, Department? department, string? phoneNumber, string? website, string? description)
     {
+        base.Update(input, country, department);
         PhoneNumber = phoneNumber ?? PhoneNumber;
         Website = website ?? Website;
         Description = description ?? Description;
+        return ValidateUpdate();
     }
+
+    public override Result ValidateUpdate()
+    {
+        return base.ValidateUpdate();
+    }
+
+    public void UpdateSkills(ICollection<Skill> skills) => Skills = skills;
+
+    public void UpdateLanguages(ICollection<Language> languages) => Languages = languages;
 }

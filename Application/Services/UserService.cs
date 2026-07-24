@@ -302,8 +302,12 @@ public class UserService(
             LastName = input.LastName,
             Address = input.Address
         };
-        broadcaster.Update(baseUpdateInput, country, department);
-        broadcaster.UpdateProfile(input.PhoneNumber, input.Website, input.Description);
+
+        Result result = broadcaster.Update(baseUpdateInput, country, department, input.PhoneNumber, input.Website, input.Description);
+        if (result.IsFailed)
+        {
+            return result;
+        }
 
         if (input.SkillIds != null)
         {
