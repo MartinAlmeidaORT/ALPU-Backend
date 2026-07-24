@@ -143,7 +143,7 @@ public abstract class User : Entity
 
         if (FirstName.Length < 3)
         {
-            errors.WithError(UserErrors.FirstNameMaxLength());
+            errors.WithError(UserErrors.FirstNameMinLength());
         }
 
         if (FirstName.Length > 50)
