@@ -35,7 +35,7 @@ public interface IUserService
 
     Task<Result<DemoUploadPayload>> RequestDemoUploadUrlAsync(int broadcasterId, string fileName);
 
-    Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key);
+    Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key, int languageId, string title);
 
     Task<Result<Demo>> DeleteDemoAsync(int broadcasterId, string key);
 

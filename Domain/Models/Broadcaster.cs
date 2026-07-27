@@ -64,9 +64,9 @@ public partial class Broadcaster : User
 
     public ICollection<Language> Languages { get; set; } = [];
 
-    public Result<Demo> AddDemo(string fileKey)
+    public Result<Demo> AddDemo(string fileKey, Language language, string title)
     {
-        Result<Demo> result = Demo.CreateDemo(UserId, fileKey);
+        Result<Demo> result = Demo.CreateDemo(UserId, fileKey, language, title);
         if (result.IsFailed) return result;
 
         Demos.Add(result.Value);

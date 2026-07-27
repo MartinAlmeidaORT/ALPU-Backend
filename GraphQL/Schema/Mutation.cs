@@ -209,7 +209,7 @@ public class Mutation
 
     [Authorize(Roles = ["Broadcaster"])]
     public async Task<Demo> ConfirmDemoUpload(
-        string key,
+        UploadDemoInput input,
         [Service] IUserService userService,
         [Service] IHttpContextAccessor httpContextAccessor,
         [Service] IJwtService jwtService)
@@ -217,7 +217,7 @@ public class Mutation
         ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
         JwtUserClaims claims = jwtService.GetUserClaims(user);
 
-        FluentResults.Result<Demo> result = await userService.ConfirmDemoUploadAsync(claims.UserId, key);
+        FluentResults.Result<Demo> result = await userService.ConfirmDemoUploadAsync(claims.UserId, input.Key, input.LanguageId, input.Title);
         return result.UnwrapOrThrow();
     }
 

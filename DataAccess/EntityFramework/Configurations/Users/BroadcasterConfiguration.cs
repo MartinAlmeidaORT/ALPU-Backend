@@ -129,6 +129,14 @@ public class DemoConfiguration : IEntityTypeConfiguration<Demo>
             .HasColumnName("file_name")
             .HasMaxLength(200);
 
+        builder.Property(d => d.LanguageId)
+            .HasColumnName("language_id")
+            .HasMaxLength(100);
+
+        builder.Property(d => d.Title)
+            .HasColumnName("title")
+            .HasMaxLength(200);
+
         builder.HasOne(d => d.Broadcaster)
             .WithMany(b => b.Demos)
             .HasForeignKey(d => d.BroadcasterId)

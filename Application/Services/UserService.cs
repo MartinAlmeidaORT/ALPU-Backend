@@ -209,7 +209,7 @@ public class UserService(
         };
     }
 
-    public async Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key)
+    public async Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key, int languageId, string title)
     {
         Broadcaster? broadcaster = await unitOfWork.Broadcasters.GetBroadcasterByIdAsync(broadcasterId);
         if (broadcaster == null)
@@ -217,7 +217,13 @@ public class UserService(
             return Result.Fail(UserErrors.UserNotFound(broadcasterId));
         }
 
-        Result<Demo> result = broadcaster.AddDemo(key);
+        Language? language = await unitOfWork.Languages.GetAllLanguages().FirstOrDefaultAsync(l => l.LanguageId == languageId);
+        if (language == null)
+        {
+            return Result.Fail(LanguageErrors.LanguageNotFound(languageId));
+        }
+
+        Result<Demo> result = broadcaster.AddDemo(key, language, title);
         if (result.IsFailed)
         {
             return result;

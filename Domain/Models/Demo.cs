@@ -8,7 +8,7 @@ public class Demo : Entity
 {
     internal Demo() { }
 
-    public static Result<Demo> CreateDemo(int broadcasterId, string fileKey)
+    public static Result<Demo> CreateDemo(int broadcasterId, string fileKey, Language language, string title)
     {
         if (string.IsNullOrWhiteSpace(fileKey))
         {
@@ -18,13 +18,21 @@ public class Demo : Entity
         return Result.Ok(new Demo
         {
             BroadcasterId = broadcasterId,
-            FileName = fileKey
+            FileName = fileKey,
+            Language = language,
+            Title = title
         });
     }
 
     public int BroadcasterId { get; set; }
 
     public string FileName { get; set; } = null!;
+
+    public string LanguageId { get; set; } = null!;
+
+    public Language Language { get; set; } = null!;
+
+    public string Title { get; set; } = null!;
 
     public virtual Broadcaster Broadcaster { get; set; } = null!;
 }
