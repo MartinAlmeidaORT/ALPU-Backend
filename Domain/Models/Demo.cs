@@ -67,7 +67,7 @@ public class Demo : Entity
 
     public string FileName { get; set; } = null!;
 
-    public string LanguageId { get; set; } = null!;
+    public int LanguageId { get; set; }
 
     public Language Language { get; set; } = null!;
 

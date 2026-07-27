@@ -12,6 +12,8 @@ public class DemoType : ObjectType<Demo>
         descriptor.Field(d => d.BroadcasterId);
 
         descriptor.Field(d => d.FileName).Name("fileKey");
+        descriptor.Field(d => d.Language);
+        descriptor.Field(d => d.Title);
 
         // audioUrl: pre-signed GET url generated on demand, never persisted.
         // Reuses the FileName member expression so projections still pull that column.
