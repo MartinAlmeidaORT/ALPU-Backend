@@ -43,6 +43,8 @@ public partial class Broadcaster : User
 
     public int CategoryId { get; set; }
 
+    public int MaxDemos { get; } = 5;
+
     public BroadcasterCategory Category { get; set; } = null!;
 
     [GeneratedRegex(@"^\+?[0-9]+$")]
@@ -68,6 +70,11 @@ public partial class Broadcaster : User
     {
         Result<Demo> result = Demo.CreateDemo(UserId, fileKey, language, title);
         if (result.IsFailed) return result;
+
+        if (Demos.Count >= MaxDemos)
+        {
+            return Result.Fail(DemoErrors.MaxDemosReached(MaxDemos));
+        }
 
         Demos.Add(result.Value);
         return result;

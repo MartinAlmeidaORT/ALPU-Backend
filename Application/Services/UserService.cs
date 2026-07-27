@@ -211,7 +211,7 @@ public class UserService(
 
     public async Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key, int languageId, string title)
     {
-        Broadcaster? broadcaster = await unitOfWork.Broadcasters.GetBroadcasterByIdAsync(broadcasterId);
+        Broadcaster? broadcaster = await unitOfWork.Broadcasters.GetBroadcasterWithSkillsAndLanguagesAsync(broadcasterId);
         if (broadcaster == null)
         {
             return Result.Fail(UserErrors.UserNotFound(broadcasterId));

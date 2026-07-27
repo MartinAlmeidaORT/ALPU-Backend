@@ -11,8 +11,8 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
     private readonly IAmazonS3 _s3Client = s3Client;
     private readonly string _bucketName = config["AWS:BucketName"]!;
 
-    private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".webp"};
-    private static readonly string[] AudioExtensions = { ".mp3", ".wav", ".m4a", ".ogg" };
+    private static readonly string[] ImageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+    private static readonly string[] AudioExtensions = [".mp3"];
 
     public async Task<Result<(string, string)>> SaveBillProofAsync(string fileName, BillType type)
     {
