@@ -1,6 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Domain.Enums;
+using Domain.Models;
 using FluentResults;
 using Microsoft.Extensions.Configuration;
 
@@ -13,6 +14,8 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
 
     private static readonly string[] ImageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private static readonly string[] AudioExtensions = [".mp3"];
+
+    public static readonly long MaxDemoFileSizeBytes = 5 * 1024 * 1024; // 5 MB
 
     public async Task<Result<(string, string)>> SaveBillProofAsync(string fileName, BillType type)
     {
@@ -88,7 +91,7 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
 
     // Returns a pre-signed PUT url so the locutor's client can upload the audio file directly.
     // Video demos are handled as YouTube links per RF18 and never touch S3.
-    public Result<(string Key, string UploadUrl)> SaveDemoAsync(string fileName, int locutorId)
+    public Result<(string Key, string Url, IReadOnlyDictionary<string, string> Fields)> SaveDemoAsync(string fileName, int locutorId)
     {
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
         if (!AudioExtensions.Contains(extension))
@@ -98,9 +101,48 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
         }
 
         var key = BuildKey($"demos/{locutorId}", fileName);
-        var uploadUrl = GetPreSignedPutUrl(key, GetContentType(extension), TimeSpan.FromMinutes(5));
+        var contentType = GetContentType(extension);
 
-        return Result.Ok((key, uploadUrl));
+        var request = new CreatePresignedPostRequest
+        {
+            BucketName = _bucketName,
+            Key = key,
+            Expires = DateTime.UtcNow.AddMinutes(5),
+            Conditions =
+            [
+                S3PostCondition.ContentLengthRange(1, MaxDemoFileSizeBytes),
+                S3PostCondition.ExactMatch("Content-Type", contentType)
+            ]
+        };
+
+        CreatePresignedPostResponse response = _s3Client.CreatePresignedPost(request);
+
+        return Result.Ok((key, response.Url, (IReadOnlyDictionary<string, string>)response.Fields));
+    }
+
+    // No longer the primary defense for demos (the ContentLengthRange condition above rejects
+    // oversized files at the S3 level before they're even fully accepted), but kept as a cheap
+    // backup in case the POST policy is ever misconfigured or bypassed some other way.
+    public async Task<Result> SaveDemoAsync(string key)
+    {
+        long sizeBytes;
+        try
+        {
+            GetObjectMetadataResponse metadata = await _s3Client.GetObjectMetadataAsync(_bucketName, key);
+            sizeBytes = metadata.ContentLength;
+        }
+        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return Result.Fail(DemoErrors.FileNotUploaded(key));
+        }
+
+        if (sizeBytes > MaxDemoFileSizeBytes)
+        {
+            await DeleteDemoAsync(key);
+            return Result.Fail(DemoErrors.FileTooLarge(sizeBytes, MaxDemoFileSizeBytes));
+        }
+
+        return Result.Ok();
     }
 
     // Pre-signed GET url for the client <audio> element to play the demo.

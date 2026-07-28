@@ -196,7 +196,7 @@ public class UserService(
             return Result.Fail(UserErrors.UserNotFound(broadcasterId));
         }
 
-        Result<(string Key, string UploadUrl)> upload = _amazonS3Service.SaveDemoAsync(fileName, broadcasterId);
+        Result<(string Key, string Url, IReadOnlyDictionary<string, string> Fields)> upload = _amazonS3Service.SaveDemoAsync(fileName, broadcasterId);
         if (upload.IsFailed)
         {
             return Result.Fail(upload.Errors);
@@ -205,7 +205,8 @@ public class UserService(
         return new DemoUploadPayload
         {
             Key = upload.Value.Key,
-            UploadUrl = upload.Value.UploadUrl
+            UploadUrl = upload.Value.Url,
+            Fields = [.. upload.Value.Fields.Select(kv => new FormField { Name = kv.Key, Value = kv.Value })]
         };
     }
 

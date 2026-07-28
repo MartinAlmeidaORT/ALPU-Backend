@@ -94,6 +94,10 @@ public static class DemoErrors
 
     public class LanguageIsRequiredError(string msg) : BadRequestError(msg);
 
+    public class FileTooLargeError(string msg) : BadRequestError(msg);
+
+    public class FileNotUploadedError(string msg) : BadRequestError(msg);
+
     public static FileKeyIsRequiredError FileKeyIsRequired() => new("Se debe especificar la clave del archivo de audio.");
 
     public static DemoNotFoundError DemoNotFound(string fileKey) => new($"No se encontro una demo con la clave {fileKey}.");
@@ -109,4 +113,10 @@ public static class DemoErrors
     public static TitleMaxLengthError TitleMaxLength() => new($"El titulo de la demo puede tener hasta 200 characteres.");
 
     public static LanguageIsRequiredError LanguageIsRequired() => new($"Necesita seleccionar un lenguaje para la demo.");
+
+    public static FileTooLargeError FileTooLarge(long actualBytes, long maxBytes) => new(
+        $"El archivo pesa {actualBytes / 1024.0 / 1024.0:F1}MB, el maximo permitido es {maxBytes / 1024.0 / 1024.0:F0}MB.");
+
+    public static FileNotUploadedError FileNotUploaded(string fileKey) => new(
+        $"No se encontro el archivo subido con la clave {fileKey}. Verifica que la subida a S3 haya finalizado antes de confirmar.");
 }
