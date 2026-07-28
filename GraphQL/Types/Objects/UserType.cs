@@ -17,6 +17,8 @@ public class UserInterfaceType : InterfaceType<User>
         descriptor.Field(x => x.UserState);
         descriptor.Field(x => x.Photo);
         descriptor.Field(x => x.Address).Type<AddressType>();
+        descriptor.Field(x => x.Gender);
+        descriptor.Field(x => x.IdentityCard);
     }
 }
 
@@ -108,5 +110,7 @@ public static class UserTypeExtensions
         descriptor.Field(x => x.UserState);
         descriptor.Field(x => x.Photo);
         descriptor.Field(x => x.Address).Type<AddressType>();
+        descriptor.Field(x => x.Gender).Type<AddressType>();
+        descriptor.Field(x => x.IdentityCard).Type<AddressType>();
     }
 }
