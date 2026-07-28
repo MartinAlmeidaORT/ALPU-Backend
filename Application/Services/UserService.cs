@@ -307,7 +307,9 @@ public class UserService(
             Email = input.Email,
             FirstName = input.FirstName,
             LastName = input.LastName,
-            Address = input.Address
+            Address = input.Address,
+            IdentityCard = input.IdentityCard,
+            Gender = input.Gender
         };
 
         Result result = broadcaster.Update(baseUpdateInput, country, department, input.PhoneNumber, input.Website, input.Description);

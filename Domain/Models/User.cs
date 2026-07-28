@@ -20,6 +20,8 @@ public abstract class User : Entity
         RUT = input.RUT;
         Address = new Address(country, department, input.City, input.Street);
         UserState = UserState.Pending;
+        Gender = input.Gender;
+        IdentityCard = input.IdentityCard;
     }
 
     protected User(CompleteGoogleSignUpUserInput input, Country country, Department department)
@@ -32,12 +34,14 @@ public abstract class User : Entity
         RUT = input.RUT;
         Address = new Address(country, department, input.City, input.Street);
         UserState = UserState.Pending;
+        Gender = input.Gender;
+        IdentityCard = input.IdentityCard;
     }
 
     public void Update(UpdateUserInput input, Country? country, Department? department)
     {
-        IdentityCard = input.IdentityCard;
-        Gender = input.Gender;
+        IdentityCard = input.IdentityCard ?? IdentityCard;
+        Gender = input.Gender ?? Gender;
         Email = input.Email ?? Email;
         FirstName = input.FirstName ?? FirstName;
         LastName = input.LastName ?? LastName;
@@ -48,6 +52,7 @@ public abstract class User : Entity
     public virtual Result ValidateSignUp()
     {
         return Result.Merge(
+            ValidateIdentityCard(),
             ValidateEmail(),
             ValidatePassword(),
             ValidateFirstName(),
@@ -62,6 +67,7 @@ public abstract class User : Entity
         if (GoogleId == null) return UserErrors.GoogleIdIsRequired();
 
         return Result.Merge(
+            ValidateIdentityCard(),
             ValidateFirstName(),
             ValidateLastName(),
             ValidateRUT(),
