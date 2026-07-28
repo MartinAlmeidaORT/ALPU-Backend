@@ -93,7 +93,8 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
         if (!AudioExtensions.Contains(extension))
         {
-            return Result.Fail("Formato de audio no permitido. Formatos aceptados: .mp3, .wav, .m4a, .ogg");
+            string message = $"Formato de audio no permitido. Formatos aceptados: {string.Join(", ", AudioExtensions)}";
+            return Result.Fail(message);
         }
 
         var key = BuildKey($"demos/{locutorId}", fileName);
