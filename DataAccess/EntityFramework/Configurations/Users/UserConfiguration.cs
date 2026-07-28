@@ -34,6 +34,18 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("user_id")
             .ValueGeneratedOnAdd();
 
+        builder.HasIndex(u => u.IdentityCard)
+            .HasDatabaseName("user_identity_card_key")
+            .IsUnique();
+
+        builder.Property(u => u.IdentityCard)
+            .HasMaxLength(8)
+            .HasColumnName("identity_card");
+
+        builder.Property(u => u.Gender)
+            .HasColumnName("gender")
+            .HasColumnType("gender_enum");
+
         builder.Property(u => u.GoogleId)
             .HasColumnName("google_id")
             .HasMaxLength(25)
