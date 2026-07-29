@@ -20,6 +20,8 @@ public abstract class User : Entity
         RUT = input.RUT;
         Address = new Address(country, department, input.City, input.Street);
         UserState = UserState.Pending;
+        Gender = input.Gender;
+        IdentityCard = input.IdentityCard;
     }
 
     protected User(CompleteGoogleSignUpUserInput input, Country country, Department department)
@@ -32,10 +34,14 @@ public abstract class User : Entity
         RUT = input.RUT;
         Address = new Address(country, department, input.City, input.Street);
         UserState = UserState.Pending;
+        Gender = input.Gender;
+        IdentityCard = input.IdentityCard;
     }
 
     public void Update(UpdateUserInput input, Country? country, Department? department)
     {
+        IdentityCard = input.IdentityCard ?? IdentityCard;
+        Gender = input.Gender ?? Gender;
         Email = input.Email ?? Email;
         FirstName = input.FirstName ?? FirstName;
         LastName = input.LastName ?? LastName;
@@ -46,6 +52,7 @@ public abstract class User : Entity
     public virtual Result ValidateSignUp()
     {
         return Result.Merge(
+            ValidateIdentityCard(),
             ValidateEmail(),
             ValidatePassword(),
             ValidateFirstName(),
@@ -60,11 +67,72 @@ public abstract class User : Entity
         if (GoogleId == null) return UserErrors.GoogleIdIsRequired();
 
         return Result.Merge(
+            ValidateIdentityCard(),
             ValidateFirstName(),
             ValidateLastName(),
             ValidateRUT(),
             Address.ValidateAddress()
         );
+    }
+
+    public virtual Result ValidateUpdate()
+    {
+        return Result.Merge(
+            ValidateIdentityCard(),
+            ValidateEmail(),
+            ValidateFirstName(),
+            ValidateLastName(),
+            ValidateRUT(),
+            Address.ValidateAddress()
+        );
+    }
+
+    public Result ValidateIdentityCard()
+    {
+        if (string.IsNullOrWhiteSpace(IdentityCard))
+            return UserErrors.IdentityCardIsRequired();
+
+        Result errors = new();
+
+        string IdentityCardClean = IdentityCard.Replace(".", "").Replace("-", "").Trim();
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(IdentityCardClean, @"^\d{7,8}$"))
+        {
+            errors.WithError(UserErrors.IdentityCardIsInvalid(IdentityCard));
+            return errors;
+        }
+
+        if (IdentityCardClean.Length == 7)
+        {
+            IdentityCardClean = "0" + IdentityCardClean;
+        }
+
+        int[] weights = { 2, 9, 8, 7, 6, 3, 4 };
+        int sum = 0;
+
+        for (int i = 0; i < 7; i++)
+        {
+            int digit = int.Parse(IdentityCardClean[i].ToString());
+            sum += digit * weights[i];
+        }
+
+        int remainder = sum % 10;
+        int expectedVerifier = (10 - remainder) % 10;
+        int actualVerifier = int.Parse(IdentityCardClean[7].ToString());
+
+        if (expectedVerifier != actualVerifier)
+        {
+            errors.WithError(UserErrors.IdentityCardIsInvalid(IdentityCard));
+        }
+
+        if (errors.IsFailed)
+        {
+            return errors;
+        }
+        else
+        {
+            return Result.Ok();
+        }
     }
 
     public Result ValidateEmail()
@@ -132,7 +200,7 @@ public abstract class User : Entity
 
         if (FirstName.Length < 3)
         {
-            errors.WithError(UserErrors.FirstNameMaxLength());
+            errors.WithError(UserErrors.FirstNameMinLength());
         }
 
         if (FirstName.Length > 50)
@@ -196,6 +264,10 @@ public abstract class User : Entity
     }
 
     public int UserId { get; set; }
+
+    public string? IdentityCard { get; set; } = null!;
+
+    public Gender? Gender { get; set; }
 
     public string? GoogleId { get; set; } = null!;
 
@@ -287,6 +359,10 @@ public static class UserErrors
     public class LastNameMaxLengthError(string msg) : ValidationError(msg);
     public class LastNameLettersOnlyError(string msg) : ValidationError(msg);
 
+    public class IdentityCardIsRequiredError(string msg) : ValidationError(msg);
+    public class IdentityCardIsInvalidError(string msg) : ValidationError(msg);
+    public class DuplicatedIdentityCardError(string msg) : ValidationError(msg);
+
     // Factory Methods
     public static UserNotFoundError UserNotFound(int id) => new($"Usuario con {id} no encontrado.");
     public static AuthError LoginFailed() => new("Email o contraseña incorrectos.");
@@ -318,4 +394,8 @@ public static class UserErrors
     public static LastNameMinLengthError LastNameMinLength() => new("El apellido debe tener al menos 3 caracteres.");
     public static LastNameMaxLengthError LastNameMaxLength() => new("El apellido puede tener hasta 50 caracteres.");
     public static LastNameLettersOnlyError LastNameLettersOnly() => new("El apellido solo puede tener letras.");
+
+    public static IdentityCardIsRequiredError IdentityCardIsRequired() => new("La cédula de identidad es requerida.");
+    public static IdentityCardIsInvalidError IdentityCardIsInvalid(string ci) => new($"La cédula de identidad no es válida. {ci}");
+    public static DuplicatedIdentityCardError DuplicatedIdentityCard(string ci) => new($"La cédula de identidad {ci} ya está en uso.");
 }

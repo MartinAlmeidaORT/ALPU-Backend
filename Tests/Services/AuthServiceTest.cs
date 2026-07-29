@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using NSubstitute;
 using Tests.Helpers;
 using Domain.Common.Errors;
+using Domain.Enums;
 
 namespace Tests.Services;
 
@@ -172,6 +173,8 @@ public class AuthServiceTests
             DepartmentId = 1,
             City = "Ciudad",
             Street = "Calle 123",
+            Gender = Gender.Male,
+            IdentityCard = "49933947",
             AgencyName = existingAgency.Name // menos de 3 caracteres
         };
 

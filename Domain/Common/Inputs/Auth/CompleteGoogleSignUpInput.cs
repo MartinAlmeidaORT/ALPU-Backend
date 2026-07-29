@@ -1,3 +1,5 @@
+using Domain.Enums;
+
 namespace Domain.Common.Inputs.Auth;
 
 public abstract record CompleteGoogleSignUpUserInput
@@ -11,6 +13,10 @@ public abstract record CompleteGoogleSignUpUserInput
     public required int DepartmentId { get; init; }
     public required string City { get; init; }
     public string? Street { get; init; }
+
+    public required Gender Gender { get; init; }
+
+    public string? IdentityCard { get; init; } = null!;
 }
 
 public record CompleteGoogleSignUpBroadcasterInput : CompleteGoogleSignUpUserInput;

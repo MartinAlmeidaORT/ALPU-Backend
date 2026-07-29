@@ -18,6 +18,18 @@ public class BroadcasterConfiguration : IEntityTypeConfiguration<Broadcaster>
         builder.Property(b => b.CategoryId)
             .HasColumnName("category_id");
 
+        builder.Property(b => b.PhoneNumber)
+            .HasColumnName("phone_number")
+            .HasMaxLength(20);
+
+        builder.Property(b => b.Website)
+            .HasColumnName("website")
+            .HasMaxLength(200);
+
+        builder.Property(b => b.Description)
+            .HasColumnName("description")
+            .HasMaxLength(1000);
+
         builder.HasOne(b => b.Category)
             .WithMany(c => c.Broadcasters)
             .HasForeignKey(b => b.CategoryId)
@@ -49,7 +61,7 @@ public class BroadcasterConfiguration : IEntityTypeConfiguration<Broadcaster>
                 j.HasKey("broadcaster_id", "skill_id");
                 j.ToTable("broadcaster_skills");
             });
-        
+
 
         builder.HasMany(b => b.Languages)
         .WithMany()
@@ -115,6 +127,14 @@ public class DemoConfiguration : IEntityTypeConfiguration<Demo>
 
         builder.Property(d => d.FileName)
             .HasColumnName("file_name")
+            .HasMaxLength(200);
+
+        builder.Property(d => d.LanguageId)
+            .HasColumnName("language_id")
+            .HasMaxLength(100);
+
+        builder.Property(d => d.Title)
+            .HasColumnName("title")
             .HasMaxLength(200);
 
         builder.HasOne(d => d.Broadcaster)

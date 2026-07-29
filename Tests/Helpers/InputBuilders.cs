@@ -1,4 +1,5 @@
 using Domain.Common.Inputs.Auth;
+using Domain.Enums;
 
 namespace Tests.Helpers;
 
@@ -14,6 +15,8 @@ public static class InputBuilders
         RUT = "12345678910A",
         DepartmentId = 1,
         City = "Ciudad",
+        Gender = Gender.Male,
+        IdentityCard = "49933947",
     };
 
     public static RegisterClientInput ValidClientInput() => new()
@@ -27,6 +30,8 @@ public static class InputBuilders
         RUT = "12345678910A",
         DepartmentId = 1,
         City = "Ciudad",
+        Gender = Gender.Male,
+        IdentityCard = "49933947",
     };
 
     public static CompleteGoogleSignUpClientInput ValidGoogleClientInput(string googleId = "google-sub-123") => new()
@@ -40,6 +45,8 @@ public static class InputBuilders
         RUT = "12345678910A",
         DepartmentId = 1,
         City = "Ciudad",
+        Gender = Gender.Male,
+        IdentityCard = "49933947",
     };
 
     public static CompleteGoogleSignUpBroadcasterInput ValidGoogleBroadcasterInput(string googleId = "google-sub-456") => new()
@@ -52,5 +59,7 @@ public static class InputBuilders
         RUT = "12345678910A",
         DepartmentId = 1,
         City = "Ciudad",
+        Gender = Gender.Male,
+        IdentityCard = "49933947",
     };
 }

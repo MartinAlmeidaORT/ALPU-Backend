@@ -162,4 +162,90 @@ public class Mutation
         FluentResults.Result<Notification[]> result = await userService.DeleteAllNotificationsAsync(claims.UserId);
         return result.UnwrapOrThrow();
     }
+
+    [Authorize]
+    public async Task<ProfilePictureUploadPayload> RequestProfilePictureUploadUrl(
+        string fileName,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+
+        FluentResults.Result<ProfilePictureUploadPayload> result = await userService.RequestProfilePictureUploadUrlAsync(claims.UserId, fileName);
+        return result.UnwrapOrThrow();
+    }
+
+    [Authorize]
+    public async Task<User> ConfirmProfilePictureUpload(
+        string key,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+
+        FluentResults.Result<User> result = await userService.ConfirmProfilePictureUploadAsync(claims.UserId, key);
+        return result.UnwrapOrThrow();
+    }
+
+    // ---- Demo (voice sample) upload — broadcasters only ----
+
+    [Authorize(Roles = ["Broadcaster"])]
+    public async Task<DemoUploadPayload> RequestDemoUploadUrl(
+        string fileName,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+
+        FluentResults.Result<DemoUploadPayload> result = await userService.RequestDemoUploadUrlAsync(claims.UserId, fileName);
+        return result.UnwrapOrThrow();
+    }
+
+    [Authorize(Roles = ["Broadcaster"])]
+    public async Task<Demo> ConfirmDemoUpload(
+        UploadDemoInput input,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+
+        FluentResults.Result<Demo> result = await userService.ConfirmDemoUploadAsync(claims.UserId, input.Key, input.LanguageId, input.Title);
+        return result.UnwrapOrThrow();
+    }
+
+    [Authorize(Roles = ["Broadcaster"])]
+    public async Task<Demo> DeleteDemo(
+        string key,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+
+        FluentResults.Result<Demo> result = await userService.DeleteDemoAsync(claims.UserId, key);
+        return result.UnwrapOrThrow();
+    }
+
+    [Authorize(Roles = ["Broadcaster"])]
+    public async Task<Broadcaster> UpdateBroadcasterProfile(
+        UpdateBroadcasterProfileInput input,
+        [Service] IUserService userService,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] IJwtService jwtService)
+    {
+        ClaimsPrincipal user = httpContextAccessor.HttpContext!.User;
+        JwtUserClaims claims = jwtService.GetUserClaims(user);
+
+        FluentResults.Result<Broadcaster> result = await userService.UpdateBroadcasterProfileAsync(claims.UserId, input);
+        return result.UnwrapOrThrow();
+    }
 }

@@ -42,7 +42,8 @@ public static class ServiceCollectionExtensions
                              .MapEnum<ServiceType>("service_type_enum")
                              .MapEnum<PriceAdjustmentType>("price_adjustment_type_enum")
                              .MapEnum<Interval>("interval_enum")
-                             .MapEnum<ContractState>("contract_state_enum");
+                             .MapEnum<ContractState>("contract_state_enum")
+                             .MapEnum<Gender>("gender_enum");
             }
         ).UseSnakeCaseNamingConvention());
         return services;
