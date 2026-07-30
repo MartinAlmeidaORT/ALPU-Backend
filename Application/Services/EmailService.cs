@@ -10,20 +10,20 @@ public class EmailService : IEmailService
 {
     private readonly IConfiguration _config;
 
-private const string LogoPath = "../static/logo.png"; // ruta física en disco (relativa a la raíz de la app)
-private const string LogoCid = "alpu-logo";
-private const string LoginUrl = "https://TU_DOMINIO.com/login";
- 
-// Paleta basada en el logo de ALPU
-private const string ColorPrimary = "#1565C0";
-private const string ColorPrimaryDark = "#0D47A1";
-private const string ColorTextDark = "#1F2937";
-private const string ColorTextMuted = "#6B7280";
-private const string ColorBackground = "#F2F4F7";
-private const string ColorCard = "#FFFFFF";
-private const string ColorBorder = "#E5E7EB";
-private const string ColorInfoBg = "#EAF2FB";
-private const string ColorInfoBorder = "#BBD9F5";
+    private const string LogoPath = "../static/logo.png"; // ruta física en disco (relativa a la raíz de la app)
+    private const string LogoCid = "alpu-logo";
+    private const string LoginUrl = "https://TU_DOMINIO.com/login";
+
+    // Paleta basada en el logo de ALPU
+    private const string ColorPrimary = "#1565C0";
+    private const string ColorPrimaryDark = "#0D47A1";
+    private const string ColorTextDark = "#1F2937";
+    private const string ColorTextMuted = "#6B7280";
+    private const string ColorBackground = "#F2F4F7";
+    private const string ColorCard = "#FFFFFF";
+    private const string ColorBorder = "#E5E7EB";
+    private const string ColorInfoBg = "#EAF2FB";
+    private const string ColorInfoBorder = "#BBD9F5";
 
 
     public EmailService(IConfiguration config)
@@ -31,12 +31,12 @@ private const string ColorInfoBorder = "#BBD9F5";
         _config = config;
     }
 
-/// <summary>
-/// Genera el layout base (header con logo, tarjeta blanca y footer) que comparten
-/// todos los correos transaccionales de ALPU. El logo se referencia como "cid:alpu-logo",
-/// no como URL, porque va embebido en el propio mensaje.
-/// </summary>
-private static string BuildEmailLayout(string title, string bodyHtml) => $$"""
+    /// <summary>
+    /// Genera el layout base (header con logo, tarjeta blanca y footer) que comparten
+    /// todos los correos transaccionales de ALPU. El logo se referencia como "cid:alpu-logo",
+    /// no como URL, porque va embebido en el propio mensaje.
+    /// </summary>
+    private static string BuildEmailLayout(string title, string bodyHtml) => $$"""
     <!DOCTYPE html>
     <html lang="es">
     <head>
@@ -98,49 +98,49 @@ private static string BuildEmailLayout(string title, string bodyHtml) => $$"""
     </body>
     </html>
     """;
- 
-/// <summary>
-/// Igual que tu SendAsync actual, pero además adjunta el logo como recurso vinculado
-/// (Content-Id = "alpu-logo") para que el <img src="cid:alpu-logo"> del HTML lo resuelva
-/// sin depender de ninguna URL pública. Usa exactamente la misma sección de configuración
-/// ("Email") que ya tenés funcionando.
-/// </summary>
-private async Task SendEmailWithLogoAsync(string toEmail, string subject, string htmlBody)
-{
-    var section = _config.GetSection("Email");
-    var message = new MimeMessage();
-    message.From.Add(new MailboxAddress(
-        section["SenderName"], section["SenderEmail"]));
-    message.To.Add(MailboxAddress.Parse(toEmail));
-    message.Subject = subject;
- 
-    var builder = new BodyBuilder
+
+    /// <summary>
+    /// Igual que tu SendAsync actual, pero además adjunta el logo como recurso vinculado
+    /// (Content-Id = "alpu-logo") para que el <img src="cid:alpu-logo"> del HTML lo resuelva
+    /// sin depender de ninguna URL pública. Usa exactamente la misma sección de configuración
+    /// ("Email") que ya tenés funcionando.
+    /// </summary>
+    private async Task SendEmailWithLogoAsync(string toEmail, string subject, string htmlBody)
     {
-        HtmlBody = htmlBody
-    };
- 
-    // Adjunta el logo como recurso vinculado; su Content-Id coincide con el cid del HTML
-    var logo = builder.LinkedResources.Add(LogoPath);
-    logo.ContentId = LogoCid;
- 
-    message.Body = builder.ToMessageBody();
- 
-    using var client = new SmtpClient();
-    await client.ConnectAsync(
-        section["SmtpHost"],
-        int.Parse(section["SmtpPort"]!),
-        SecureSocketOptions.StartTls);
-    await client.AuthenticateAsync(
-        section["SmtpUsername"],
-        section["AppPassword"]);
-    await client.SendAsync(message);
-    await client.DisconnectAsync(true);
-}
+        var section = _config.GetSection("Email");
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(
+            section["SenderName"], section["SenderEmail"]));
+        message.To.Add(MailboxAddress.Parse(toEmail));
+        message.Subject = subject;
+
+        var builder = new BodyBuilder
+        {
+            HtmlBody = htmlBody
+        };
+
+        // Adjunta el logo como recurso vinculado; su Content-Id coincide con el cid del HTML
+        var logo = builder.LinkedResources.Add(LogoPath);
+        logo.ContentId = LogoCid;
+
+        message.Body = builder.ToMessageBody();
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(
+            section["SmtpHost"],
+            int.Parse(section["SmtpPort"]!),
+            SecureSocketOptions.StartTls);
+        await client.AuthenticateAsync(
+            section["SmtpUsername"],
+            section["AppPassword"]);
+        await client.SendAsync(message);
+        await client.DisconnectAsync(true);
+    }
 
 
-public Task SendAccountPendingAsync(string toEmail, string userName)
-{
-    var body = $$"""
+    public Task SendAccountPendingAsync(string toEmail, string userName)
+    {
+        var body = $$"""
         <h1 style="margin:0 0 16px 0; font-size:20px; line-height:28px; color:{{ColorTextDark}}; font-family:'Segoe UI', Arial, Helvetica, sans-serif;">
           ¡Hola, {{userName}}!
         </h1>
@@ -163,17 +163,17 @@ public Task SendAccountPendingAsync(string toEmail, string userName)
           — El equipo de ALPU
         </p>
         """;
- 
-    return SendEmailWithLogoAsync(
-        toEmail,
-        "Tu cuenta en ALPU está pendiente de aprobación",
-        BuildEmailLayout("Cuenta pendiente de aprobación", body)
-    );
-}
- 
-public Task SendAccountApprovedAsync(string toEmail, string userName)
-{
-    var body = $$"""
+
+        return SendEmailWithLogoAsync(
+            toEmail,
+            "Tu cuenta en ALPU está pendiente de aprobación",
+            BuildEmailLayout("Cuenta pendiente de aprobación", body)
+        );
+    }
+
+    public Task SendAccountApprovedAsync(string toEmail, string userName)
+    {
+        var body = $$"""
         <h1 style="margin:0 0 16px 0; font-size:20px; line-height:28px; color:{{ColorTextDark}}; font-family:'Segoe UI', Arial, Helvetica, sans-serif;">
           ¡Buenas noticias, {{userName}}!
         </h1>
@@ -196,11 +196,11 @@ public Task SendAccountApprovedAsync(string toEmail, string userName)
           — El equipo de ALPU
         </p>
         """;
- 
-    return SendEmailWithLogoAsync(
-        toEmail,
-        "Tu cuenta en ALPU fue aprobada",
-        BuildEmailLayout("Cuenta aprobada", body)
-    );
-}
+
+        return SendEmailWithLogoAsync(
+            toEmail,
+            "Tu cuenta en ALPU fue aprobada",
+            BuildEmailLayout("Cuenta aprobada", body)
+        );
+    }
 }
