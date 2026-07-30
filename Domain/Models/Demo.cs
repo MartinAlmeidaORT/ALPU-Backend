@@ -43,7 +43,7 @@ public class Demo : Entity
     {
         if (Title == null) return Result.Fail(DemoErrors.TitleIsRequired());
 
-        if (Title.Length < 5)
+        if (Title.Length < 4)
         {
             return Result.Fail(DemoErrors.TitleMinLength());
         }
@@ -108,7 +108,7 @@ public static class DemoErrors
 
     public static TitleIsRequiredError TitleIsRequired() => new($"Necesita ingresar un titulo para la demo.");
 
-    public static TitleMinLengthError TitleMinLength() => new($"El titulo de la demo necesita por lo menos 5 characteres.");
+    public static TitleMinLengthError TitleMinLength() => new($"El titulo de la demo necesita por lo menos 4 characteres.");
 
     public static TitleMaxLengthError TitleMaxLength() => new($"El titulo de la demo puede tener hasta 200 characteres.");
 
