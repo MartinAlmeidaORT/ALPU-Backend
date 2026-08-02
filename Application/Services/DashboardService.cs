@@ -8,7 +8,7 @@ namespace Application.Services;
 
 public class DashboardService(IUnitOfWork unitOfWork) : IDashboardService
 {
-    public IUnitOfWork _unitOfWork = unitOfWork;
+    private IUnitOfWork _unitOfWork = unitOfWork;
 
     private readonly int _amountToTake = 20;
 

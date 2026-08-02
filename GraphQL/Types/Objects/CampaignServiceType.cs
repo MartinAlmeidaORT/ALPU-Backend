@@ -56,7 +56,7 @@ public class IvrCampaignServiceType : ObjectType<IvrCampaignService>
     }
 }
 
-public class PeriodCampaignServiceInterface : InterfaceType<PeriodCampaignService>
+public class PeriodCampaignServiceType : InterfaceType<PeriodCampaignService>
 {
     protected override void Configure(IInterfaceTypeDescriptor<PeriodCampaignService> descriptor)
     {
@@ -75,7 +75,7 @@ public class TvCampaignServiceType : ObjectType<TvCampaignService>
     {
         descriptor.Name("TvCampaignService");
         descriptor.BindFieldsExplicitly();
-        descriptor.Implements<PeriodCampaignServiceInterface>();
+        descriptor.Implements<PeriodCampaignServiceType>();
         descriptor.Field(x => x.Campaign);
         descriptor.Field(x => x.Pieces);
         descriptor.Field(x => x.BasePriceOverride);
@@ -88,7 +88,7 @@ public class RadioCampaignServiceType : ObjectType<RadioCampaignService>
     {
         descriptor.Name("RadioCampaignService");
         descriptor.BindFieldsExplicitly();
-        descriptor.Implements<PeriodCampaignServiceInterface>();
+        descriptor.Implements<PeriodCampaignServiceType>();
         descriptor.Field(x => x.Campaign);
         descriptor.Field(x => x.Pieces);
         descriptor.Field(x => x.BasePriceOverride);
@@ -101,7 +101,7 @@ public class CinemaCampaignServiceType : ObjectType<CinemaCampaignService>
     {
         descriptor.Name("CinemaCampaignService");
         descriptor.BindFieldsExplicitly();
-        descriptor.Implements<PeriodCampaignServiceInterface>();
+        descriptor.Implements<PeriodCampaignServiceType>();
         descriptor.Field(x => x.Campaign);
         descriptor.Field(x => x.Pieces);
         descriptor.Field(x => x.BasePriceOverride);
@@ -114,7 +114,7 @@ public class CameraCampaignServiceType : ObjectType<CameraCampaignService>
     {
         descriptor.Name("CameraCampaignService");
         descriptor.BindFieldsExplicitly();
-        descriptor.Implements<PeriodCampaignServiceInterface>();
+        descriptor.Implements<PeriodCampaignServiceType>();
         descriptor.Field(x => x.Campaign);
         descriptor.Field(x => x.Pieces);
         descriptor.Field(x => x.BasePriceOverride);
@@ -127,7 +127,7 @@ public class OtherMediaCampaignServiceType : ObjectType<OtherMediaCampaignServic
     {
         descriptor.Name("OtherMediaCampaignService");
         descriptor.BindFieldsExplicitly();
-        descriptor.Implements<PeriodCampaignServiceInterface>();
+        descriptor.Implements<PeriodCampaignServiceType>();
         descriptor.Field(x => x.Campaign);
         descriptor.Field(x => x.Pieces);
         descriptor.Field(x => x.BasePriceOverride);

@@ -26,7 +26,7 @@ public class RegistrarFacturaSteps
     private BillInput _input = new();
     private Bill? _registroGuardado;
     private Exception? _excepcion;
-    private IHttpContextAccessor _httpContextAccessor;
+    private IHttpContextAccessor _httpContextAccessor = null!;
 
     public RegistrarFacturaSteps(ScenarioContext scenarioContext)
     {

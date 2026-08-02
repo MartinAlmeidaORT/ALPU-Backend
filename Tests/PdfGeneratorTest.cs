@@ -24,6 +24,7 @@ public class PdfGeneratorTest
         var contract = new Contract
         {
             ContractId = 26,
+            ContractSerial = "JP04-26",
             Date = date,
             DueDate = date.AddMonths(3),
             TotalPrice = 5000,

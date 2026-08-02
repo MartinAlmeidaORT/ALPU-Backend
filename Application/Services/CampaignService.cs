@@ -11,9 +11,9 @@ namespace Application.Services;
 
 public class CampaignService(ICampaignServiceFactory campaignFactory, IPriceTable priceTable, IUnitOfWork unitOfWork) : ICampaignService
 {
-    public readonly ICampaignServiceFactory _campaignFactory = campaignFactory;
-    public readonly IPriceTable _priceTable = priceTable;
-    public readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly ICampaignServiceFactory _campaignFactory = campaignFactory;
+    private readonly IPriceTable _priceTable = priceTable;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Result<Campaign>> CreateCampaign(CampaignInput input)
     {

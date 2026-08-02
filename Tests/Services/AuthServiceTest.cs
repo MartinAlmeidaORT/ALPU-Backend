@@ -19,7 +19,7 @@ public class AuthServiceTests
     // --- Substitutes ---
     private readonly IHasher _hasher = Substitute.For<IHasher>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
-    private readonly IConfiguration _config = Substitute.For<IConfiguration>();
+    private readonly IJwtService _jwtService = Substitute.For<IJwtService>();
     private readonly IGoogleAuthService _googleAuthService = Substitute.For<IGoogleAuthService>();
     private readonly IEmailService _emailService = Substitute.For<IEmailService>();
 
@@ -27,10 +27,7 @@ public class AuthServiceTests
 
     public AuthServiceTests()
     {
-        // JWT config mínima para que GenerateJWT no explote
-        _config["JWT:Secret"].Returns("super-secret-key-for-testing-purposes-only-32chars");
-
-        _sut = new AuthService(_hasher, _unitOfWork, _config, _googleAuthService, _emailService);
+        _sut = new AuthService(_hasher, _unitOfWork, _jwtService, _googleAuthService, _emailService);
     }
 
     // ---------------------------------------------------------------
@@ -82,6 +79,7 @@ public class AuthServiceTests
         _unitOfWork.Departments.GetByIdAsync(input.DepartmentId).Returns(new Department { DepartmentId = 1 });
         _unitOfWork.Broadcasters.GetCategoryByIdAsync(1).Returns(new BroadcasterCategory { BroadcasterCategoryId = 1 });
         _hasher.Hash(input.Password).Returns("hashed-password");
+        _jwtService.GenerateJWT(Arg.Any<Broadcaster>()).Returns("Bearer token");
 
         // Act
         var result = await _sut.RegisterBroadcasterAsync(input);
@@ -248,6 +246,7 @@ public class AuthServiceTests
 
         _unitOfWork.Users.GetUserByEmailAsync(input.Email).Returns(user);
         _hasher.Verify(input.Password, user.Password).Returns(true);
+        _jwtService.GenerateJWT(Arg.Any<User>()).Returns("Bearer token");
 
         var result = await _sut.LoginAsync(input);
 
@@ -333,6 +332,8 @@ public class AuthServiceTests
         var existingUser = DomainBuilders.ValidClient();
         existingUser.GoogleId = "google-sub-123";
         existingUser.Email = googleInfo.Email;
+
+        _jwtService.GenerateJWT(Arg.Any<User>()).Returns("Bearer token");
 
         _googleAuthService.ExchangeCodeAsync(input.Code).Returns(googleInfo);
         _unitOfWork.Users.GetUserByGoogleIdAsync(googleInfo.Subject).Returns(existingUser);
