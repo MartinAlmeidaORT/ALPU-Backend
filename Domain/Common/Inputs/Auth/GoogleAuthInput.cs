@@ -1,6 +1,6 @@
 namespace Domain.Common.Inputs.Auth;
 
-public class GoogleAuthInput
+public record GoogleAuthInput
 {
     public required string Code { get; init; }
 }

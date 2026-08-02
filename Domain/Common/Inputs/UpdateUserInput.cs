@@ -2,7 +2,7 @@ using Domain.Enums;
 
 namespace Domain.Common.Inputs;
 
-public class UpdateUserInput
+public record UpdateUserInput
 {
     public string? IdentityCard { get; set; }
 

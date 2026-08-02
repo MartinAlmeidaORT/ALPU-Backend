@@ -1,6 +1,6 @@
 namespace Domain.Common.Inputs;
 
-public class UpdateAddressInput
+public record UpdateAddressInput
 {
     public string? CountryCode { get; set; }
     public int? DepartmentId { get; set; }
