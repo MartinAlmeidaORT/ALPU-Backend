@@ -1,4 +1,4 @@
-﻿using Domain.Common;
+﻿using Domain.Common.Abstracts;
 using Domain.Enums;
 
 namespace Domain.Models.Services;

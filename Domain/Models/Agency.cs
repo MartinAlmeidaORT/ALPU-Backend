@@ -1,10 +1,10 @@
-using Domain.Common;
+using Domain.Common.Abstracts;
 using Domain.Common.Errors;
 using FluentResults;
 
 namespace Domain.Models;
 
-public partial class Agency : Entity
+public class Agency : Entity
 {
     internal Agency() { }
 

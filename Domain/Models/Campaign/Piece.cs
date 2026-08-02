@@ -1,5 +1,4 @@
-﻿using Domain.Common;
-using FluentResults;
+﻿using Domain.Common.Abstracts;
 
 namespace Domain.Models.Campaign;
 

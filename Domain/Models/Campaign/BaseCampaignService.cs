@@ -1,3 +1,4 @@
+using Domain.Common.Abstracts;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Enums;
@@ -7,7 +8,7 @@ using FluentResults;
 
 namespace Domain.Models.Campaign;
 
-public abstract class BaseCampaignService
+public abstract class BaseCampaignService : Entity
 {
     internal protected BaseCampaignService()
     {

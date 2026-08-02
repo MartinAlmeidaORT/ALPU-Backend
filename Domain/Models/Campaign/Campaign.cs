@@ -1,3 +1,4 @@
+using Domain.Common.Abstracts;
 using Domain.Common.Extensions;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
@@ -9,7 +10,7 @@ using FluentResults;
 
 namespace Domain.Models.Campaign;
 
-public class Campaign
+public class Campaign : Entity
 {
     public int CampaignId { get; set; }
 

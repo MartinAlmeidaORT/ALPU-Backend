@@ -1,8 +1,9 @@
+using Domain.Common.Abstracts;
 using Domain.Enums;
 
 namespace Domain.Models.Services;
 
-public class Period
+public class Period : Entity
 {
     internal Period() { }
 

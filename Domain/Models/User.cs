@@ -1,4 +1,4 @@
-﻿using Domain.Common;
+﻿using Domain.Common.Abstracts;
 using Domain.Common.Errors;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;

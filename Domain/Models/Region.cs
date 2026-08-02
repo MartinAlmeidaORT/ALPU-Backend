@@ -1,4 +1,4 @@
-﻿using Domain.Common;
+﻿using Domain.Common.Abstracts;
 
 namespace Domain.Models;
 
