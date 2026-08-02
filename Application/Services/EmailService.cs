@@ -31,7 +31,7 @@ public class EmailService : IEmailService
         _config = config;
         LogoPath = _config["Static:LogoPath"] ?? throw new InvalidOperationException("No se encontró la ruta del logo en la configuración.");
     }
-    
+
 
     /// <summary>
     /// Genera el layout base (header con logo, tarjeta blanca y footer) que comparten
