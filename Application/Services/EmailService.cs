@@ -10,7 +10,7 @@ public class EmailService : IEmailService
 {
     private readonly IConfiguration _config;
 
-    private const string LogoPath = "../static/logo.png"; // ruta física en disco (relativa a la raíz de la app)
+    private string LogoPath = null; // ruta física en disco (relativa a la raíz de la app)
     private const string LogoCid = "alpu-logo";
     private const string LoginUrl = "https://TU_DOMINIO.com/login";
 
@@ -29,7 +29,9 @@ public class EmailService : IEmailService
     public EmailService(IConfiguration config)
     {
         _config = config;
+        LogoPath = _config["Static:LogoPath"] ?? throw new InvalidOperationException("No se encontró la ruta del logo en la configuración.");
     }
+    
 
     /// <summary>
     /// Genera el layout base (header con logo, tarjeta blanca y footer) que comparten
