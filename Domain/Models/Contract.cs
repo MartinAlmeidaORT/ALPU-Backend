@@ -92,6 +92,8 @@ public static class ContractErrors
 
     public static ContractNotFoundError ContractNotFound(int contractId) => new($"El contrato con id {contractId} no existe.");
 
+    public static ContractNotFoundError ContractNotFound(string contractSerial) => new($"El contrato con serie {contractSerial} no existe.");
+
     public static ContractNotActiveError ContractNotActive(int contractId) => new($"El contrato con id {contractId} no esta activo.");
 
     public static SerialGenerationConflictError SerialGenerationConflict(int contractId) => new($"No se pudo generar un numero de serie unico para el contrato con id {contractId} tras varios intentos.");
