@@ -1,8 +1,8 @@
-using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Interfaces.Private;
 using Domain.Interfaces.Public.Repositories;
+using Domain.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Singletons;
 using Domain.Models.Campaign;
 using FluentResults;

@@ -3,7 +3,6 @@ using Domain.Interfaces.Public.Repositories;
 using Domain.Enums;
 using DataAccess.EntityFramework;
 using DataAccess.Repositories;
-using Application.Interfaces.Public.Services;
 using Application.Services;
 using GraphQL.Schema;
 using GraphQL.Types.Objects;

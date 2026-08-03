@@ -1,4 +1,3 @@
-using Application.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Common;
 using Domain.Models;
@@ -6,6 +5,7 @@ using Domain.Interfaces.Private;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
 using FluentResults;
+using Domain.Interfaces.Public.Services;
 
 namespace Application.Services;
 

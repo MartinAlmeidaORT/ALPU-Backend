@@ -1,6 +1,5 @@
 using Reqnroll;
 using FluentAssertions;
-using Application.Interfaces.Public.Services;
 using Domain.Models;
 using Domain.Enums;
 using Domain.Interfaces.Public.Services;

@@ -1,6 +1,6 @@
 using Domain.Common.Inputs.CampaignService;
 
-namespace Application.Interfaces.Public.Services;
+namespace Domain.Interfaces.Public.Services;
 
 public interface IPriceCalculatorService
 {

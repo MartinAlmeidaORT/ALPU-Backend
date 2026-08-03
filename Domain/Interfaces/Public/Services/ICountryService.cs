@@ -1,6 +1,6 @@
 using Domain.Models;
 
-namespace Application.Interfaces.Public.Services;
+namespace Domain.Interfaces.Public.Services;
 
 public interface ICountryService
 {

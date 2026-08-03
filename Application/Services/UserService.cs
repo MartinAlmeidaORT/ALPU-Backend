@@ -8,7 +8,6 @@ using HotChocolate.Subscriptions;
 using Domain.Interfaces.Private;
 using DataAccess.ExternalServices;
 using Domain.Common.Payloads;
-using Application.Interfaces.Public.Services;
 
 namespace Application.Services;
 

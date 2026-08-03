@@ -1,5 +1,5 @@
-using Application.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Repositories;
+using Domain.Interfaces.Public.Services;
 using Domain.Models;
 
 namespace Application.Services;

@@ -2,7 +2,7 @@ using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
 using FluentResults;
 
-namespace Application.Interfaces.Public.Services;
+namespace Domain.Interfaces.Public.Services;
 
 public interface IAuthService
 {

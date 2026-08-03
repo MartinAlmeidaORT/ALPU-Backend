@@ -3,7 +3,7 @@ using Domain.Common.Payloads;
 using Domain.Models.Campaign;
 using FluentResults;
 
-namespace Application.Interfaces.Public.Services;
+namespace Domain.Interfaces.Public.Services;
 
 public interface ICampaignService
 {

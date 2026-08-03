@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Application.Interfaces.Public.Services;
 using Domain.Common;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.Auth;

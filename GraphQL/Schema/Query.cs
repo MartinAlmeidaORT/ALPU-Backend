@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Application.Interfaces.Public.Services;
 using Domain.Common;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;

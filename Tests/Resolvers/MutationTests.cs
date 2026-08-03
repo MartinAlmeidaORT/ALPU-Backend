@@ -1,7 +1,7 @@
 // Resolvers/MutationTests.cs
-using Application.Interfaces.Public.Services;
 using Domain.Common.Inputs.Auth;
 using Domain.Common.Payloads;
+using Domain.Interfaces.Public.Services;
 using Domain.Models;
 using FluentAssertions;
 using GraphQL.Schema;

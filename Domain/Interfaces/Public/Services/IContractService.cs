@@ -4,7 +4,7 @@ using Domain.Common.Payloads;
 using Domain.Models;
 using FluentResults;
 
-namespace Application.Interfaces.Public.Services;
+namespace Domain.Interfaces.Public.Services;
 
 public interface IContractService
 {
