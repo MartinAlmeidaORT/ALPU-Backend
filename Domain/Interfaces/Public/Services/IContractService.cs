@@ -16,7 +16,7 @@ public interface IContractService
 
     Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input);
 
-    Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(Contract contract);
+    Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(int contractId);
 
     Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId);
 

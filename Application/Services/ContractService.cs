@@ -172,9 +172,18 @@ public class ContractService(
         return Result.Ok();
     }
 
-    public async Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(Contract contract)
+    public async Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(int contractId)
     {
-        return new ContractUrlPayload(_amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key));
+        Contract? contract = _unitOfWork.Contracts.GetAllContracts()
+            .Where(c => c.ContractId == contractId)
+            .SingleOrDefault();
+
+        if (contract == null)
+        {
+            return Result.Fail(ContractErrors.ContractNotFound(contractId));
+        }
+
+        return new ContractUrlPayload(_amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key), contract);
     }
 
     private async Task<Result<Contract>> CancelContractForReplacementAsync(int contractId)
