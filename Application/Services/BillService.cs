@@ -1,7 +1,7 @@
-using DataAccess.ExternalServices;
 using Domain.Common.Inputs;
 using Domain.Common.Payloads;
 using Domain.Enums;
+using Domain.Interfaces.Private;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Interfaces.Public.Services;
 using Domain.Models;
@@ -10,10 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
 
-public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service, IUserService userService) : IBillService
+public class BillService(IUnitOfWork unitOfWork, IAmazonS3Service amazonS3Service, IUserService userService) : IBillService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
+    private readonly IAmazonS3Service _amazonS3Service = amazonS3Service;
     private readonly IUserService _userService = userService;
 
     public IQueryable<Bill> GetAllBills()

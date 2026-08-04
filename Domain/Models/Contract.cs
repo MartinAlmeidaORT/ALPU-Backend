@@ -88,6 +88,8 @@ public static class ContractErrors
 
     public class ContractAlreadyReplacedError(string msg) : ValidationError(msg);
 
+    public class RedundantStateUpdateError(string msg) : ValidationError(msg);
+
     public static UnauthorizedUserError UnauthorizedUser(int userId) => new($"El usuario con id {userId} no tiene acceso a este contrato.");
 
     public static ContractNotFoundError ContractNotFound(int contractId) => new($"El contrato con id {contractId} no existe.");
@@ -99,4 +101,6 @@ public static class ContractErrors
     public static SerialGenerationConflictError SerialGenerationConflict(int contractId) => new($"No se pudo generar un numero de serie unico para el contrato con id {contractId} tras varios intentos.");
 
     public static ContractAlreadyReplacedError ContractAlreadyReplaced(int contractId) => new($"El contrato con id {contractId} ya fue reemplazado por otro contrato.");
+
+    public static RedundantStateUpdateError RedundantStateUpdate() => new("El contrato ya se encuentra en ese estado.");
 }

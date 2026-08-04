@@ -1,13 +1,14 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Domain.Enums;
+using Domain.Interfaces.Private;
 using Domain.Models;
 using FluentResults;
 using Microsoft.Extensions.Configuration;
 
 namespace DataAccess.ExternalServices;
 
-public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
+public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config) : IAmazonS3Service
 {
     private readonly IAmazonS3 _s3Client = s3Client;
     private readonly string _bucketName = config["AWS:BucketName"]!;
@@ -63,7 +64,7 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
         return _s3Client.GetPreSignedURL(request);
     }
 
-    public async Task MoveContractToCancelledAsync(int contractId)
+    public async Task<string> MoveContractToCancelledAsync(int contractId)
     {
         var sourceKey = $"contracts/{contractId}.pdf";
         var destinationKey = $"contracts/cancelled/{contractId}.pdf";
@@ -85,6 +86,7 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
             Key = sourceKey
         };
         await _s3Client.DeleteObjectAsync(deleteRequest);
+        return destinationKey;
     }
 
     // ---- Voice demos (CU13) ----

@@ -88,17 +88,8 @@ public class Query
             .Where(c => c.ContractId == contractId && (claims.Role == "Administrator" || claims.Role == "Supervisor" || claims.Role == "Accountant" || c.ClientId == claims.UserId || c.BroadcasterId == claims.UserId))
             .SingleOrDefault();
 
-        if (contract == null)
-        {
-            var error = ContractErrors.UnauthorizedUser(claims.UserId);
-            resolverContext.ReportError(ErrorBuilder.New()
-                        .SetMessage(error.Message)
-                        .SetCode(error.GetType().Name)
-                        .Build());
-            return new(null!);
-        }
 
-        FluentResults.Result<ContractUrlPayload> result = await contractService.GetContractPdfDownloadUrl(contract);
+        FluentResults.Result<ContractUrlPayload> result = await contractService.GetContractPdfDownloadUrl(contractId);
         return result.UnwrapOrThrow();
     }
 

@@ -1,9 +1,9 @@
 using Application.QuestPDF;
-using DataAccess.ExternalServices;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Enums;
+using Domain.Interfaces.Private;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Singletons;
@@ -21,7 +21,7 @@ public class ContractService(
     ICampaignService campaignService,
     IPriceTable priceTable,
     IUnitOfWork unitOfWork,
-    AmazonS3Service amazonS3Service,
+    IAmazonS3Service amazonS3Service,
     IUserService userService) : IContractService
 {
     private const int MaxSerialAssignAttempts = 3;
@@ -29,7 +29,7 @@ public class ContractService(
     private readonly ICampaignService _campaignService = campaignService;
     private readonly IPriceTable _priceTable = priceTable;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
+    private readonly IAmazonS3Service _amazonS3Service = amazonS3Service;
     private readonly IUserService _userService = userService;
 
     public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
@@ -97,27 +97,39 @@ public class ContractService(
 
     public async Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId)
     {
+        User? user = await _unitOfWork.Users.GetUserByIdAsync(userId);
+
+        if (user == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(userId));
+        }
+
         Contract? contract = _unitOfWork.Contracts
             .GetAllContracts()
-            .Where(c => (c.ClientId == userId || c.BroadcasterId == userId) && c.ContractId == input.ContractId)
+            .Where(c => c.ContractId == input.ContractId)
             .Include(c => c.Client)
             .Include(c => c.Broadcaster)
             .SingleOrDefault();
 
         if (contract == null)
         {
-            return Result.Fail($"El contrato con id: {input.ContractId} no existe o no tiene acceso al mismo.");
+            return Result.Fail(ContractErrors.ContractNotFound(input.ContractId));
+        }
+
+        if (user is Accountant || !(contract?.ClientId == userId || contract?.BroadcasterId == userId))
+        {
+            return Result.Fail(ContractErrors.UnauthorizedUser(userId));
         }
 
         if (contract.State == input.NewState)
         {
-            return Result.Fail("El contrato ya se encuentra en ese estado.");
+            return Result.Fail(ContractErrors.RedundantStateUpdate());
         }
 
         contract.State = input.NewState;
         if (contract.State == ContractState.Canceled)
         {
-            await _amazonS3Service.MoveContractToCancelledAsync(contract.ContractId);
+            contract.PdfAmazonS3Key = await _amazonS3Service.MoveContractToCancelledAsync(contract.ContractId);
             if (contract.Client.UserId != userId)
             {
                 await _userService.AddNotificationAsync(contract.Client, $"Cancelado el contrato: {contract.ContractSerial}", $"");
@@ -172,9 +184,18 @@ public class ContractService(
         return Result.Ok();
     }
 
-    public async Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(Contract contract)
+    public async Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(int contractId)
     {
-        return new ContractUrlPayload(_amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key));
+        Contract? contract = _unitOfWork.Contracts.GetAllContracts()
+            .Where(c => c.ContractId == contractId)
+            .SingleOrDefault();
+
+        if (contract == null)
+        {
+            return Result.Fail(ContractErrors.ContractNotFound(contractId));
+        }
+
+        return new ContractUrlPayload(_amazonS3Service.GetDownloadUrl(contract.PdfAmazonS3Key), contract);
     }
 
     private async Task<Result<Contract>> CancelContractForReplacementAsync(int contractId)
