@@ -1,0 +1,6 @@
+@startuml GraphQL
+skinparam groupInheritance 2
+left to right direction
+!include GraphQL-Classes.puml
+!include GraphQL-Relations.puml
+@enduml

@@ -1,0 +1,29 @@
+' ==========================================================
+' UnitOfWork agrega una instancia de cada repositorio
+' (expuestos como interfaces de Domain, acá se conecta directo
+' a la clase concreta ya que la interfaz vive en otro diagrama)
+' ==========================================================
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.UserRepository : Users
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.BroadcasterRepository : Broadcasters
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.ClientRepository : Clients
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.CountryRepository : Countries
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.DepartmentRepository : Departments
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.AlpuServiceRepository : Services
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.ContractRepository : Contracts
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.BillRepository : Bills
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.LanguageRepository : Languages
+DataAccess.Repositories.UnitOfWork "1" o-- "1" DataAccess.Repositories.SkillRepository : Skills
+
+' ==========================================================
+' Cada repositorio depende del DbContext (inyectado, no es dueño)
+' ==========================================================
+DataAccess.Repositories.UserRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.BroadcasterRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.ClientRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.CountryRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.DepartmentRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.AlpuServiceRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.ContractRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.BillRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.LanguageRepository ..> DataAccess.EntityFramework.DatabaseContext : usa
+DataAccess.Repositories.SkillRepository ..> DataAccess.EntityFramework.DatabaseContext : usa

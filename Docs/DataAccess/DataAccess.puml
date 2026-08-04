@@ -1,0 +1,6 @@
+@startuml DataAccess
+skinparam groupInheritance 1
+left to right direction
+!include DataAccess-Classes.puml
+!include DataAccess-Relations.puml
+@enduml

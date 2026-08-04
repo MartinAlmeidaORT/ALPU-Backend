@@ -1,0 +1,18 @@
+' ==========================================================
+' Tipos concretos que implementan la interfaz GraphQL de
+' servicios de campaña (union/interface para CU04)
+' Nota: en el esquema GraphQL la implementación de interfaz es
+' plana (no importa la profundidad de herencia de C# en Domain),
+' por eso las 9 quedan directo bajo CampaignServiceInterface.
+' Ojo: no hay InternetCampaignServiceType - a confirmar contra el
+' código si Internet se resuelve como PeriodCampaignServiceType.
+' ==========================================================
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.EventCampaignServiceType
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.NarrativeCampaignServiceType
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.IvrCampaignServiceType
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.PeriodCampaignServiceType
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.TvCampaignServiceType
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.RadioCampaignServiceType
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.CinemaCampaignServiceType
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.CameraCampaignServiceType
+GraphQL.Types.Objects.CampaignServiceInterface <|.. GraphQL.Types.Objects.OtherMediaCampaignServiceType

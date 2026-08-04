@@ -1,0 +1,232 @@
+package Application {
+
+  package Common.Extensions {
+    class JsonExtensions <<static>> {
+      {static} + Result<T> ConvertJsonElementToRecord<T>(this JsonElement jsonElement)
+
+      {static} + String? GetString(this Dictionary<string, JsonElement> json, string key)
+
+      {static} + static bool GetBool(this Dictionary<string, JsonElement> json, string key)
+
+      {static} + static int? GetInt(this Dictionary<string, JsonElement> json, string key)
+    }
+  }
+
+  package Factories {
+    class CampaignServiceFactory <<Implements CampaignServiceFactory>> {
+      - IPriceTable _priceTable = priceTable
+
+      + CampaignServiceFactory(IPriceTable priceTable)
+
+      + async Task<Result<BaseCampaignService>> Create(CampaignServiceInput request)
+      + static Result<List<Piece>> BuildPieces(List<PieceInput> pieces)
+
+      - Result<BaseCampaignService> BuildService<O>(CampaignServiceInput request, BaseService service, List<Piece> pieces, Func<BaseService, List<Piece>, IPriceTable, O, BaseCampaignService> factory)
+
+      - Result<BaseCampaignService> BuildTv(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+      - Result<BaseCampaignService> BuildRadio(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+      - Result<BaseCampaignService> BuildInternet(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+      - Result<BaseCampaignService> BuildCinema(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+      - Result<BaseCampaignService> BuildCamera(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+      - Result<BaseCampaignService> BuildNarrative(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+      - Result<BaseCampaignService> BuildIvr(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+      - Result<BaseCampaignService> BuildEvent(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+      - Result<BaseCampaignService> BuildOtherMedia(CampaignServiceInput request, BaseService service, List<Piece> pieces)
+    }    
+  }
+
+  package QuestPDF {
+    class ContractDocument <<Implements IDocument>> {
+      + Contract Model { get; init; } = model
+      + DocumentMetadata GetMetadata() => DocumentMetadata.Default
+      + DocumentSettings GetSettings() => DocumentSettings.Default
+
+      + ContractDocument(Contract model)
+      + void Compose(IDocumentContainer container)
+    }
+  }
+
+  package Services {
+    class AlpuService <<Implements IAlpuService>> {
+      - readonly IUnitOfWork _unitOfWork = unitOfWork
+
+      + AlpuService(IUnitOfWork unitOfWork)
+      + IQueryable<BaseService> GetAllServices()
+    }
+
+    class AuthService <<Implements IAuthService>> {
+      - readonly IJwtService _jwtService = jwtService
+      - readonly IEmailService _emailService = emailService
+
+      + AuthService(IHasher hasher, IUnitOfWork unitOfWork, IJwtService jwtService, IGoogleAuthService googleAuthService, IEmailService emailService)
+      + async Task<Result<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
+      + async Task<Result<AuthPayload>> RegisterClientAsync(RegisterClientInput input)
+      + async Task<Result<AuthPayload>> LoginAsync(UserLoginInput input)
+      + async Task<Result<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input)
+      + async Task<Result<AuthPayload>> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input)
+      + async Task<Result<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
+    }
+
+    class BillService <<Implements IBillService>> {
+      - readonly IUnitOfWork _unitOfWork = unitOfWork
+      - readonly IAmazonS3Service _amazonS3Service = amazonS3Service
+      - readonly IUserService _userService = userService
+
+      + BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service, IUserService userService)
+      + async Task<Result<RegisterBillPayload>> RegisterBillAsync(BillInput input)
+      + IQueryable<Bill> GetAllBills()
+      + string GetBillProofDownloadUrl(Bill bill)
+      + async Task<Result<Bill>> DeleteBillAsync(int billId)
+    }
+
+    class CampaignService <<Implements ICampaignService>> {
+      - readonly ICampaignServiceFactory _campaignFactory = campaignFactory
+      - readonly IPriceTable _priceTable = priceTable
+      - readonly IUnitOfWork _unitOfWork = unitOfWork
+      
+      + CampaignService(ICampaignServiceFactory campaignFactory, IPriceTable priceTable, IUnitOfWork unitOfWork)
+      + async Task<Result<Campaign>> CreateCampaign(CampaignInput input)
+      + async Task<Result<PriceBreakdown>> CalculatePrice(CampaignInput input)
+    }
+
+    class ContractService <<Implements IContractService>> {
+      - const int MaxSerialAssignAttempts = 3
+      - readonly ICampaignService _campaignService = campaignService
+      - readonly IPriceTable _priceTable = priceTable
+      - readonly IUnitOfWork _unitOfWork = unitOfWork
+      - readonly IAmazonS3Service _amazonS3Service = amazonS3Service
+      - readonly IUserService _userService = userService
+
+      + ContractService(ICampaignService campaignService, IPriceTable priceTable, IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service, IUserService userService)
+      + async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
+      + Task<Contract> DeleteContractAsync(int id)
+      + IQueryable<Contract> GetAllContracts()
+      + IQueryable<Contract> GetAllContracts(int userId, string role)
+      + Task<Contract?> GetContractByIdAsync(int id)
+      + async Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId)
+      + async Task<Result> ApproveContractAsync(int userId, int contractId)
+      + async Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(int contractId)
+      {static} - bool IsUniqueSerialViolation(DbUpdateException ex)
+      - async Task<Result<Contract>> CancelContractForReplacementAsync(int contractId)
+      - async Task<Result<(Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax)>> BuildCampaignWithPricingAsync(CampaignInput input)
+      - async Task<Result<Contract>> PersistNewContractAsync(CampaignInput input, (Campaign Campaign, decimal TotalPrice, decimal TotalPricePostTax) pricing, string countryCode, Contract? original)
+      - async Task<(string PdfKey, string Url)> GenerateAndUploadContractPdfAsync(Contract contract)
+      - Task NotifyContractCreatedAsync(Contract contract)
+      - async Task PromoteBroadcasterIfEligibleAsync(Broadcaster broadcaster)
+    }
+
+    class CountryService <<Implements ICountryService>> {
+      - readonly IUnitOfWork _unitOfWork = unitOfWork
+
+      + CountryService(IUnitOfWork unitOfWork)
+      + IQueryable<Country> GetAllCountries()
+    }
+
+    class DashboardService <<Implements IDashboardService>> {
+      - IUnitOfWork _unitOfWork = unitOfWork
+      - readonly int _amountToTake = 20
+
+      + DashboardService(IUnitOfWork unitOfWork)
+      + async Task<DashboardPayload> GetDashboardDataAsync()
+      - IQueryable<decimal> GetTotalIncome()
+      - IQueryable<decimal> GetTotalExpense()
+      - IQueryable<UserPayload> GetTopClientsByContracts()
+      - IQueryable<UserPayload> GetTopBroadcastersByContracts()
+      - IQueryable<PaidContractsPayload> GetPaidContractsByMonth(DateOnly? calendarCutoff)
+      - IQueryable<PaidContractsPayload> GetTopClientsByPaidContracts(DateOnly? calendarCutoff)
+      - async Task<MonthlyDelinquentGroup[]> GetMonthlyDelinquentClientsAsync(DateOnly calendarCutoff)
+    }
+
+    class DepartmentService <<Implements IDepartmentService>> {
+      - readonly IUnitOfWork _unitOfWork = unitOfWork
+      
+      + DepartmentService(IUnitOfWork unitOfWork)
+      + IQueryable<Department> GetAllDepartments()
+    }
+
+    class EmailService <<Implements IEmailService>> {
+      - readonly IConfiguration _config
+      - const string LogoPath = "../static/logo.png"
+      - const string LogoCid = "alpu-logo"
+      - const string LoginUrl = "https://TU_DOMINIO.com/login"
+      .. Paleta basada en el logo de ALPU ..
+      - const string ColorPrimary = "#1565C0"
+      - const string ColorPrimaryDark = "#0D47A1"
+      - const string ColorTextDark = "#1F2937"
+      - const string ColorTextMuted = "#6B7280"
+      - const string ColorBackground = "#F2F4F7"
+      - const string ColorCard = "#FFFFFF"
+      - const string ColorBorder = "#E5E7EB"
+      - const string ColorInfoBg = "#EAF2FB"
+      - const string ColorInfoBorder = "#BBD9F5"
+      --
+      + EmailService(IConfiguration config)
+      + Task SendAccountPendingAsync(string toEmail, string userName)
+      + Task SendAccountApprovedAsync(string toEmail, string userName)
+      - static string BuildEmailLayout(string title, string bodyHtml) 
+      - async Task SendEmailWithLogoAsync(string toEmail, string subject, string htmlBody)
+    }
+
+    class LanguageService <<Implements ILanguageService>> {
+      - readonly IUnitOfWork _unitOfWork = unitOfWork
+
+      + LanguageService(IUnitOfWork unitOfWork)
+      + IQueryable<Language> GetAllLanguages()
+    }
+
+    class SkillService <<Implements ISkillService>> {
+      - readonly IUnitOfWork _unitOfWork = unitOfWork
+
+      + SkillService(IUnitOfWork unitOfWork)
+      + IQueryable<Skill> GetAllSkills()
+    }
+
+    class UserService {
+      - readonly ITopicEventSender _sender = sender
+      - readonly IEmailService _emailService = emailService
+      - readonly IAmazonS3Service _amazonS3Service = amazonS3Service
+      - readonly ILanguageService _languageService = languageService
+      - readonly ISkillService _skillService = skillService
+
+      + UserService(IUnitOfWork unitOfWork, ITopicEventSender sender, IEmailService emailService, AmazonS3Service amazonS3Service, ILanguageService languageService, ISkillService skillService)
+      + IQueryable<User> GetAllUsers()
+      + IQueryable<Client> GetAllClients()
+      + IQueryable<Broadcaster> GetAllBroadcasters()
+      + async Task<User?> GetUserByIdAsync(int id)
+      + async Task<User> UpdateUserAsync(int id, UpdateUserInput dto)
+      + async Task<Result> ApproveUser(UpdateUserStateInput input)
+      + async Task<User> DeleteUserAsync(int id)
+      + IQueryable<Notification> GetUserNotifications(int userId)
+      + async Task AddNotificationAsync(User user, string title, string description)
+      + async Task<Result<Notification>> DeleteNotificationAsync(int userId, int notificationId)
+      + async Task<Result<Notification[]>> DeleteAllNotificationsAsync(int userId)
+      + async Task<Result<ProfilePictureUploadPayload>> RequestProfilePictureUploadUrlAsync(int userId, string fileName)
+      + async Task<Result<User>> ConfirmProfilePictureUploadAsync(int userId, string key)
+      + async Task<Result<DemoUploadPayload>> RequestDemoUploadUrlAsync(int broadcasterId, string fileName)
+      + async Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key, int languageId, string title)
+      + async Task<Result<Demo>> DeleteDemoAsync(int broadcasterId, string key)
+      + async Task<Result<Broadcaster>> UpdateBroadcasterProfileAsync(int broadcasterId, UpdateBroadcasterProfileInput input)
+    }
+  }
+
+  package Singletons {
+    class PriceTable <<Implements IPriceTable>> {
+      - List<BaseService> _services = []
+      - List<VolumeDiscount> _volumeDiscounts = []
+      - List<MultiServiceDiscount> _multiServiceDiscounts = []
+      - List<PriceAdjustment> _priceAdjustments = []
+      - DateTime _lastLoad = DateTime.MinValue
+      - readonly SemaphoreSlim _lock = new(1, 1)
+      - readonly IServiceScopeFactory _scopeFactory = scopeFactory
+
+      + PriceTable(IServiceScopeFactory scopeFactory)
+      + async Task<BaseService?> GetServiceById(int id)
+      + async Task<VolumeDiscount?> GetVolumeDiscountAsync(ServiceType type, int quantity)
+      + async Task<MultiServiceDiscount?> GetMultiServiceDiscountAsync(ServiceType typeA, ServiceType typeB)
+      + async Task<PriceAdjustment?> GetPriceAdjustmentAsync(string key)
+      + void InvalidateCache()
+      - async Task EnsureLoadedAsync()
+    }
+  } 
+}
+
