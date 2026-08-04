@@ -16,7 +16,7 @@ public record BillInput
 
     public BillType Type { get; set; }
 
-    public int? ContractId { get; set; }
+    public string? ContractSerial { get; set; }
 
     public string FileName { get; set; } = string.Empty;
 }

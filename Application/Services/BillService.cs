@@ -24,17 +24,17 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
     public async Task<Result<RegisterBillPayload>> RegisterBillAsync(BillInput input)
     {
         Contract? contract = null;
-        if (input.ContractId != null)
+        if (input.ContractSerial != null)
         {
             contract = _unitOfWork.Contracts.GetAllContracts()
                 .Include(c => c.Client)
                 .Include(c => c.Broadcaster)
                 .Include(c => c.Bills)
-                .SingleOrDefault(c => c.ContractId == (int)input.ContractId);
+                .SingleOrDefault(c => c.ContractSerial == input.ContractSerial);
 
             if (contract == null)
             {
-                return Result.Fail(ContractErrors.ContractNotFound((int)input.ContractId));
+                return Result.Fail(ContractErrors.ContractNotFound(input.ContractSerial));
             }
         }
 
