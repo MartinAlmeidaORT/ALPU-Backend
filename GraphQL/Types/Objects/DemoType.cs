@@ -1,4 +1,5 @@
-using DataAccess.ExternalServices;
+
+using Domain.Interfaces.Private;
 using Domain.Models;
 
 namespace GraphQL.Types.Objects;
@@ -22,7 +23,7 @@ public class DemoType : ObjectType<Demo>
             .Resolve(ctx =>
             {
                 Demo demo = ctx.Parent<Demo>();
-                var s3Service = ctx.Service<AmazonS3Service>();
+                var s3Service = ctx.Service<IAmazonS3Service>();
                 return s3Service.GetDemoPlaybackUrl(demo.FileName);
             });
     }
