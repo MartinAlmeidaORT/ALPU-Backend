@@ -53,12 +53,12 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
                 }
                 await _userService.AddNotificationAsync(
                     newBill.Value.Contract.Client,
-                    $"Pago del contrato: {newBill.Value.Contract.ContractId}",
+                    $"Pago del contrato: {newBill.Value.Contract.ContractSerial}",
                     $"Se registro el pago con la suma de {newBill.Value.Amount}."
                 );
                 await _userService.AddNotificationAsync(
                     newBill.Value.Contract.Broadcaster,
-                    $"Pago del contrato: {newBill.Value.Contract.ContractId}",
+                    $"Pago del contrato: {newBill.Value.Contract.ContractSerial}",
                     $"Cliente {newBill.Value.Contract.Client.FullName} pago la suma de {newBill.Value.Amount}."
                 );
                 decimal totalAmount = newBill.Value.Contract.Bills.Sum(b => b.Amount);
@@ -66,12 +66,12 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
                 {
                     await _userService.AddNotificationAsync(
                         newBill.Value.Contract.Client,
-                        $"Contrato {newBill.Value.Contract.ContractId} completado",
+                        $"Contrato {newBill.Value.Contract.ContractSerial} completado",
                         $"Se registro el pago final del contrato."
                     );
                     await _userService.AddNotificationAsync(
                         newBill.Value.Contract.Broadcaster,
-                        $"Contrato {newBill.Value.Contract.ContractId} completado",
+                        $"Contrato {newBill.Value.Contract.ContractSerial} completado",
                         $"Cliente {newBill.Value.Contract.Client.FullName} completo el pago del contrato."
                     );
                     newBill.Value.Contract.State = ContractState.Paid;
