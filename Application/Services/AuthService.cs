@@ -38,6 +38,11 @@ public class AuthService(
             return UserErrors.DuplicatedEmail(input.Email);
         }
 
+        if (input.IdentityCard != null && unitOfWork.Users.GetAllUsers().Any(u => u.IdentityCard == input.IdentityCard))
+        {
+            return UserErrors.DuplicatedIdentityCard(input.IdentityCard);
+        }
+
         if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
         if (department is null) return DepartmentErrors.DepartmentNotFound(input.DepartmentId);
 

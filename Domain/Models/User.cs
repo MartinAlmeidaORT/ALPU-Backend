@@ -89,6 +89,11 @@ public abstract class User : Entity
 
     public Result ValidateIdentityCard()
     {
+        if (Address.Country.CountryCode.Trim() != "UY")
+        {
+            return Result.Ok();
+        }
+
         if (string.IsNullOrWhiteSpace(IdentityCard))
             return UserErrors.IdentityCardIsRequired();
 
