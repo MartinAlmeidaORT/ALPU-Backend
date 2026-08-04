@@ -116,7 +116,10 @@ public class ContractService(
             return Result.Fail(ContractErrors.ContractNotFound(input.ContractId));
         }
 
-        if (user is Accountant || !(contract?.ClientId == userId || contract?.BroadcasterId == userId))
+        var isPrivileged = user is Administrator or Supervisor;
+        var isContractParty = contract is not null && (contract.ClientId == userId || contract.BroadcasterId == userId);
+
+        if (!isPrivileged && !isContractParty)
         {
             return Result.Fail(ContractErrors.UnauthorizedUser(userId));
         }
