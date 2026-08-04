@@ -1,9 +1,9 @@
 using Application.QuestPDF;
-using DataAccess.ExternalServices;
 using Domain.Common.Inputs;
 using Domain.Common.Inputs.CampaignService;
 using Domain.Common.Payloads;
 using Domain.Enums;
+using Domain.Interfaces.Private;
 using Domain.Interfaces.Public.Repositories;
 using Domain.Interfaces.Public.Services;
 using Domain.Interfaces.Public.Singletons;
@@ -21,7 +21,7 @@ public class ContractService(
     ICampaignService campaignService,
     IPriceTable priceTable,
     IUnitOfWork unitOfWork,
-    AmazonS3Service amazonS3Service,
+    IAmazonS3Service amazonS3Service,
     IUserService userService) : IContractService
 {
     private const int MaxSerialAssignAttempts = 3;
@@ -29,7 +29,7 @@ public class ContractService(
     private readonly ICampaignService _campaignService = campaignService;
     private readonly IPriceTable _priceTable = priceTable;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
+    private readonly IAmazonS3Service _amazonS3Service = amazonS3Service;
     private readonly IUserService _userService = userService;
 
     public async Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)

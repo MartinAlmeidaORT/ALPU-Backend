@@ -70,7 +70,7 @@ public static class ServiceCollectionExtensions
             // EC2 con LabRole: toma credenciales del instance profile automáticamente
             return new AmazonS3Client(region);
         });
-        services.AddSingleton<AmazonS3Service>();
+        services.AddSingleton<IAmazonS3Service, AmazonS3Service>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IAlpuService, AlpuService>();
         services.AddScoped<IUserService, UserService>();

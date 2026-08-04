@@ -6,7 +6,6 @@ using Domain.Interfaces.Public.Services;
 using Microsoft.EntityFrameworkCore;
 using HotChocolate.Subscriptions;
 using Domain.Interfaces.Private;
-using DataAccess.ExternalServices;
 using Domain.Common.Payloads;
 
 namespace Application.Services;
@@ -15,7 +14,7 @@ public class UserService(
     IUnitOfWork unitOfWork,
     ITopicEventSender sender,
     IEmailService emailService,
-    AmazonS3Service amazonS3Service,
+    IAmazonS3Service amazonS3Service,
     ILanguageService languageService,
     ISkillService skillService) : IUserService
 {
@@ -23,7 +22,7 @@ public class UserService(
 
     private readonly IEmailService _emailService = emailService;
 
-    private readonly AmazonS3Service _amazonS3Service = amazonS3Service;
+    private readonly IAmazonS3Service _amazonS3Service = amazonS3Service;
 
     private readonly ILanguageService _languageService = languageService;
 
