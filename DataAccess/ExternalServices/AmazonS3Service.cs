@@ -63,7 +63,7 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
         return _s3Client.GetPreSignedURL(request);
     }
 
-    public async Task MoveContractToCancelledAsync(int contractId)
+    public async Task<string> MoveContractToCancelledAsync(int contractId)
     {
         var sourceKey = $"contracts/{contractId}.pdf";
         var destinationKey = $"contracts/cancelled/{contractId}.pdf";
@@ -85,6 +85,7 @@ public class AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
             Key = sourceKey
         };
         await _s3Client.DeleteObjectAsync(deleteRequest);
+        return destinationKey;
     }
 
     // ---- Voice demos (CU13) ----

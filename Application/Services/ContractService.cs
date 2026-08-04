@@ -129,7 +129,7 @@ public class ContractService(
         contract.State = input.NewState;
         if (contract.State == ContractState.Canceled)
         {
-            await _amazonS3Service.MoveContractToCancelledAsync(contract.ContractId);
+            contract.PdfAmazonS3Key = await _amazonS3Service.MoveContractToCancelledAsync(contract.ContractId);
             if (contract.Client.UserId != userId)
             {
                 await _userService.AddNotificationAsync(contract.Client, $"Cancelado el contrato: {contract.ContractId}", $"");
