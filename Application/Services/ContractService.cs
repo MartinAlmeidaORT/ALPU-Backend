@@ -97,21 +97,33 @@ public class ContractService(
 
     public async Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId)
     {
+        User? user = await _unitOfWork.Users.GetUserByIdAsync(userId);
+
+        if (user == null)
+        {
+            return Result.Fail(UserErrors.UserNotFound(userId));
+        }
+
         Contract? contract = _unitOfWork.Contracts
             .GetAllContracts()
-            .Where(c => (c.ClientId == userId || c.BroadcasterId == userId) && c.ContractId == input.ContractId)
+            .Where(c => c.ContractId == input.ContractId)
             .Include(c => c.Client)
             .Include(c => c.Broadcaster)
             .SingleOrDefault();
 
         if (contract == null)
         {
-            return Result.Fail($"El contrato con id: {input.ContractId} no existe o no tiene acceso al mismo.");
+            return Result.Fail(ContractErrors.ContractNotFound(input.ContractId));
+        }
+
+        if (user is Accountant || !(contract?.ClientId == userId || contract?.BroadcasterId == userId))
+        {
+            return Result.Fail(ContractErrors.UnauthorizedUser(userId));
         }
 
         if (contract.State == input.NewState)
         {
-            return Result.Fail("El contrato ya se encuentra en ese estado.");
+            return Result.Fail(ContractErrors.RedundantStateUpdate());
         }
 
         contract.State = input.NewState;
