@@ -1,0 +1,1394 @@
+
+package Domain {
+
+    package Common {
+
+        package Abstracts {
+            class Entity {
+
+            }
+
+            class RepositoryBase<TEntity where TEntity : Entity> {
+                # readonly DbContext _context = context;
+                + RepositoryBase<TEntity>(DbContext context)
+                # TEntity Create(TEntity entity)
+                # IQueryable<TEntity> GetAll()
+                # async Task<TEntity?> Get(params object[] keys)
+                # TEntity Update(TEntity entity)
+                # TEntity Delete(TEntity entity)
+            }
+        }
+
+        package Error {
+            class BaseError <<Extends Error>> {
+                + BaseError(string message, HttpStatusCode statusCode)
+            }
+
+            class InternalServerError {
+                + InternalServerError()
+            }
+
+            class NotFoundError {
+                + NotFoundError(string Msg)
+            }
+
+            class BadRequestError {
+                + BadRequestError(string Msg)
+            }
+
+            class ValidationError {
+                + ValidationError(string Msg)
+            }
+
+            class ConflictError {
+                + ConflictError(string Msg)
+            }
+
+            class AuthError {
+                + AuthError(string Msg)
+            }
+        }
+
+        package Extensions {
+            class PriceBreakdownExtensions {
+                {static} + async Task<PriceBreakdown> ApplyPriceAdjustment(this PriceBreakdown breakdown, string key, IPriceTable priceTable)
+                {static} + async Task<ServiceBreakdown> ApplyPriceAdjustment(this ServiceBreakdown breakdown, string key, IPriceTable priceTable)
+            }
+        }
+
+        package Inputs {
+            package Auth {
+                class CompleteGoogleSignUpUserInput <<record>> {
+                    + required string Subject { get; init; }
+                    + required string Email { get; init; }
+                    + required string FirstName { get; init; }
+                    + required string LastName { get; init; }
+                    + required string RUT { get; init; }
+                    + required string CountryCode { get; init; }
+                    + required int DepartmentId { get; init; }
+                    + required string City { get; init; }
+                    + string? Street { get; init; }
+                    + required Gender Gender { get; init; }
+                    + string? IdentityCard { get; init; } = null!
+                }
+
+                class CompleteGoogleSignUpBroadcasterInput <<record>> {
+
+                }
+
+                class CompleteGoogleSignUpClientInput <<record>> {
+                    + required string AgencyName { get; init; }
+                }
+
+                class GoogleAuthInput <<record>> {
+                    + required string Code { get; init; }
+                }
+
+                class RegisterUserInput <<record>> {
+                    + required string Email { get; init; }
+                    + required string Password { get; init; }
+                    + required string FirstName { get; init; }
+                    + required string LastName { get; init; }
+                    + required string RUT { get; init; }
+                    + required string CountryCode { get; init; }
+                    + required int DepartmentId { get; init; }
+                    + required string City { get; init; }
+                    + string? Street { get; init; }
+                    + required Gender Gender { get; init; }
+                    + string? IdentityCard { get; init; } = null!
+                }
+
+                class RegisterBroadcasterInput <<record>> {
+
+                }
+
+                class RegisterClientInput <<record>> {
+                    + required string AgencyName { get; init; }
+                }
+
+                class UserLoginInput <<record>> {
+                    + required string Email { get; set; }
+                    + required string Password { get; set; }
+                }
+
+            }
+
+            package CampaignService {
+                class CampaignInput <<record>> {
+                    + required int ClientId { get; init; }
+                    + required int BroadcasterId { get; init; }
+                    + required string Campaign { get; init; }
+                    + int? ContractId { get; init; }
+                    + required string CountryCode { get; init; }
+                    + required CampaignServiceInput[] Services { get; init; }
+                }
+
+                class CampaignServiceInput <<record>> {
+                    + int ServiceId { get; init; }
+                    + JsonElement Options { get; init; }
+                    + List<PieceInput> Pieces { get; init; } = null!
+                }
+
+                class PieceInput <<record>> {
+                    + string? Name { get; init; }
+                }
+
+                class BaseCampaignServiceOptions <<record>> {
+
+                }
+
+                class NarrativeCampaignServiceOptions <<record>> {
+                    + int Minutes { get; set; }
+                    + int ExtraRoles { get; set; }
+                    + bool IsNonCommercial { get; set; }
+                    + bool HasLipSync { get; set; }
+                    + bool OnInternet { get; set; }
+                    + decimal? PriceOverride { get; set; }
+                    + DateOnly Date { get; set; }
+                }
+
+                class IvrCampaignServiceOptions <<record>> {
+                    + string MessageText { get; set; } = null!
+                    + int AdditionalMessages { get; set; }
+                    + int Updates { get; set; }
+                    + bool CanUpdate { get; set; }
+                    + bool IsInterior { get; set; }
+                    + decimal? PriceOverride { get; set; }
+                    + DateOnly Date { get; set; }
+                }
+
+                class EventCampaignServiceOptions <<record>> {
+                    + bool ForMassBroadcast { get; set; }
+                    + DateOnly Date { get; set; }
+                }
+
+                class PeriodCampaignServiceOptions <<record>> {
+                    + Interval Period { get; set; }
+                }
+
+                class TvCampaignServiceOptions <<record>> {
+                    + bool IsInterior { get; set; }
+                }
+
+                class CinemaCampaignServiceOptions <<record>> {
+                    + bool IsInterior { get; set; }
+                }
+
+                class InternetCampaignServiceOptions <<record>> {
+
+                }
+
+                class RadioCampaignServiceOptions <<record>> {
+                    + bool IsInterior { get; set; }
+                }
+
+                class OtherMediaCampaignServiceOptions <<record>> {
+
+                }
+
+                class CameraCampaignServiceOptions <<record>> {
+                    + bool ForInternalUse { get; set; }
+                }
+
+            }
+
+            class BillInput <<record>> {
+                internal BillInput()
+                + string Title { get; set; } = string.Empty
+                + string Description { get; set; } = string.Empty
+                + DateOnly Date { get; set; }
+                + decimal Amount { get; set; }
+                + BillType Type { get; set; }
+                + string? ContractSerial { get; set; }
+                + string FileName { get; set; } = string.Empty
+            }
+
+            class CalculateContractInput <<record>> {
+                + CalculateContractServiceInput[] Services { get; set; } = null!
+                + int ClientId { get; set; }
+                + int BroadcasterId { get; set; }
+            }
+
+            class CalculateContractServiceInput <<record>> {
+                + int ServiceId { get; set; }
+                + string PieceName { get; set; } = null!
+                + ServiceFlagsInput Options { get; set; } = null!
+            }
+
+            class ServiceFlagsInput <<record>> {
+                + bool? HasMedia { get; set; }
+                + bool? IsNonComercial { get; set; }
+                + bool? IsInterior { get; set; }
+                + bool? HasInternetPromo { get; set; }
+                + bool? HasLipSync { get; set; }
+                + bool? HasMassMediaBroadcast { get; set; }
+                + string? MessageIVR { get; set; }
+                + int? AdditionalMessageIVR { get; set; }
+                + int? NarrativeMinutes { get; set; }
+                + int? RoleQuantity { get; set; }
+                + int? Pieces { get; set; }
+                + int? DurationId { get; set; }
+                + bool? MultipleBroadcaster { get; set; }
+                + decimal? OverridePrice { get; set; }
+            }
+
+            class UpdateAddressInput <<record>> {
+                + string? CountryCode { get; set; }
+                + int? DepartmentId { get; set; }
+                + string? City { get; set; }
+                + string? Street { get; set; }
+            }
+
+            class UpdateBroadcasterProfileInput <<record>> {
+                + string? FirstName { get; init; }
+                + string? LastName { get; init; }
+                + string? Email { get; init; }
+                + Gender? Gender { get; init; }
+                + string? IdentityCard { get; init; }
+                + UpdateAddressInput? Address { get; init; }
+                + string? PhoneNumber { get; init; }
+                + string? Website { get; init; }
+                + string? Description { get; init; }
+                + ICollection<int>? SkillIds { get; init; }
+                + ICollection<int>? LanguageIds { get; init; }
+            }
+
+            class UpdateContractStateInput <<record>> {
+                + int ContractId { get; init; }
+                + ContractState NewState { get; init; }
+            }
+
+            class UpdateUserInput <<record>> {
+                + string? IdentityCard { get; set; }
+                + Gender? Gender { get; set; }
+                + string? Email { get; set; }
+                + string? FirstName { get; set; }
+                + string? LastName { get; set; }
+                + string? RUT { get; set; }
+                + UpdateAddressInput? Address { get; set; }
+            }
+
+            class UpdateUserStateInput <<record>> {
+                + int UserId { get; init; }
+                + UserState NewState { get; init; }
+            }
+
+            class UploadDemoInput <<record>> {
+                + string Key { get; init; } = null!
+                + int LanguageId { get; init; }
+                + string Title { get; init; } = null!
+            }
+
+            class RequestUploadInput <<record>> {
+                + required string FileName { get; init; }
+            }
+
+            class ConfirmUploadInput <<record>> {
+                + required string Key { get; init; }
+            }
+        }
+
+        package Payloads {
+            class AuthPayload <<record>> {
+                + required string Token { get; set; }
+                + required User User { get; set; }
+            }
+
+            class BillUrlPayload <<record>> {
+                + required string AmazonS3Url { get; set; }
+            }
+
+            class CalculateContractPayload <<record>> {
+                + decimal TotalPrice { get; init; }
+                + ServicePricePayload[] ServicePrice { get; init; } = []
+            }
+
+            class ServicePricePayload <<record>> {
+                + string PieceName { get; init; } = null!
+                + string Service { get; init; } = null!
+                + decimal Price { get; init; }
+                + decimal Discount { get; init; }
+                + int? DurationId { get; init; }
+                + int? Variants { get; init; }
+                + decimal TotalPriceWithDiscount { get; init; }
+                + ServiceFlagPayload[] ServiceFlags { get; init; } = null!
+            }
+
+            class ServiceFlagPayload <<record>> {
+                + required bool IsOn { get; set; }
+                + required string Label { get; set; }
+            }
+
+            class PriceBreakdown <<record>> {
+                + List<ServiceBreakdown> Services { get; init; } = []
+                + List<PriceAdjustmentBreakdown> Adjustments { get; set; } = []
+                + decimal BeforeDiscount { get; set; }
+                + decimal Total { get; set; }
+            }
+
+            class PriceAdjustmentBreakdown <<record>> {
+                + PriceAdjustmentBreakdown(string key, string name, decimal amount, decimal applyDiscount, PriceAdjustmentType type)
+                + string Key { get; set; } = null!
+                + string Name { get; set; } = null!
+                + decimal Amount { get; set; }
+                + decimal ApplyDiscount { get; set; }
+                + PriceAdjustmentType Type { get; set; }
+            }
+
+            class ServiceBreakdown <<record>> {
+                + string ServiceName { get; init; } = null!
+                + ServiceType ServiceType { get; init; }
+                + decimal BasePrice { get; set; }
+                + decimal? SubsequentPrice { get; init; }
+                + decimal? VolumeDiscount { get; init; }
+                + decimal BeforeDiscount { get; set; }
+                + decimal SubTotal { get; set; }
+                + List<PriceAdjustmentBreakdown> Adjustments { get; set; } = []
+                + PieceBreakdown[] Pieces { get; init; } = null!
+            }
+
+            class PieceBreakdown <<record>> {
+                + PieceBreakdown()
+                + PieceBreakdown(string name, bool isSubsequent, decimal price)
+                + string Name { get; init; } = null!
+                + bool IsSubsequent { get; init; }
+                + decimal Price { get; init; }
+            }
+
+            class ContractUrlPayload <<record>> {
+                + ContractUrlPayload()
+                + ContractUrlPayload(string pdfAmazonS3Url, Contract contract)
+                + required string PdfAmazonS3Url { get; init; }
+                + required Contract Contract { get; init; }
+            }
+
+            class DashboardPayload <<record>> {
+                + required decimal TotalIncome { get; init; }
+                + required decimal TotalExpense { get; init; }
+                + required UserPayload[] TopClientsByContracts { get; init; }
+                + required UserPayload[] TopBroadcasterByContracts { get; init; }
+                + required PaidContractsPayload[] TopClientsByPaidContracts { get; init; }
+                + required MonthlyTrendGroup[] MonthlyPaidGroup { get; init; }
+                + required MonthlyDelinquentGroup[] MonthlyDelinquentsGroup { get; init; }
+            }
+
+            class UserPayload <<record>> {
+                + required User User { get; init; }
+                + required int Contracts { get; init; }
+            }
+
+            class MonthlyTrendGroup <<record>> {
+                + required string Month { get; init; }
+                + required PaidContractsPayload[] Clients { get; init; }
+            }
+
+            class PaidContractsPayload <<record>> {
+                + required int ClientId { get; init; }
+                + required string FirstName { get; init; }
+                + required string LastName { get; init; }
+                + required string Email { get; init; }
+                + required int PaidContracts { get; init; }
+                + required int Month { get; init; }
+                + required int Year { get; init; }
+            }
+
+            class MonthlyDelinquentGroup <<record>> {
+                + required string Month { get; init; }
+                + required DelinquentClientPayload[] Clients { get; init; }
+            }
+
+            class DelinquentClientPayload <<record>> {
+                + required int ClientId { get; init; }
+                + required string FirstName { get; init; }
+                + required string LastName { get; init; }
+                + required string Email { get; init; }
+                + required int LateContracts { get; init; }
+            }
+
+            class FormField <<record>> {
+                + required string Name { get; init; }
+                + required string Value { get; init; }
+            }
+
+            class DemoUploadPayload <<record>> {
+                + required string Key { get; init; }
+                + required string UploadUrl { get; init; }
+                + required IReadOnlyList<FormField> Fields { get; init; }
+            }
+
+            class GenerateContractPayload <<record>> {
+                + required Contract Contract { get; init; }
+                + required string PdfAmazonS3Url { get; init; }
+            }
+
+            class GoogleAuthPayload <<record>> {
+                + string? Token { get; init; }
+                + bool RequiresRegistration { get; init; }
+                + string? Subject { get; init; }
+                + string? Email { get; init; }
+                + string? FirstName { get; init; }
+                + string? LastName { get; init; }
+                + User? User { get; init; }
+            }
+
+            class ProfilePictureUploadPayload <<record>> {
+                + required string Key { get; init; }
+                + required string UploadUrl { get; init; }
+            }
+
+            class RegisterBillPayload <<record>> {
+                + RegisterBillPayload()
+                + RegisterBillPayload(Bill bill, string amazonS3Url)
+                + Bill Bill { get; init; } = null!
+                + string AmazonS3Url { get; init; } = string.Empty
+            }
+        }
+
+        class ContractSerialGenerator <<static>> {
+            {static} + string Generate(string broadcasterFirstName, string broadcasterLastName, int broadcasterId, int rootContractId, int replacementCount)
+            {static} - string GetInitials(string firstName, string lastName)
+        }
+
+        class GoogleUserInfo {
+            + required string Subject { get; init; }
+            + required string Email { get; init; }
+            + string? GivenName { get; init; }
+            + string? FamilyName { get; init; }
+        }
+
+        class JwtUserClaims {
+            + required int UserId { get; init; }
+            + required string Role { get; init; }
+            + required string Email { get; init; }
+            + required string FirstName { get; init; }
+            + required string LastName { get; init; }
+            + required string AccountState { get; init; }
+        }
+    }
+
+    package Enums {
+        enum BillType {
+            Income
+            Expense
+        }
+
+        enum ContractState {
+            Pending
+            Active
+            Completed
+            Canceled
+            Paid
+        }
+
+        enum Gender {
+            Male
+            Female
+            NonSpecified
+        }
+
+        enum Interval {
+            OneWeek
+            OneMonth
+            ThreeMonths
+            SixMonths
+            OneYear
+        }
+
+        enum MembershipState {
+            Valid
+            Expired
+        }
+
+        enum PriceAdjustmentType {
+            Fixed
+            Percentage
+        }
+
+        enum ServiceType {
+            TvGeneric
+            TvZocalo
+            TvHost
+            RadioGeneric
+            RadioZocalo
+            RadioHost
+            InternetVideo
+            InternetAudio
+            OthersVideo
+            OthersAudio
+            Others
+            Cinema
+            Ivr
+            Narrative
+            Camera
+            Event
+        }
+
+        enum UserState {
+            Enabled
+            Pending
+            Penalized
+        }
+    }
+
+    package Interfaces {
+        package Public {
+            package Repositores {
+                interface IAlpuServiceRepository {
+                    IQueryable<BaseService> GetAllServices()
+                    IQueryable<VolumeDiscount> GetAllVolumeDiscounts()
+                    IQueryable<MultiServiceDiscount> GetAllMultiServiceDiscounts()
+                    IQueryable<PriceAdjustment> GetAllPriceAdjustments()
+                    Task<BaseService?> GetServiceByIdAsync(int id)
+                    Task<BaseService?> GetByType(ServiceType service, int? period = null)
+                    Task<VolumeDiscount?> GetVolumeDiscountAsync(ServiceType type, int quantity)
+                    Task<MultiServiceDiscount?> GetMultiMediaDiscountAsync(ServiceType typeA, ServiceType typeB)
+                }
+
+                interface IBillRepository {
+                    Bill CreateBill(Bill entity)
+                    IQueryable<Bill> GetAllBills()
+                    Task<Bill?> GetBillByIdAsync(int id)
+                    void DeleteBill(Bill entity)
+                }
+
+                interface IBroadcasterRepository {
+                    Broadcaster CreateBroadcaster(Broadcaster entity)
+                    IQueryable<Broadcaster> GetAllBroadcasters()
+                    Task<Broadcaster?> GetBroadcasterByIdAsync(int id)
+                    Task<Broadcaster?> GetBroadcasterWithSkillsAndLanguagesAsync(int id)
+                    Task<BroadcasterCategory?> GetCategoryByIdAsync(int id)
+                    Broadcaster UpdateBroadcaster(Broadcaster entity)
+                    Broadcaster DeleteBroadcaster(Broadcaster entity)
+                }
+
+                interface IClientRepository {
+                    Client CreateClient(Client entity)
+                    IQueryable<Client> GetAllClients()
+                    Task<Client?> GetClientByIdAsync(int id)
+                    Agency CreateAgency(Agency entity)
+                    Task<Agency?> GetAgencyByIdAsync(int id)
+                    Task<Agency?> GetAgencyByNameAsync(string name)
+                    Client DeleteClient(Client client)
+                }
+
+                interface IContractRepository {
+                    Contract CreateContract(Contract entity)
+                    IQueryable<Contract> GetAllContracts()
+                    Task<Contract?> GetByIdAsync(int id)
+                    Task<Contract> GetContractWithFullDetailsAsync(int id)
+                    Task<int> CountByRootIdAsync(int rootContractId)
+                }
+
+                interface ICountryRepository {
+                    IQueryable<Country> GetAllCountries()
+                    Task<Country?> GetByCodeAsync(string code)
+                }
+
+                interface IDepartmentRepository {
+                    IQueryable<Department> GetAllDepartments()
+                    Task<Department?> GetByIdAsync(int id)
+                }
+
+                interface ILanguageRepository {
+                    IQueryable<Language> GetAllLanguages()
+                }
+
+                interface ISkillRepository {
+                    IQueryable<Skill> GetAllSkills()
+                }
+
+                interface IUnitOfWork {
+                    IUserRepository Users { get; }
+                    IBroadcasterRepository Broadcasters { get; }
+                    IClientRepository Clients { get; }
+                    ICountryRepository Countries { get; }
+                    IDepartmentRepository Departments { get; }
+                    IContractRepository Contracts { get; }
+                    IAlpuServiceRepository Services { get; }
+                    IBillRepository Bills { get; }
+                    ILanguageRepository Languages { get; }
+                    ISkillRepository Skills { get; }
+                    void Attach<T>(T entity) where T : class;
+                    Task SaveChangesAsync();
+                }
+
+                interface IUserRepository {
+                    IQueryable<User> GetAllUsers()
+                    IQueryable<Client> GetAllClients()
+                    IQueryable<Broadcaster> GetAllBroadcasters()
+                    Task<User?> GetUserByIdAsync(int id)
+                    User DeleteUser(User entity)
+                    Task<User?> GetUserByEmailAsync(string email)
+                    Task<User?> GetUserByRutAsync(string rut)
+                    Task<User?> GetUserByGoogleIdAsync(string googleId)
+                }
+            }
+
+            package Services {
+                interface IAlpuService {
+                    IQueryable<BaseService> GetAllServices()
+                }
+
+                interface IAuthService {
+                    Task<Result<AuthPayload>> RegisterBroadcasterAsync(RegisterBroadcasterInput input)
+                    Task<Result<AuthPayload>> RegisterClientAsync(RegisterClientInput input)
+                    Task<Result<AuthPayload>> LoginAsync(UserLoginInput input)
+                    Task<Result<GoogleAuthPayload>> GoogleAuthAsync(GoogleAuthInput input)
+                    Task<Result<AuthPayload>> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input)
+                    Task<Result<AuthPayload>> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input)
+                }
+
+                interface IBillService {
+                    Task<Result<RegisterBillPayload>> RegisterBillAsync(BillInput input)
+                    IQueryable<Bill> GetAllBills()
+                    string GetBillProofDownloadUrl(Bill bill)
+                    Task<Result<Bill>> DeleteBillAsync(int billId)
+                }
+
+                interface ICampaignService {
+                    Task<Result<Campaign>> CreateCampaign(CampaignInput input)
+                    Task<Result<PriceBreakdown>> CalculatePrice(CampaignInput input)
+                }
+
+                interface IContractService {
+                    IQueryable<Contract> GetAllContracts()
+                    IQueryable<Contract> GetAllContracts(int userId, string role)
+                    Task<Contract?> GetContractByIdAsync(int id)
+                    Task<Result<GenerateContractPayload>> CreateContractAsync(CampaignInput input)
+                    Task<Result<ContractUrlPayload>> GetContractPdfDownloadUrl(int contractId)
+                    Task<Result> UpdateContractAsync(UpdateContractStateInput input, int userId)
+                    Task<Result> ApproveContractAsync(int userId, int contractId)
+                    Task<Contract> DeleteContractAsync(int id)
+                }
+
+                interface ICountryService {
+                    IQueryable<Country> GetAllCountries()
+                }
+
+                interface IDashboardService {
+                    Task<DashboardPayload> GetDashboardDataAsync()
+                }
+
+                interface IDepartmentService {
+                    IQueryable<Department> GetAllDepartments()
+                }
+
+                interface ILanguageService {
+                    IQueryable<Language> GetAllLanguages()
+                }
+
+                interface INotificationService {
+                    void NotifyContractChangeAsync(int contractId, string message)
+                }
+
+                interface IPriceCalculatorService {
+                    Task<decimal> CalcularTotalAsync(List<CampaignServiceInput> inputs)
+                }
+
+                interface ISkillService {
+                    IQueryable<Skill> GetAllSkills()
+                }
+
+                interface IUserService {
+                    IQueryable<User> GetAllUsers()
+                    IQueryable<Client> GetAllClients()
+                    IQueryable<Broadcaster> GetAllBroadcasters()
+                    Task<User?> GetUserByIdAsync(int id)
+                    Task<User> UpdateUserAsync(int id, UpdateUserInput dto)
+                    Task<Result> ApproveUser(UpdateUserStateInput input)
+                    Task<User> DeleteUserAsync(int id)
+                    IQueryable<Notification> GetUserNotifications(int id)
+                    Task AddNotificationAsync(User user, string title, string description)
+                    Task<Result<Notification>> DeleteNotificationAsync(int userId, int notificationId)
+                    Task<Result<Notification[]>> DeleteAllNotificationsAsync(int userId)
+                    Task<Result<ProfilePictureUploadPayload>> RequestProfilePictureUploadUrlAsync(int userId, string fileName)
+                    Task<Result<User>> ConfirmProfilePictureUploadAsync(int userId, string key)
+                    Task<Result<DemoUploadPayload>> RequestDemoUploadUrlAsync(int broadcasterId, string fileName)
+                    Task<Result<Demo>> ConfirmDemoUploadAsync(int broadcasterId, string key, int languageId, string title)
+                    Task<Result<Demo>> DeleteDemoAsync(int broadcasterId, string key)
+                    Task<Result<Broadcaster>> UpdateBroadcasterProfileAsync(int broadcasterId, UpdateBroadcasterProfileInput input)
+                }
+            }
+
+            package Singletons {
+                interface IPriceTable {
+                    Task<BaseService?> GetServiceById(int id)
+                    Task<VolumeDiscount?> GetVolumeDiscountAsync(ServiceType type, int quantity)
+                    Task<MultiServiceDiscount?> GetMultiServiceDiscountAsync(ServiceType typeA, ServiceType typeB)
+                    Task<PriceAdjustment?> GetPriceAdjustmentAsync(string key)
+                    void InvalidateCache()
+                }
+            }
+        }
+
+        package private {
+            interface ICampaignServiceFactory {
+                Task<Result<BaseCampaignService>> Create(CampaignServiceInput request)
+            }
+
+            interface IEmailService {
+                Task SendAccountPendingAsync(string toEmail, string userName)
+                Task SendAccountApprovedAsync(string toEmail, string userName)
+            }
+
+            interface IGoogleAuthService {
+                Task<GoogleUserInfo?> ExchangeCodeAsync(string code)
+            }
+
+            interface IHasher {
+                string Hash(string password)
+                bool Verify(string password, string hashedPassword)
+            }
+
+            interface IJwtService {
+                string GenerateJWT(User user)
+                IReadOnlyDictionary<string, string> DecodeClaims(string token)
+                JwtUserClaims GetUserClaims(ClaimsPrincipal principal)
+            }
+        }
+    }
+
+    package Models {
+        package Campaign {
+            package Period {
+                class CameraCampaignService {
+                    - readonly new CameraCampaignServiceOptions Options
+                    internal protected CameraCampaignService()
+                    + CameraCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, CameraCampaignServiceOptions options)
+                    + async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                }
+
+                class CinemaCampaignService {
+                    - readonly new CinemaCampaignServiceOptions Options
+                    internal protected CinemaCampaignService()
+                    + CinemaCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, CinemaCampaignServiceOptions options)
+                    + async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                }
+
+                class InternetCampaignService {
+                    internal protected InternetCampaignService()
+                    + InternetCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, InternetCampaignServiceOptions options)
+                }
+
+                class OtherMediaCampaignService {
+                    internal protected OtherMediaCampaignService()
+                    + OtherMediaCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, OtherMediaCampaignServiceOptions options)
+                }
+
+                class RadioCampaignService {
+                    - readonly new RadioCampaignServiceOptions Options
+                    internal protected RadioCampaignService()
+                    + RadioCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, RadioCampaignServiceOptions options)
+                    + async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                }
+
+                class TvCampaignService {
+                    - readonly new TvCampaignServiceOptions Options
+                    internal protected TvCampaignService()
+                    + TvCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, TvCampaignServiceOptions options)
+                    + async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                }
+
+                class PeriodCampaignService {
+                    # readonly new PeriodCampaignServiceOptions Options
+                    internal protected PeriodCampaignService()
+                    # PeriodCampaignService(PeriodService service, List<Piece> pieces, IPriceTable priceTable, PeriodCampaignServiceOptions options)
+                    + async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                    + override DateOnly GetExpireDate()
+                }
+
+            }
+
+            class BaseCampaignService <<abstract>> <<Entity>> {
+                # readonly IPriceTable _priceTable
+                # BaseCampaignServiceOptions Options { get; set; } = null!
+                + int CampaignServiceId { get; set; }
+                + int CampaignId { get; set; }
+                + Campaign Campaign { get; set; } = null!
+                + int ServiceId { get; set; }
+                + BaseService Service { get; set; } = null!
+                + List<Piece> Pieces { get; init; } = null!
+                + decimal? BasePriceOverride { get; set; }
+                internal protected BaseCampaignService()
+                # BaseCampaignService(BaseService service, List<Piece> pieces, IPriceTable priceTable)
+                + virtual async Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                + virtual decimal CalculateSubTotal()
+                + void ApplyVolumeDiscount(ref ServiceBreakdown breakdown, VolumeDiscount volumeDiscount)
+                + PieceBreakdown[] CalculatePieces()
+                + abstract DateOnly GetExpireDate()
+            }
+
+            class Campaign <<Entity>> {
+                + int CampaignId { get; set; }
+                + int ContractId { get; set; }
+                + Contract Contract { get; set; } = null!
+                + string Name { get; set; } = null!
+                + List<BaseCampaignService> Services { get; set; } = null!
+                internal Campaign()
+                + Campaign(string name, List<BaseCampaignService> services)
+                + async Task<Result<PriceBreakdown>> Calculate(CampaignInput input, IPriceTable priceTable, IUnitOfWork unitOfWork)
+                + async Task ApplyMultiServiceDiscount(PriceBreakdown breakdown, List<ServiceType> services, IPriceTable priceTable)
+                + DateOnly GetExpireDate()
+            }
+
+            class CampaignServiceDate {
+                + DateOnly Date { get; set; }
+                + override DateOnly GetExpireDate()
+                internal protected CampaignServiceDate()
+                + CampaignServiceDate(BaseService service, List<Piece> pieces, IPriceTable priceTable, DateOnly date)
+            }
+
+            class EventCampaignService {
+                - readonly new EventCampaignServiceOptions Options
+                internal protected EventCampaignService()
+                + EventCampaignService(BaseService service, List<Piece> pieces, IPriceTable priceTable, EventCampaignServiceOptions options)
+                + override async Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                + override decimal CalculateSubTotal()
+            }
+
+            class IvrCampaignService {
+                - readonly new IvrCampaignServiceOptions Options
+                internal protected IvrCampaignService()
+                + IvrCampaignService(IvrService service, List<Piece> pieces, IPriceTable priceTable, IvrCampaignServiceOptions options)
+                + async override Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                + override decimal CalculateSubTotal()
+                - int CountWords(string text)
+            }
+
+            class NarrativeCampaignService {
+                - readonly new NarrativeService Service
+                - readonly new NarrativeCampaignServiceOptions Options
+                internal protected NarrativeCampaignService()
+                + NarrativeCampaignService(NarrativeService service, List<Piece> pieces, IPriceTable priceTable, NarrativeCampaignServiceOptions options)
+                + override async Task<Result<ServiceBreakdown>> Calculate(CampaignInput campaign)
+                + override decimal CalculateSubTotal()
+            }
+
+            class Piece <<Entity>> {
+                internal Piece()
+                + static Piece CreatePiece(string name)
+                + int PieceId { get; set; }
+                + int CampaignServiceId { get; set; }
+                + BaseCampaignService CampaignService { get; set; } = null!
+                + string Name { get; set; } = null!
+            }
+
+        }
+
+        package Services {
+            class BaseService <<abstract>> <<Entity>> {
+                + int ServiceId { get; set; }
+                + string Discriminator { get; set; } = null!
+                + string Name { get; set; } = null!
+                + ServiceType Type { get; set; }
+                + decimal? BasePrice { get; set; }
+                + decimal? ExtraPrice { get; set; }
+                + decimal? FirstExtraPrice { get; set; }
+            }
+
+            class DateService {
+                internal DateService()
+            }
+
+            class IvrService {
+                internal IvrService()
+                + decimal InitialMessagePrice => BasePrice ?? throw new NullReferenceException()
+                + decimal AdditionalMessagePrice => ExtraPrice ?? throw new NullReferenceException()
+                + decimal UpdateMessagePrice { get; set; }
+                + virtual ICollection<RangeIvr> RangeIvr { get; set; } = []
+            }
+
+            class NarrativeService {
+                internal NarrativeService()
+                + decimal RolePrice { get; set; }
+            }
+
+            class PeriodService {
+                internal PeriodService()
+                + ICollection<Period> Periods { get; set; } = []
+            }
+
+            class Period <<Entity>> {
+                internal Period()
+                + int ServiceId { get; set; }
+                + PeriodService Service { get; set; } = null!
+                + decimal BasePrice { get; set; }
+                + decimal? ExtraPrice { get; set; }
+                + decimal? FirstExtraPrice { get; set; }
+                + Interval Interval { get; set; }
+            }
+
+            class MultiServiceDiscount <<Entity>> {
+                internal MultiServiceDiscount()
+                + string Name { get; set; } = null!
+                + string Key { get; set; } = null!
+                + ServiceType ServiceA { get; set; }
+                + ServiceType ServiceB { get; set; }
+                + PriceAdjustmentType Type { get; set; }
+                + decimal Amount { get; set; }
+                + bool IsDiscountForServiceBOnly { get; set; }
+            }
+
+            class PriceAdjustment <<Entity>> {
+                internal PriceAdjustment()
+                + int PriceAdjustmentId { get; set; }
+                + string Name { get; set; } = null!
+                + PriceAdjustmentType Type { get; set; }
+                + decimal Amount { get; set; }
+                + string Key { get; set; } = null!
+            }
+
+            class RangeIvr <<Entity>> {
+                internal RangeIvr()
+                + int ServiceId { get; set; }
+                + int MinWord { get; set; }
+                + int? MaxWord { get; set; }
+                + decimal PricePerWord { get; set; }
+                + IvrService Service { get; set; } = null!
+            }
+
+            class VolumeDiscount <<Entity>> {
+                internal VolumeDiscount()
+                + int VolumeDiscountId { get; set; }
+                + string Name { get; set; } = null!
+                + ServiceType ServiceType { get; set; }
+                + int MinQuantity { get; set; }
+                + int? MaxQuantity { get; set; }
+                + PriceAdjustmentType Type { get; set; }
+                + decimal Amount { get; set; }
+            }
+
+        }
+
+        class Accountant {
+            internal Accountant()
+        }
+
+        class Administrator {
+            internal Administrator()
+        }
+
+        class Broadcaster {
+            {static} - partial Regex PhoneRegex()
+            + int CategoryId { get; set; }
+            + int MaxDemos { get; } = 5
+            + BroadcasterCategory Category { get; set; } = null!
+            + string? PhoneNumber { get; set; }
+            + string? Website { get; set; }
+            + string? Description { get; set; }
+            + ICollection<Contract> Contracts { get; set; } = []
+            + ICollection<Demo> Demos { get; set; } = []
+            + ICollection<Membership> Memberships { get; set; } = []
+            + ICollection<Skill> Skills { get; set; } = []
+            + ICollection<Language> Languages { get; set; } = []
+            internal Broadcaster()
+            # Broadcaster(RegisterBroadcasterInput input, Country country, Department department, BroadcasterCategory category)
+            # Broadcaster(CompleteGoogleSignUpBroadcasterInput input, Country country, Department department, BroadcasterCategory category)
+            + static Result<Broadcaster> SignUp(RegisterBroadcasterInput input, Country country, Department department, BroadcasterCategory category, string passwordHashed)
+            + static Result<Broadcaster> SignUpFromGoogle(CompleteGoogleSignUpBroadcasterInput input, Country country, Department department, BroadcasterCategory category)
+            + Result<Demo> AddDemo(string fileKey, Language language, string title)
+            + Result<Demo> RemoveDemo(string key)
+            + Result Update(UpdateUserInput input, Country? country, Department? department, string? phoneNumber, string? website, string? description)
+            + override Result ValidateUpdate()
+            + Result ValidatePhoneNumber()
+            + Result ValidateWebsite()
+            + Result ValidateDescription()
+            + void UpdateSkills(ICollection<Skill> skills)
+            + void UpdateLanguages(ICollection<Language> languages)
+        }
+
+        class BroadcasterErrors {
+            + class PhoneNumberLengthError(string msg) <<ValidationError>>
+            + class PhoneNumbersOnlyError(string msg) <<ValidationError>>
+            + class InvalidWebsiteError(string msg) <<ValidationError>>
+            + class DescriptionMinLengthError(string msg) <<ValidationError>>
+            + class DescriptionMaxLengthError(string msg) <<ValidationError>>
+            {static} + PhoneNumberLengthError PhoneNumberMaxLength()
+            {static} + PhoneNumbersOnlyError InvalidNumberFormat()
+            {static} + InvalidWebsiteError InvalidWebsite()
+            {static} + DescriptionMinLengthError DescriptionMinLength()
+            {static} + DescriptionMaxLengthError DescriptionMaxLength()
+        }
+
+        class BroadcasterCategory <<Entity>> {
+            internal BroadcasterCategory()
+            + int BroadcasterCategoryId { get; set; }
+            + string Name { get; set; } = null!
+            + int LifetimeJobCount { get; set; }
+            + virtual ICollection<Broadcaster> Broadcasters { get; set; } = []
+        }
+
+        class Client {
+            + int AgencyId { get; set; }
+            + virtual Agency Agency { get; set; } = null!
+            + virtual ICollection<Contract> Contracts { get; set; } = []
+            internal Client()
+            # Client(RegisterClientInput input, Country country, Department department, Agency agency)
+            # Client(CompleteGoogleSignUpClientInput input, Country country, Department department, Agency agency)
+            {static} + Result<Client> SignUp(RegisterClientInput input, Country country, Department department, Agency agency, string passwordHashed)
+            {static} + Result<Client> SignUpFromGoogle(CompleteGoogleSignUpClientInput input, Country country, Department department, Agency agency)
+            + override Result ValidateSignUp()
+            + override Result ValidateGoogleSignUp()
+            + Result ValidateAgency()
+        }
+
+        class ClientErrors {
+            + class AgencyIsRequiredError(string msg) <<ValidationError>>
+            {static} + AgencyIsRequiredError AgencyIsRequired()
+        }
+
+        class Supervisor {
+            internal Supervisor()
+        }
+
+        class User <<Entity>> {
+            + int UserId { get; set; }
+            + string? IdentityCard { get; set; } = null!
+            + Gender? Gender { get; set; }
+            + string? GoogleId { get; set; } = null!
+            + UserState UserState { get; set; }
+            + string Email { get; set; } = null!
+            + string? Password { get; set; }
+            + string FirstName { get; set; } = null!
+            + string LastName { get; set; } = null!
+            + string RUT { get; set; } = null!
+            + int AddressId { get; set; }
+            + string? Photo { get; set; } = null!
+            + virtual Address Address { get; set; } = null!
+            + virtual ICollection<Notification> Notifications { get; set; } = []
+            + string FullName => $"{FirstName} {LastName}"
+            internal User()
+            # User(RegisterUserInput input, Country country, Department department)
+            # User(CompleteGoogleSignUpUserInput input, Country country, Department department)
+            + void Update(UpdateUserInput input, Country? country, Department? department)
+            + virtual Result ValidateSignUp()
+            + virtual Result ValidateGoogleSignUp()
+            + virtual Result ValidateUpdate()
+            + Result ValidateIdentityCard()
+            + Result ValidateEmail()
+            + Result ValidatePassword()
+            + Result ValidateFirstName()
+            + Result ValidateLastName()
+            + Result ValidateRUT()
+            + Result<Notification> AddNotification(string title, string description)
+            + Result<Notification> RemoveNotification(int notificationId)
+            + Notification[] ClearNotifications()
+        }
+
+        class UserErrors {
+            + class UserNotFoundError(string msg) <<NotFoundError>>
+            + class GoogleUserTryNormalLoginError(string msg) <<BadRequestError>>
+            + class GoogleTokenIsInvalidError(string msg) <<AuthError>>
+            + class GoogleIdIsRequiredError(string msg) <<BadRequestError>>
+            + class EmailIsRequiredError(string msg) <<ValidationError>>
+            + class EmailIsMissingAtCharacterError(string msg) <<ValidationError>>
+            + class EmailMinLengthError(string msg) <<ValidationError>>
+            + class EmailMaxLengthError(string msg) <<ValidationError>>
+            + class DuplicatedEmailError(string msg) <<ConflictError>>
+            + class RutIsRequiredError(string msg) <<ConflictError>>
+            + class RutIsInvalidError(string msg) <<ValidationError>>
+            + class DuplicatedRutError(string msg) <<ConflictError>>
+            + class PasswordIsRequiredError(string msg) <<ValidationError>>
+            + class PasswordMinLengthError(string msg) <<ValidationError>>
+            + class PasswordMaxLengthError(string msg) <<ValidationError>>
+            + class FirstNameIsRequiredError(string msg) <<ValidationError>>
+            + class FirstNameMinLengthError(string msg) <<ValidationError>>
+            + class FirstNameMaxLengthError(string msg) <<ValidationError>>
+            + class FirstNameLettersOnlyError(string msg) <<ValidationError>>
+            + class LastNameIsRequiredError(string msg) <<ValidationError>>
+            + class LastNameMinLengthError(string msg) <<ValidationError>>
+            + class LastNameMaxLengthError(string msg) <<ValidationError>>
+            + class LastNameLettersOnlyError(string msg) <<ValidationError>>
+            + class IdentityCardIsRequiredError(string msg) <<ValidationError>>
+            + class IdentityCardIsInvalidError(string msg) <<ValidationError>>
+            + class DuplicatedIdentityCardError(string msg) <<ValidationError>>
+
+            {static} + UserNotFoundError UserNotFound(int id)
+            {static} + AuthError LoginFailed()
+            {static} + GoogleUserTryNormalLoginError GoogleUserTryNormalLogin()
+            {static} + GoogleTokenIsInvalidError GoogleTokenIsInvalid()
+            {static} + GoogleIdIsRequiredError GoogleIdIsRequired()
+            {static} + EmailIsRequiredError EmailIsRequired()
+            {static} + EmailIsMissingAtCharacterError EmailIsMissingAtCharacter(string email)
+            {static} + EmailMinLengthError EmailMinLength(string email)
+            {static} + EmailMaxLengthError EmailMaxLength(string email)
+            {static} + DuplicatedEmailError DuplicatedEmail(string email)
+            {static} + RutIsRequiredError RutIsRequired()
+            {static} + RutIsInvalidError RutIsInvalid(string rut)
+            {static} + DuplicatedRutError DuplicatedRut(string rut)
+            {static} + PasswordIsRequiredError PasswordIsRequired()
+            {static} + PasswordMinLengthError PasswordMinLength()
+            {static} + PasswordMaxLengthError PasswordMaxLength()
+            {static} + FirstNameIsRequiredError FirstNameIsRequired()
+            {static} + FirstNameMinLengthError FirstNameMinLength()
+            {static} + FirstNameMaxLengthError FirstNameMaxLength()
+            {static} + FirstNameLettersOnlyError FirstNameLettersOnly()
+            {static} + LastNameIsRequiredError LastNameIsRequired()
+            {static} + LastNameMinLengthError LastNameMinLength()
+            {static} + LastNameMaxLengthError LastNameMaxLength()
+            {static} + LastNameLettersOnlyError LastNameLettersOnly()
+            {static} + IdentityCardIsRequiredError IdentityCardIsRequired()
+            {static} + IdentityCardIsInvalidError IdentityCardIsInvalid(string ci)
+            {static} + DuplicatedIdentityCardError DuplicatedIdentityCard(string ci)
+        }
+
+        class Address <<Entity>> {
+            + int AddressId { get; set; }
+            + string CountryCode { get; set; } = null!
+            + string? Street { get; set; }
+            + string City { get; set; } = null!
+            + int DepartmentId { get; set; }
+            + Department Department { get; set; } = null!
+            + virtual Country Country { get; set; } = null!
+            internal Address()
+            + Address(Country country, Department department, string city, string? street)
+            + void Update(Country? country, Department? department, UpdateAddressInput? input)
+            + Result ValidateAddress()
+            + Result ValidateCity()
+            + Result ValidateDepartment()
+            + Result ValidateStreet()
+            + override string ToString()
+        }
+
+        class AddressErrors {
+            + class AddressNotFoundError(string msg) <<NotFoundError>>
+            + class CityIsRequiredError(string msg) <<ValidationError>>
+            + class CityMinLengthError(string msg) <<ValidationError>>
+            + class CityMaxLengthError(string msg) <<ValidationError>>
+            + class CityIsLettersOnlyError(string msg) <<ValidationError>>
+            + class DepartmentIsRequiredError(string msg) <<ValidationError>>
+            + class StreetIsRequiredError(string msg) <<ValidationError>>
+            + class StreetMinLengthError(string msg) <<ValidationError>>
+            + class StreetMaxLengthError(string msg) <<ValidationError>>
+            {static} + AddressNotFoundError AddressNotFound(int AddressId)
+            {static} + CityIsRequiredError CityIsRequired()
+            {static} + CityMinLengthError CityMinLength(string city)
+            {static} + CityMaxLengthError CityMaxLength(string city)
+            {static} + CityIsLettersOnlyError CityIsLettersOnly(string city)
+            {static} + DepartmentIsRequiredError StateIsRequired()
+            {static} + StreetIsRequiredError StreetIsRequired()
+            {static} + StreetMinLengthError StreetMinLength(string street)
+            {static} + StreetMaxLengthError StreetMaxLength(string street)
+        }
+
+        class Agency <<Entity>> {
+            + int AgencyId { get; set; }
+            + string Name { get; set; } = null!
+            + virtual ICollection<Client> Clients { get; set; } = []
+            internal Agency()
+            + Agency(string name)
+            + Result Validate()
+        }
+
+        class AgencyErrors {
+            + class NameIsRequiredError(string msg) <<ValidationError>>
+            + class NameMinLengthError(string msg) <<ValidationError>>
+            + class NameMaxLengthError(string msg) <<ValidationError>>
+            + class NameIsLettersOnlyError(string msg) <<ValidationError>>
+            {static} + NameIsRequiredError NameIsRequired()
+            {static} + NameMinLengthError NameMinLength(string name)
+            {static} + NameMaxLengthError NameMaxLength(string name)
+            {static} + NameIsLettersOnlyError NameIsLettersOnly(string name)
+        }
+
+        class Bill <<Entity>> {
+            + int BillId { get; set; }
+            + BillType Type { get; set; }
+            + int? ContractId { get; set; }
+            + string Title { get; set; } = null!
+            + string Description { get; set; } = null!
+            + DateOnly Date { get; set; }
+            + decimal Amount { get; set; }
+            + string ProofFile { get; set; } = null!
+            + virtual Contract? Contract { get; set; }
+            internal Bill()
+            + static Result<Bill> CreateBill(BillType type, string title, string description, DateOnly date, decimal amount, Contract? contract = null)
+            + Result Validate()
+        }
+
+        class BillErrors {
+            + class BillNotFoundError(string msg) <<NotFoundError>>
+            + class TitleIsRequiredError(string msg) <<ValidationError>>
+            + class DescriptionMinLengthError(string msg) <<ValidationError>>
+            + class DescriptionMaxLengthError(string msg) <<ValidationError>>
+            + class NegativeAmountError(string msg) <<ValidationError>>
+            {static} + BillNotFoundError BillNotFound(int id)
+            {static} + TitleIsRequiredError TitleIsRequired()
+            {static} + DescriptionMinLengthError DescriptionMinLength()
+            {static} + DescriptionMaxLengthError DescriptionMaxLength()
+            {static} + NegativeAmountError NegativeAmount()
+        }
+
+        class Contract <<Entity>> {
+            + int ContractId { get; set; }
+            + string? ContractSerial { get; set; }
+            + int? RootContractId { get; set; } = null
+            + int? ReplacesContractId { get; set; }
+            + Contract? ReplacesContract { get; set; }
+            + int ClientId { get; set; }
+            + virtual Client Client { get; set; } = null!
+            + bool ClientApproved { get; set; }
+            + int BroadcasterId { get; set; }
+            + virtual Broadcaster Broadcaster { get; set; } = null!
+            + bool BroadcasterApproved { get; set; }
+            + DateOnly Date { get; set; }
+            + DateOnly DueDate { get; set; }
+            + decimal TotalPrice { get; set; }
+            + ContractState State { get; set; }
+            + int TermYears { get; set; }
+            + string PdfAmazonS3Key { get; set; }
+            + virtual ICollection<Campaign.Campaign> Campaigns { get; set; } = []
+            + virtual ICollection<Bill> Bills { get; set; } = []
+            + string CountryCode { get; set; } = null!
+            + virtual Country Country { get; set; } = null!
+            + decimal TotalPricePostTax { get; set; }
+            internal Contract()
+            {static} + Contract CreateContract(int clientId, int broadcasterId, Campaign.Campaign campaign, decimal price, string countryCode, decimal totalPricePostTax, Contract? replacesContract = null)
+            + void AssignSerial(string broadcasterFirstName, string broadcasterLastName, int? replacedRootContractId, int replacementCount)
+        }
+
+        class ContractErrors {
+            + class ContractNotFoundError(string msg) <<NotFoundError>>
+            + class UnauthorizedUserError(string msg) <<AuthError>>
+            + class ContractNotActiveError(string msg) <<ValidationError>>
+            + class SerialGenerationConflictError(string msg) <<ValidationError>>
+            + class ContractAlreadyReplacedError(string msg) <<ValidationError>>
+	    + class RedundantStateUpdateError(string msg) <<ValidationError>>
+            {static} + UnauthorizedUserError UnauthorizedUser(int userId)
+            {static} + ContractNotFoundError ContractNotFound(int contractId)
+	    {static} + ContractNotFoundError ContractNotFound(string contractSerial)
+            {static} + ContractNotActiveError ContractNotActive(int contractId)
+            {static} + SerialGenerationConflictError SerialGenerationConflict(int contractId)
+            {static} + ContractAlreadyReplacedError ContractAlreadyReplaced(int contractId)
+	    {static} + RedundantStateUpdateError RedundantStateUpdate()
+        }
+
+        class Country <<Entity>> {
+            + string CountryCode { get; set; } = null!
+            + int? RegionId { get; set; }
+            + string Name { get; set; } = null!
+            + virtual ICollection<Contract> Contracts { get; set; } = []
+            + virtual ICollection<Department> Departments { get; set; } = []
+            + virtual Region? Region { get; set; }
+            internal Country()
+        }
+
+        class CountryErrors {
+            + class CountryNotFoundError(string msg) <<NotFoundError>>
+            {static} + CountryNotFoundError CountryNotFound(string countryCode)
+        }
+
+        class Demo <<Entity>> {
+            + int BroadcasterId { get; set; }
+            + string FileName { get; set; } = null!
+            + int LanguageId { get; set; }
+            + Language Language { get; set; } = null!
+            + string Title { get; set; } = null!
+            + virtual Broadcaster Broadcaster { get; set; } = null!
+            internal Demo()
+            {static} + Result<Demo> CreateDemo(int broadcasterId, string fileKey, Language language, string title)
+            + Result ValidateDemo()
+            + Result ValidateTitle()
+            + Result ValidateLanguage()
+        }
+
+        class DemoErrors {
+            + class FileKeyIsRequiredError(string msg) <<BadRequestError>>
+            + class DemoNotFoundError(string msg) <<NotFoundError>>
+            + class InvalidFileKeyError(string msg) <<BadRequestError>>
+            + class MaxDemosReachedError(string msg) <<BadRequestError>>
+            + class TitleIsRequiredError(string msg) <<BadRequestError>>
+            + class TitleMinLengthError(string msg) <<BadRequestError>>
+            + class TitleMaxLengthError(string msg) <<BadRequestError>>
+            + class LanguageIsRequiredError(string msg) <<BadRequestError>>
+            + class FileTooLargeError(string msg) <<BadRequestError>>
+            + class FileNotUploadedError(string msg) <<BadRequestError>>
+            {static} + FileKeyIsRequiredError FileKeyIsRequired()
+            {static} + DemoNotFoundError DemoNotFound(string fileKey)
+            {static} + InvalidFileKeyError InvalidFileKey()
+            {static} + MaxDemosReachedError MaxDemosReached(int max)
+            {static} + TitleIsRequiredError TitleIsRequired() 
+            {static} + TitleMinLengthError TitleMinLength()
+            {static} + TitleMaxLengthError TitleMaxLength()
+            {static} + LanguageIsRequiredError LanguageIsRequired()
+            {static} + FileTooLargeError FileTooLarge(long actualBytes, long maxBytes)
+            {static} + FileNotUploadedError FileNotUploaded(string fileKey)
+        }
+
+        class Department {
+            + int DepartmentId { get; set; }
+            + string CountryCode { get; set; } = null!
+            + Country Country { get; set; } = null!
+            + string Name { get; set; } = null!
+            internal Department()
+        }
+
+        class DepartmentErrors {
+            + class DepartmentNotFoundError(string msg) <<NotFoundError>>
+            {static} + DepartmentNotFoundError DepartmentNotFound(int departmentId)
+        }
+
+        class Language {
+            + int LanguageId { get; set; }
+            + string Name { get; set; } = null!
+            internal Language()
+        }
+
+        class LanguageErrors {
+            + class LanguageNotFoundError(string msg) <<NotFoundError>>
+            {static} + LanguageNotFoundError LanguageNotFound(int languageId)
+        }
+
+        class Membership {
+            + int MembershipId { get; set; }
+            + MembershipState State { get; set; }
+            + int BroadcasterId { get; set; }
+            + DateOnly? PayDate { get; set; }
+            + DateOnly? DueDate { get; set; }
+            + decimal? Amount { get; set; }
+            + virtual Broadcaster Broadcaster { get; set; } = null!
+            internal Membership()
+        }
+
+        class Notification {
+            + int NotificationId { get; set; }
+            + int UserId { get; set; }
+            + string Title { get; set; } = null!
+            + string Description { get; set; } = null!
+            + DateTime Date { get; set; }
+            + bool? IsRead { get; set; }
+            + virtual User User { get; set; } = null!
+            internal Notification()
+            + static Result<Notification> CreateNotification(string title, string description)
+            + Result<Notification> Validate()
+        }
+
+        class NotificationErrors {
+            + class NotificationNotFoundError(string msg) <<NotFoundError>>
+            + class TitleIsRequiredError(string msg) <<ValidationError>>
+            {static} + NotificationNotFoundError NotificationNotFound(int id)
+            {static} + TitleIsRequiredError TitleIsRequired()
+        }
+
+        class Region {
+            + int RegionId { get; set; }
+            + decimal Multiplier { get; set; }
+            + virtual ICollection<Country> Countries { get; set; } = []
+            internal Region()
+        }
+
+        class Skill {
+            + int SkillId { get; set; }
+            + string Name { get; set; } = null!
+            internal Skill() { }
+        }
+
+        class SkillErrors {
+            + class SkillNotFoundError(string msg) <<NotFoundError>>
+            {static} + SkillNotFoundError SkillNotFound(int skillId)
+        }
+
+    }
+    
+}
+

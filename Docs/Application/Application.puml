@@ -1,0 +1,6 @@
+@startuml Application
+skinparam linetype ortho
+left to right direction
+!include Application-Classes.puml
+!include Application-Relations.puml
+@enduml

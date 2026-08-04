@@ -1,0 +1,5 @@
+@startuml Domain
+skinparam groupInheritance 2
+!include Domain-Classes.puml
+!include Domain-Relations.puml
+@enduml

@@ -1,0 +1,225 @@
+package GraphQL {
+    package Common {
+        class SocketAuthPayload {
+            + string? Authorization
+        }
+
+        class AuthSocketInterceptor <<DefaultSocketSessionInterceptor>> {
+            - readonly JwtSecurityTokenHandler _tokenHandler
+            - readonly TokenValidationParameters _validationParams
+
+            + AuthSocketInterceptor(IConfiguration configuration)
+            + override async ValueTask<ConnectionStatus> OnConnectAsync(ISocketSession session, IOperationMessagePayload connectionInitMessage, CancellationToken ct)
+        }
+
+        class GlobalExceptionFilter <<Implements IErrorFilter>> {
+            - readonly ILogger<GlobalExceptionFilter> _logger = logger;
+
+            + GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger)
+            + IError OnError(IError error)
+        }
+
+        class ResultApiExtensions <<static>> {
+            {static} + void UnwrapOrThrow(this FluentResults.Result result)
+            {static} + T UnwrapOrThrow<T>(this FluentResults.Result<T> result)
+        }
+
+        class ServiceCollectionExtensions {
+            {static} + IServiceCollection AddDatabase(this IServiceCollection services, ConfigurationManager configuration)
+            {static} + IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+            {static} + IServiceCollection AddServiceGraphQL(this IServiceCollection services)
+            {static} + IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration configuration)
+            {static} + IServiceCollection AddExternalServices(this IServiceCollection services, IConfiguration configuration)
+            {static} + IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services)
+        }
+    }
+
+    package Schema {
+        class Mutation {
+            + async Task<AuthPayload> RegisterBroadcaster([Service] IAuthService authService, RegisterBroadcasterInput input)
+            + async Task<AuthPayload> RegisterClient([Service] IAuthService authService, RegisterClientInput input)
+            + async Task<AuthPayload> LoginAsync([Service] IAuthService authService, UserLoginInput input)
+            + async Task<GoogleAuthPayload> GoogleAuthAsync(GoogleAuthInput input, [Service] IAuthService authService)
+            + async Task<AuthPayload> CompleteGoogleSignUpBroadcasterAsync(CompleteGoogleSignUpBroadcasterInput input, [Service] IAuthService authService)
+            + async Task<AuthPayload> CompleteGoogleSignUpClientAsync(CompleteGoogleSignUpClientInput input, [Service] IAuthService authService)
+            + async Task<IQueryable<Contract>> UpdateContractState(UpdateContractStateInput input, [Service] IContractService contractService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<GenerateContractPayload> GenerateContract(CampaignInput input, [Service] IContractService contractService)
+            + async Task<IQueryable<Contract>> ApproveContract(int contractId, [Service] IContractService contractService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<IQueryable<User>> ApproveUser(UpdateUserStateInput input, [Service] IUserService userService)
+            + async Task<RegisterBillPayload> RegisterBill(BillInput input, [Service] IBillService billService)
+            + async Task<Bill> DeleteBill(int billId, [Service] IBillService billService)
+            + async Task<Notification> DeleteNotification(int notificationId, [Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<Notification[]> ClearNotifications([Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<ProfilePictureUploadPayload> RequestProfilePictureUploadUrl(string fileName, [Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<User> ConfirmProfilePictureUpload(string key, [Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<DemoUploadPayload> RequestDemoUploadUrl(string fileName, [Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<Demo> ConfirmDemoUpload(UploadDemoInput input, [Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<Demo> DeleteDemo(string key, [Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<Broadcaster> UpdateBroadcasterProfile(UpdateBroadcasterProfileInput input, [Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+        }
+
+        class Query {
+            + string Ping() 
+            + IQueryable<User> GetUsers([Service] IUserService userService)
+            + IQueryable<Client> GetClients([Service] IUserService userService)
+            + IQueryable<Broadcaster> GetBroadcasters([Service] IUserService userService)
+            + IQueryable<Broadcaster> GetBroadcastersPaged([Service] IUserService userService)
+            + IQueryable<Country> GetCountries([Service] ICountryService countryService)
+            + IQueryable<Skill> GetSkills([Service] ISkillService skillService)
+            + IQueryable<Language> GetLanguages([Service] ILanguageService languageService)
+            + IQueryable<Department> GetDepartments([Service] IDepartmentService departmentService)
+            + IQueryable<BaseService> GetServices([Service] IAlpuService alpuService)
+            + async Task<PriceBreakdown> CalculateContract(CampaignInput input, [Service] ICampaignService campaignService)
+            + IQueryable<Contract> GetContracts([Service] IContractService contractService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+            + async Task<ContractUrlPayload> GetContractPdfDownloadUrl([Service] IContractService contractService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService, IResolverContext resolverContext, int contractId)
+            + async Task<IQueryable<Bill>> GetBills([Service] IBillService billService)
+            + async Task<BillUrlPayload> GetBillProofDownloadUrl([Service] IBillService billService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService, int billId)
+            + async Task<DashboardPayload> GetDashboard([Service] IDashboardService dashboardService)
+            + async Task<IQueryable<Notification>> GetNotifications([Service] IUserService userService, [Service] IHttpContextAccessor httpContextAccessor, [Service] IJwtService jwtService)
+        }
+
+        class Subscription {
+            + Notification OnNotificationAdded([EventMessage] Notification notification)
+            + async IAsyncEnumerable<Notification> SubscribeToNotifications([Service] ITopicEventReceiver receiver, [Service] IHttpContextAccessor httpContextAccessor)
+        }
+    }
+
+    package Types {
+        package Inputs {
+            class BillInputType <<InputObjectType<BillInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<BillInput> descriptor)
+            }
+
+            class BroadcasterFilterInputType <<FilterInputType<Broadcaster>>> {
+                # override void Configure(IInputObjectTypeDescriptor<Broadcaster> descriptor)
+            }
+
+            class CampaignInputType <<InputObjectType<CampaignInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<CampaignInput> descriptor)
+            }
+
+            class CampaignServiceInputType <<InputObjectType<CampaignServiceInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<CampaignServiceInput> descriptor)
+            }
+
+            class CompleteGoogleBroadcasterSignUpInputType <<InputObjectType<CompleteGoogleSignUpBroadcasterInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<CompleteGoogleSignUpBroadcasterInput> descriptor)
+            }
+
+            class CompleteGoogleClientSignUpInputType <<InputObjectType<CompleteGoogleSignUpClientInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<CompleteGoogleSignUpClientInput> descriptor)
+            }
+
+            class GoogleAuthInputType <<InputObjectType<GoogleAuthInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<GoogleAuthInput> descriptor)
+            }
+
+            class UserLoginInputType <<InputObjectType<UserLoginInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<UserLoginInput> descriptor)
+            }
+
+            class RegisterBroadcasterInputType <<InputObjectType<RegisterBroadcasterInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<RegisterBroadcasterInput> descriptor)
+            }
+
+            class RegisterClientInputType <<InputObjectType<RegisterClientInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<RegisterClientInput> descriptor)
+            }
+
+            class ServiceFlagsInputType <<InputObjectType<ServiceFlagsInput>>> {
+                # override void Configure(IInputObjectTypeDescriptor<ServiceFlagsInput> descriptor)
+            }
+        }
+
+        package Objects {
+            class AddressType <<ObjectType<Address>>> {
+                # override void Configure(IObjectTypeDescriptor<Address> descriptor)
+            }
+
+            class AgencyType <<ObjectType<Agency>>> {
+                # override void Configure(IObjectTypeDescriptor<Agency> descriptor)
+            }
+
+            class AuthPayloadType <<ObjectType<AuthPayload>>> {
+                # override void Configure(IObjectTypeDescriptor<AuthPayload> descriptor)
+            }
+
+            class BillType <<ObjectType<Bill>>> {
+                # override void Configure(IObjectTypeDescriptor<Bill> descriptor)
+            }
+
+            class CampaignServiceInterface <<InterfaceType<BaseCampaignService>>> {
+                # override void Configure(IInterfaceTypeDescriptor<BaseCampaignService> descriptor)
+            }
+
+            class EventCampaignServiceType <<ObjectType<EventCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<EventCampaignService> descriptor)
+            }
+
+            class NarrativeCampaignServiceType <<ObjectType<NarrativeCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<NarrativeCampaignService> descriptor)
+            }
+
+            class IvrCampaignServiceType <<ObjectType<IvrCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<IvrCampaignService> descriptor)
+            }
+
+            class PeriodCampaignServiceType <<ObjectType<PeriodCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<PeriodCampaignService> descriptor)
+            }
+
+            class TvCampaignServiceType <<ObjectType<TvCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<TvCampaignService> descriptor)
+            }
+
+            class RadioCampaignServiceType <<ObjectType<RadioCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<RadioCampaignService> descriptor)
+            }
+
+            class CinemaCampaignServiceType <<ObjectType<CinemaCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<CinemaCampaignService> descriptor)
+            }
+
+            class CameraCampaignServiceType <<ObjectType<CameraCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<CameraCampaignService> descriptor)
+            }
+
+            class OtherMediaCampaignServiceType <<ObjectType<OtherMediaCampaignService>>> {
+                # override void Configure(IObjectTypeDescriptor<OtherMediaCampaignService> descriptor)
+            }
+
+            class CampaignType <<ObjectType<Campaign>>> {
+                # override void Configure(IObjectTypeDescriptor<Campaign> descriptor)
+            }
+
+            class ContractType <<ObjectType<Contract>>> {
+                # override void Configure(IObjectTypeDescriptor<Contract> descriptor)
+            }
+
+            class CountryType <<ObjectType<Country>>> {
+                # override void Configure(IObjectTypeDescriptor<Country> descriptor)
+            }
+
+            class DemoType <<ObjectType<Demo>>> {
+                # override void Configure(IObjectTypeDescriptor<Demo> descriptor)
+            }
+
+            class GoogleAuthType <<ObjectType<GoogleAuthPayload>>> {
+                # override void Configure(IObjectTypeDescriptor<GoogleAuthPayload> descriptor)
+            }
+
+            class LanguageType <<ObjectType<Language>>> {
+                # override void Configure(IObjectTypeDescriptor<Language> descriptor)
+            }
+
+            class NotificationType <<ObjectType<Notification>>> {
+                # override void Configure(IObjectTypeDescriptor<Notification> descriptor)
+            }
+
+            class PieceType <<ObjectType<Piece>>> {
+                # override void Configure(IObjectTypeDescriptor<Piece> descriptor)
+            }
+        }
+    }
+}
+

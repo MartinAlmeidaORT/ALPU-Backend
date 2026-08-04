@@ -1,0 +1,31 @@
+@startuml System-Dependencies
+title Dependencias del sistema - ALPU Backend
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam ArrowColor #555555
+skinparam ArrowFontSize 11
+
+package "GraphQL" as GraphQL
+package "Application" as Application
+package "DataAccess" as DataAccess
+package "Domain" as Domain
+
+GraphQL --> Application : consume servicios
+GraphQL ..> DataAccess : registra en DI
+Application --> Domain : implementa interfaces
+DataAccess --> Domain : implementa interfaces
+
+database "PostgreSQL" as DB
+cloud "AWS S3" as S3
+cloud "Google OAuth" as Google
+cloud "SMTP\n(Mailtrap)" as SMTP
+
+DataAccess --> DB
+DataAccess --> S3
+DataAccess --> Google
+Application --> SMTP
+
+@enduml

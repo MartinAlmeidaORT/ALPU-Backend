@@ -1,0 +1,344 @@
+package DataAccess {
+    package EntityFramework {
+        class DatabaseContext <<DbContext>> {
+            + virtual DbSet<Address> Addresses { get; set; }
+            + virtual DbSet<Agency> Agencies { get; set; }
+            + virtual DbSet<Bill> Bills { get; set; }
+            + virtual DbSet<BroadcasterCategory> BroadcasterCategories { get; set; }
+            + virtual DbSet<Contract> Contracts { get; set; }
+            + virtual DbSet<Country> Countries { get; set; }
+            + virtual DbSet<Department> Departments { get; set; }
+            + virtual DbSet<Demo> Demos { get; set; }
+            + virtual DbSet<PriceAdjustment> PriceAdjustments { get; set; }
+            + virtual DbSet<Membership> Memberships { get; set; }
+            + virtual DbSet<Notification> Notifications { get; set; }
+            + virtual DbSet<Region> Regions { get; set; }
+            + virtual DbSet<BaseService> Services { get; set; }
+            + virtual DbSet<IvrService> Ivrs { get; set; }
+            + virtual DbSet<RangeIvr> RangeIvrs { get; set; }
+            + virtual DbSet<NarrativeService> Narratives { get; set; }
+            + virtual DbSet<Piece> Pieces { get; set; }
+            + virtual DbSet<User> Users { get; set; }
+            + virtual DbSet<Broadcaster> Broadcasters { get; set; }
+            + virtual DbSet<Client> Clients { get; set; }
+            + virtual DbSet<Administrator> Admins { get; set; }
+            + virtual DbSet<Supervisor> Supervisors { get; set; }
+            + virtual DbSet<Accountant> Accountants { get; set; }
+            + virtual DbSet<VolumeDiscount> VolumeDiscounts { get; set; }
+            + virtual DbSet<MultiServiceDiscount> MultiServiceDiscounts { get; set; }
+            + virtual DbSet<Campaign> Campaigns { get; set; }
+            + virtual DbSet<BaseCampaignService> CampaignServices { get; set; }
+
+            + DatabaseContext()
+            + DatabaseContext(DbContextOptions<DatabaseContext> options)
+            # override void OnModelCreating(ModelBuilder modelBuilder)
+        }
+
+        class SnakeCaseConverter<TEnum> <<ValueConverter<TEnum, string>>> {
+            + SnakeCaseConverter()
+        }
+
+        package Configurations {
+            class AgencyConfiguration <Implements IEntityTypeConfiguration<Agency>> {
+                + void Configure(EntityTypeBuilder<Agency> builder)
+            }
+
+            class BillConfiguration <Implements IEntityTypeConfiguration<Bill>> {
+                + void Configure(EntityTypeBuilder<Bill> builder)
+            }
+
+            package Users {
+                class BroadcasterConfiguration <Implements IEntityTypeConfiguration<Broadcaster>> {
+                    + void Configure(EntityTypeBuilder<Broadcaster> builder)
+                }
+
+                class BroadcasterCategoryConfiguration <IEntityTypeConfiguration<BroadcasterCategory>> {
+                    + void Configure(EntityTypeBuilder<BroadcasterCategory> builder)
+                }
+
+                class DemoConfiguration <IEntityTypeConfiguration<Demo>> {
+                    + void Configure(EntityTypeBuilder<Demo> builder)
+                }
+
+                class ClientConfiguration <IEntityTypeConfiguration<Client>> {
+                    + void Configure(EntityTypeBuilder<Client> builder)
+                }
+
+                class UserConfiguration <IEntityTypeConfiguration<User>> {
+                    + void Configure(EntityTypeBuilder<User> builder)
+                }
+
+                class AdministratorConfiguration <IEntityTypeConfiguration<Administrator>> {
+                    + void Configure(EntityTypeBuilder<Administrator> builder)
+                }
+
+                class AccountantConfiguration <IEntityTypeConfiguration<Accountant>> {
+                    + void Configure(EntityTypeBuilder<Accountant> builder)
+                }
+
+                class SupervisorConfiguration <IEntityTypeConfiguration<Supervisor>> {
+                    + void Configure(EntityTypeBuilder<Supervisor> builder)
+                }
+
+                class MembershipConfiguration <IEntityTypeConfiguration<Membership>> {
+                    + void Configure(EntityTypeBuilder<Membership> builder)
+                }
+
+                class NotificationConfiguration <IEntityTypeConfiguration<Notification>> {
+                    + void Configure(EntityTypeBuilder<Notification> builder)
+                }
+            }
+
+            package Services {
+                class BaseServiceConfiguration <IEntityTypeConfiguration<BaseService>> {
+                    + void Configure(EntityTypeBuilder<BaseService> builder)
+                }
+
+                class DateServiceConfiguration <IEntityTypeConfiguration<DateService>> {
+                    + void Configure(EntityTypeBuilder<DateService> builder)
+                }
+
+                class IvrServiceConfiguration <IEntityTypeConfiguration<IvrService>> {
+                    + void Configure(EntityTypeBuilder<IvrService> builder)
+                }
+
+                class RangeIvrConfiguration <IEntityTypeConfiguration<RangeIvr>> {
+                    + void Configure(EntityTypeBuilder<RangeIvr> builder)
+                }
+
+                class MultiServiceDiscountConfiguration <IEntityTypeConfiguration<MultiServiceDiscount>> {
+                    + void Configure(EntityTypeBuilder<MultiServiceDiscount> builder)
+                }
+
+                class NarrativeServiceConfiguration <IEntityTypeConfiguration<NarrativeService>> {
+                    + void Configure(EntityTypeBuilder<NarrativeService> builder)
+                }
+
+                class PeriodServiceConfiguration <IEntityTypeConfiguration<PeriodService>> {
+                    + void Configure(EntityTypeBuilder<PeriodService> builder)
+                }
+
+                class PeriodConfiguration <IEntityTypeConfiguration<Period>> {
+                    + void Configure(EntityTypeBuilder<Period> builder)
+                }
+
+                class PriceAdjustmentConfiguration <IEntityTypeConfiguration<PriceAdjustment>> {
+                    + void Configure(EntityTypeBuilder<PriceAdjustment> builder)
+                }
+
+                class VolumeDiscountConfiguration <IEntityTypeConfiguration<VolumeDiscount>> {
+                    + void Configure(EntityTypeBuilder<VolumeDiscount> builder)
+                }
+            }
+
+            package Contracts {
+                class CampaignConfiguration <IEntityTypeConfiguration<Campaign>> {
+                    + void Configure(EntityTypeBuilder<Campaign> builder)
+                }
+
+                class CampaignServiceConfiguration <IEntityTypeConfiguration<BaseCampaignService>> {
+                    + void Configure(EntityTypeBuilder<BaseCampaignService> builder)
+                }
+
+                class CampaignServiceDateConfiguration <IEntityTypeConfiguration<CampaignServiceDate>> {
+                    + void Configure(EntityTypeBuilder<CampaignServiceDate> builder)
+                }
+
+                class ContractConfiguration <IEntityTypeConfiguration<Contract>> {
+                    + void Configure(EntityTypeBuilder<Contract> builder)
+                }
+
+                class PieceConfiguration <IEntityTypeConfiguration<Piece>> {
+                    + void Configure(EntityTypeBuilder<Piece> builder)
+                }
+            }
+
+            package Common {
+                class AddressConfiguration <IEntityTypeConfiguration<Address>> {
+                    + void Configure(EntityTypeBuilder<Address> builder)
+                }
+
+                class CountryConfiguration <IEntityTypeConfiguration<Country>> {
+                    + void Configure(EntityTypeBuilder<Country> builder)
+                }
+
+                class DepartmentConfiguration <IEntityTypeConfiguration<Department>> {
+                    + void Configure(EntityTypeBuilder<Department> builder)
+                }
+
+                class LanguageConfiguration <IEntityTypeConfiguration<Language>> {
+                    + void Configure(EntityTypeBuilder<Language> builder)
+                }
+
+                class RegionConfiguration <IEntityTypeConfiguration<Region>> {
+                    + void Configure(EntityTypeBuilder<Region> builder)
+                }
+
+                class SkillConfiguration <IEntityTypeConfiguration<Skill>> {
+                    + void Configure(EntityTypeBuilder<Skill> builder)
+                }
+            }
+        }
+    }
+
+    package ExternalServices {
+        class AmazonS3Service <Implements IAmazonS3Service> {
+            {static} + readonly long MaxDemoFileSizeBytes = 5MB
+            {static} - readonly string[] ImageExtensions = [".jpg", ".jpeg", ".png", ".webp"]
+            {static} - readonly string[] AudioExtensions = [".mp3"]
+            {static} - string GetContentType(string extension)
+            {static} - string BuildKey(string prefix, string fileName)
+            - readonly IAmazonS3 _s3Client = s3Client
+            - readonly string _bucketName = config["AWS:BucketName"]!
+
+            + AmazonS3Service(IAmazonS3 s3Client, IConfiguration config)
+            + async Task<Result<(string, string)>> SaveBillProofAsync(string fileName, BillType type)
+            + async Task<string> SaveContractAsync(byte[] pdfBytes, int contractId)
+            + string GetDownloadUrl(string key, int expiryMinutes = 15)
+            + async Task<string> MoveContractToCancelledAsync(int contractId)
+            + Result<(string Key, string Url, IReadOnlyDictionary<string, string> Fields)> SaveDemoAsync(string fileName, int locutorId)
+            + async Task<Result> SaveDemoAsync(string key)
+            + string GetDemoPlaybackUrl(string key, int expiryMinutes = 30)
+            + async Task DeleteDemoAsync(string key)
+            + Result<(string Key, string UploadUrl)> SaveProfilePictureAsync(string fileName, int locutorId)
+            + string GetProfilePictureUrl(string key, int expiryMinutes = 15)
+            + async Task DeleteProfilePictureAsync(string key)
+            - string GetPreSignedPutUrl(string key, string contentType, TimeSpan expiresIn)
+        }
+
+        class GoogleAuthService <Implements IGoogleAuthService> {
+            + GoogleAuthService(HttpClient httpClient, IConfiguration config)
+            + async Task<GoogleUserInfo?> ExchangeCodeAsync(string code)
+            {static} - async Task<GoogleUserInfo?> ValidateGoogleTokenAsync(string token, string clientId)
+        }
+    }
+
+    package Repositories {
+        class AlpuServiceRepository <RepositoryBase<BaseService>(context), IAlpuServiceRepository> {
+            + AlpuServiceRepository(DatabaseContext context)
+            + IQueryable<BaseService> GetAllServices()
+            + IQueryable<VolumeDiscount> GetAllVolumeDiscounts()
+            + IQueryable<MultiServiceDiscount> GetAllMultiServiceDiscounts()
+            + IQueryable<PriceAdjustment> GetAllPriceAdjustments()
+            + async Task<BaseService?> GetServiceByIdAsync(int id)
+            + async Task<BaseService?> GetByType(ServiceType service, int? period = null)
+            + async Task<VolumeDiscount?> GetVolumeDiscountAsync(ServiceType type, int quantity)
+            + async Task<MultiServiceDiscount?> GetMultiMediaDiscountAsync(ServiceType typeA, ServiceType typeB)
+        }
+
+        class BillRepository <RepositoryBase<Bill>(context), IBillRepository> {
+            + BillRepository(DatabaseContext context)
+            + Bill CreateBill(Bill entity)
+            + IQueryable<Bill> GetAllBills()
+            + async Task<Bill?> GetBillByIdAsync(int id)
+            + void DeleteBill(Bill entity)
+        }
+
+        class BroadcasterRepository <RepositoryBase<Broadcaster>(context), IBroadcasterRepository> {
+            + BroadcasterRepository(DatabaseContext context)
+            + Broadcaster CreateBroadcaster(Broadcaster entity)
+            + IQueryable<Broadcaster> GetAllBroadcasters()
+            + async Task<Broadcaster?> GetBroadcasterByIdAsync(int id)
+            + async Task<Broadcaster?> GetBroadcasterWithSkillsAndLanguagesAsync(int id)
+            + async Task<BroadcasterCategory?> GetCategoryByIdAsync(int id)
+            + Broadcaster UpdateBroadcaster(Broadcaster entity)
+            + Broadcaster DeleteBroadcaster(Broadcaster entity)
+        }
+
+        class ClientRepository <RepositoryBase<Client>(context), IClientRepository> {
+            + ClientRepository(DatabaseContext context)
+            + Client CreateClient(Client entity) => Create(entity);
+            + Agency CreateAgency(Agency entity)
+            + IQueryable<Client> GetAllClients()
+            + async Task<Client?> GetClientByIdAsync(int id)
+            + async Task<Agency?> GetAgencyByIdAsync(int id)
+            + Client DeleteClient(Client client)
+            + async Task<Agency?> GetAgencyByNameAsync(string name)
+        }
+
+        class ContractRepository <RepositoryBase<Contract>(context), IContractRepository> {
+            + ContractRepository(DatabaseContext context)
+            + Contract CreateContract(Contract entity)
+            + IQueryable<Contract> GetAllContracts()
+            + async Task<Contract?> GetByIdAsync(int id)
+            + async Task<Contract> GetContractWithFullDetailsAsync(int id)
+            + async Task<int> CountByRootIdAsync(int rootContractId)
+        }
+
+        class CountryRepository <RepositoryBase<Country>(context), ICountryRepository> {
+            + CountryRepository(DatabaseContext context)
+            + IQueryable<Country> GetAllCountries()
+            + async Task<Country?> GetByCodeAsync(string code)
+        }
+
+        class DepartmentRepository <RepositoryBase<Department>(context), IDepartmentRepository> {
+            + DepartmentRepository(DatabaseContext context)
+            + IQueryable<Department> GetAllDepartments()
+            + async Task<Department?> GetByIdAsync(int id)
+        }
+
+        class LanguageRepository <RepositoryBase<Language>(context), ILanguageRepository> {
+            + LanguageRepository(DatabaseContext context)
+            + IQueryable<Language> GetAllLanguages()
+        }
+
+        class SkillRepository <RepositoryBase<Skill>(context), ISkillRepository> {
+            + SkillRepository(DatabaseContext context)
+            + IQueryable<Skill> GetAllSkills()
+        }
+
+        class UnitOfWork <Implements IUnitOfWork> {
+            + UnitOfWork(DatabaseContext context)
+            - readonly DatabaseContext _context = context
+            - IUserRepository? _users
+            - IBroadcasterRepository? _broadcasters
+            - IClientRepository? _clients
+            - ICountryRepository? _countries
+            - IDepartmentRepository? _departments
+            - IAlpuServiceRepository? _services
+            - IContractRepository? _contracts
+            - IBillRepository? _bills
+            - ILanguageRepository? _languages
+            - ISkillRepository? _skills
+            + IUserRepository Users
+            + IBroadcasterRepository Broadcasters
+            + IClientRepository Clients
+            + ICountryRepository Countries
+            + IDepartmentRepository Departments
+            + IAlpuServiceRepository Services
+            + IContractRepository Contracts
+            + IBillRepository Bills
+            + ILanguageRepository Languages
+            + ISkillRepository Skills
+            + void Attach<T>(T entity) <where T : class>
+            + async Task SaveChangesAsync()
+        }
+
+        class UserRepository <RepositoryBase<User>(context), IUserRepository> {
+            + UserRepository(DatabaseContext context)
+            + IQueryable<User> GetAllUsers()
+            + IQueryable<Client> GetAllClients()
+            + IQueryable<Broadcaster> GetAllBroadcasters()
+            + async Task<User?> GetUserByIdAsync(int id)
+            + User DeleteUser(User entity)
+            + Task<User?> GetUserByEmailAsync(string email)
+            + Task<User?> GetUserByRutAsync(string rut)
+            + Task<User?> GetUserByGoogleIdAsync(string googleId)
+        }
+    }
+
+    package Security {
+        class Hasher <Implements IHasher> {
+            + string Hash(string password)
+            + bool Verify(string password, string hashedPassword)
+        }
+
+        class JwtService <Implements IJwtService> {
+            - readonly IConfiguration _configuration = configuration
+            + JwtService(IConfiguration configuration)
+            + IReadOnlyDictionary<string, string> DecodeClaims(string token)
+            + string GenerateJWT(User user)
+            + JwtUserClaims GetUserClaims(ClaimsPrincipal principal)
+        }
+    }
+}

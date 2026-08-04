@@ -1,0 +1,105 @@
+' ==========================================================
+' Herencia de Inputs de autenticación (Common.Inputs.Auth)
+' ==========================================================
+CompleteGoogleSignUpUserInput <|-- CompleteGoogleSignUpBroadcasterInput
+CompleteGoogleSignUpUserInput <|-- CompleteGoogleSignUpClientInput
+RegisterUserInput <|-- RegisterBroadcasterInput
+RegisterUserInput <|-- RegisterClientInput
+
+' ==========================================================
+' Herencia de Options de servicios contratados (Common.Inputs.CampaignService)
+' ==========================================================
+BaseCampaignServiceOptions <|-- NarrativeCampaignServiceOptions
+BaseCampaignServiceOptions <|-- IvrCampaignServiceOptions
+BaseCampaignServiceOptions <|-- EventCampaignServiceOptions
+BaseCampaignServiceOptions <|-- PeriodCampaignServiceOptions
+PeriodCampaignServiceOptions <|-- TvCampaignServiceOptions
+PeriodCampaignServiceOptions <|-- CinemaCampaignServiceOptions
+PeriodCampaignServiceOptions <|-- InternetCampaignServiceOptions
+PeriodCampaignServiceOptions <|-- RadioCampaignServiceOptions
+PeriodCampaignServiceOptions <|-- OtherMediaCampaignServiceOptions
+PeriodCampaignServiceOptions <|-- CameraCampaignServiceOptions
+
+' ==========================================================
+' Herencia de Usuarios (TPT)
+' ==========================================================
+User <|-- Accountant
+User <|-- Administrator
+User <|-- Broadcaster
+User <|-- Client
+User <|-- Supervisor
+
+User "1" *-- "1" Address : Address
+User "1" *-- "*" Notification : Notifications
+
+' ==========================================================
+' Broadcaster
+' ==========================================================
+Broadcaster "*" o-- "1" BroadcasterCategory : Category
+Broadcaster "1" *-- "*" Demo : Demos
+Broadcaster "1" *-- "*" Membership : Memberships
+Broadcaster "*" -- "*" Skill : Skills
+Broadcaster "*" -- "*" Language : Languages
+
+' ==========================================================
+' Client / Agency
+' ==========================================================
+Client "*" o-- "1" Agency : Agency
+
+' ==========================================================
+' Address / catálogo geográfico
+' ==========================================================
+Address "*" o-- "1" Country : Country
+Address "*" o-- "1" Department : Department
+Country "*" o-- "1" Region : Region
+Country "1" o-- "*" Department : Departments
+
+' ==========================================================
+' Demo
+' ==========================================================
+Demo "*" o-- "1" Language : Language
+
+' ==========================================================
+' Núcleo de contratación
+' ==========================================================
+Contract "*" o-- "1" Client : Client
+Contract "*" o-- "1" Broadcaster : Broadcaster
+Contract "*" o-- "1" Country : Country
+Contract "1" *-- "*" Domain.Models.Campaign.Campaign : Campaigns
+Contract "1" *-- "*" Bill : Bills
+Contract "0..1" -- "0..1" Contract : ReplacesContract
+
+Domain.Models.Campaign.Campaign "1" *-- "*" BaseCampaignService : Services
+
+' ==========================================================
+' Jerarquía de servicios contratados (CU04)
+' Nota: se corrigió el sentido de 4 relaciones respecto de la
+' version anterior (PeriodCampaignService/Event/Ivr/Narrative
+' colgaban del padre incorrecto).
+' ==========================================================
+BaseCampaignService <|-- CampaignServiceDate
+CampaignServiceDate <|-- EventCampaignService
+CampaignServiceDate <|-- IvrCampaignService
+CampaignServiceDate <|-- NarrativeCampaignService
+BaseCampaignService <|-- PeriodCampaignService
+PeriodCampaignService <|-- CameraCampaignService
+PeriodCampaignService <|-- CinemaCampaignService
+PeriodCampaignService <|-- InternetCampaignService
+PeriodCampaignService <|-- OtherMediaCampaignService
+PeriodCampaignService <|-- RadioCampaignService
+PeriodCampaignService <|-- TvCampaignService
+
+BaseCampaignService "*" o-- "1" BaseService : Service
+BaseCampaignService "1" *-- "*" Piece : Pieces
+NarrativeCampaignService "*" o-- "1" NarrativeService : Service
+
+' ==========================================================
+' Catálogo de aranceles (BaseService) - distinto de lo contratado
+' ==========================================================
+BaseService <|-- DateService
+BaseService <|-- IvrService
+BaseService <|-- NarrativeService
+BaseService <|-- PeriodService
+
+IvrService "1" *-- "*" RangeIvr : RangeIvr
+PeriodService "1" *-- "*" Domain.Models.Services.Period : Periods

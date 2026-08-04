@@ -1,0 +1,17 @@
+' ==========================================================
+' Dependencias entre servicios (inyección por constructor)
+' Nota: las dependencias hacia interfaces de Domain (IJwtService,
+' IUnitOfWork, IEmailService, IHasher, etc.) y hacia DataAccess
+' (AmazonS3Service) no se dibujan acá porque viven en otro
+' diagrama - PlantUML no conecta clases entre archivos distintos.
+' ==========================================================
+Application.Services.ContractService ..> Application.Services.CampaignService : usa
+Application.Services.ContractService ..> Application.Services.UserService : usa
+Application.Services.UserService ..> Application.Services.LanguageService : usa
+Application.Services.UserService ..> Application.Services.SkillService : usa
+Application.Services.CampaignService ..> Application.Factories.CampaignServiceFactory : usa
+
+' Pistas de layout (no son relaciones reales, solo ordenan el diagrama)
+Application.Services.SkillService -[hidden]> Application.Services.LanguageService
+Application.Services.CountryService -[hidden]> Application.Services.DepartmentService
+Application.QuestPDF -[hidden]> Application.Common
