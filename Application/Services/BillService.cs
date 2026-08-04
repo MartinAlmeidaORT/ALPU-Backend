@@ -66,12 +66,12 @@ public class BillService(IUnitOfWork unitOfWork, AmazonS3Service amazonS3Service
                 {
                     await _userService.AddNotificationAsync(
                         newBill.Value.Contract.Client,
-                        $"Contrato {newBill.Value.Contract.ContractId} completado",
+                        $"Contrato {newBill.Value.Contract.ContractSerial} completado",
                         $"Se registro el pago final del contrato."
                     );
                     await _userService.AddNotificationAsync(
                         newBill.Value.Contract.Broadcaster,
-                        $"Contrato {newBill.Value.Contract.ContractId} completado",
+                        $"Contrato {newBill.Value.Contract.ContractSerial} completado",
                         $"Cliente {newBill.Value.Contract.Client.FullName} completo el pago del contrato."
                     );
                     newBill.Value.Contract.State = ContractState.Paid;

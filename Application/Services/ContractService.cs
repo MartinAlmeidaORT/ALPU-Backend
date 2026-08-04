@@ -120,11 +120,11 @@ public class ContractService(
             await _amazonS3Service.MoveContractToCancelledAsync(contract.ContractId);
             if (contract.Client.UserId != userId)
             {
-                await _userService.AddNotificationAsync(contract.Client, $"Cancelado el contrato: {contract.ContractId}", $"");
+                await _userService.AddNotificationAsync(contract.Client, $"Cancelado el contrato: {contract.ContractSerial}", $"");
             }
             if (contract.Broadcaster.UserId != userId)
             {
-                await _userService.AddNotificationAsync(contract.Broadcaster, $"Cancelado el contrato: {contract.ContractId}", $"");
+                await _userService.AddNotificationAsync(contract.Broadcaster, $"Cancelado el contrato: {contract.ContractSerial}", $"");
             }
         }
 
@@ -153,18 +153,18 @@ public class ContractService(
         if (contract.ClientId == userId)
         {
             contract.ClientApproved = true;
-            await _userService.AddNotificationAsync(contract.Broadcaster, $"Actualizacion contrato: {contract.ContractId}", $"Cliente {contract.Client.FullName} aprobo el contrato.");
+            await _userService.AddNotificationAsync(contract.Broadcaster, $"Actualizacion contrato: {contract.ContractSerial}", $"Cliente {contract.Client.FullName} aprobo el contrato.");
         }
         else
         {
             contract.BroadcasterApproved = true;
-            await _userService.AddNotificationAsync(contract.Client, $"Actualizacion contrato: {contract.ContractId}", $"Locutor {contract.Broadcaster.FullName} aprobo el contrato.");
+            await _userService.AddNotificationAsync(contract.Client, $"Actualizacion contrato: {contract.ContractSerial}", $"Locutor {contract.Broadcaster.FullName} aprobo el contrato.");
         }
 
         if (contract.BroadcasterApproved && contract.ClientApproved)
         {
-            await _userService.AddNotificationAsync(contract.Client, $"El contrato: {contract.ContractId} fue aprobado y esta activo", $"El contrato tiene vigencia hasta el {contract.DueDate}");
-            await _userService.AddNotificationAsync(contract.Broadcaster, $"El contrato: {contract.ContractId} fue aprobado y esta activo", $"El contrato tiene vigencia hasta el {contract.DueDate}");
+            await _userService.AddNotificationAsync(contract.Client, $"El contrato: {contract.ContractSerial} fue aprobado y esta activo", $"El contrato tiene vigencia hasta el {contract.DueDate}");
+            await _userService.AddNotificationAsync(contract.Broadcaster, $"El contrato: {contract.ContractSerial} fue aprobado y esta activo", $"El contrato tiene vigencia hasta el {contract.DueDate}");
             contract.State = ContractState.Active;
         }
 
@@ -194,8 +194,8 @@ public class ContractService(
         original.State = ContractState.Canceled;
         await _amazonS3Service.MoveContractToCancelledAsync(original.ContractId);
 
-        await _userService.AddNotificationAsync(original.Client, $"Contrato reemplazado: {original.ContractId}", "Se genero un nuevo contrato en su lugar.");
-        await _userService.AddNotificationAsync(original.Broadcaster, $"Contrato reemplazado: {original.ContractId}", "Se genero un nuevo contrato en su lugar.");
+        await _userService.AddNotificationAsync(original.Client, $"Contrato reemplazado: {original.ContractSerial}", "Se genero un nuevo contrato en su lugar.");
+        await _userService.AddNotificationAsync(original.Broadcaster, $"Contrato reemplazado: {original.ContractSerial}", "Se genero un nuevo contrato en su lugar.");
 
         return Result.Ok(original);
     }
