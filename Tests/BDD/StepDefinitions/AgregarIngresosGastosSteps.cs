@@ -5,7 +5,6 @@ using Domain.Enums;
 using Domain.Interfaces.Public.Services;
 using Domain.Common.Inputs;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http;
@@ -17,9 +16,9 @@ namespace Tests.BDD.StepDefinitions;
 [Binding]
 public class RegistrarFacturaSteps
 {
-    private readonly ScenarioContext _scenarioContext;
+    private const string SerialInexistente = "A";
+
     private readonly IBillService _billServiceMock;
-    private readonly IContractService _contractServiceMock;
     private readonly IUserService _userServiceMock;
 
     private BillInput _input = new();
@@ -27,11 +26,9 @@ public class RegistrarFacturaSteps
     private Exception? _excepcion;
     private IHttpContextAccessor _httpContextAccessor = null!;
 
-    public RegistrarFacturaSteps(ScenarioContext scenarioContext)
+    public RegistrarFacturaSteps()
     {
-        _scenarioContext = scenarioContext;
         _billServiceMock = Substitute.For<IBillService>();
-        _contractServiceMock = Substitute.For<IContractService>();
         _userServiceMock = Substitute.For<IUserService>();
 
         _userServiceMock
@@ -43,6 +40,13 @@ public class RegistrarFacturaSteps
             .Returns(callInfo =>
             {
                 var input = callInfo.Arg<BillInput>();
+
+                if (input.ContractSerial == SerialInexistente)
+                {
+                    return Task.FromResult(Result.Fail<RegisterBillPayload>(
+                        ContractErrors.ContractNotFound(input.ContractSerial)));
+                }
+
                 _registroGuardado = new Bill
                 {
                     BillId = 1,
@@ -51,20 +55,12 @@ public class RegistrarFacturaSteps
                     Date = input.Date,
                     Amount = input.Amount,
                     Type = input.Type,
-                    ContractId = input.ContractId
+                    ContractId = input.ContractSerial != null ? 1 : null
                 };
 
                 RegisterBillPayload payload = new(_registroGuardado, "");
                 return Task.FromResult(Result.Ok(payload));
             });
-
-        _contractServiceMock
-            .GetContractByIdAsync(1)
-            .Returns(new Contract { ContractId = 1 });
-
-        _contractServiceMock
-            .GetContractByIdAsync(Arg.Is<int>(id => id != 1))
-            .ReturnsNull();
     }
 
     // ─── Background ─────────────────────────────────────────────────────────────
@@ -123,7 +119,7 @@ public class RegistrarFacturaSteps
             Date = new DateOnly(2026, 5, 26),
             Amount = 8500m,
             Type = BillType.Income,
-            ContractId = 1
+            ContractSerial = "01ABC-12"
         };
 
         await EjecutarRegistro();
@@ -132,7 +128,7 @@ public class RegistrarFacturaSteps
     [When(@"se envía una solicitud para registrar una factura con un contrato inexistente")]
     public async Task WhenRegistrarFacturaContratoInexistente()
     {
-        _input = new BillInput { ContractId = 999 };
+        _input = new BillInput { ContractSerial = "A" };
         await EjecutarRegistro();
     }
 
@@ -183,14 +179,12 @@ public class RegistrarFacturaSteps
             if (rol is not ("administrador" or "contador" or "supervisor"))
                 throw new UnauthorizedAccessException();
 
-            if (_input.ContractId.HasValue)
-            {
-                var contrato = await _contractServiceMock
-                    .GetContractByIdAsync(_input.ContractId.Value)
-                    ?? throw new Exception("El contrato no existe");
-            }
+            Result<RegisterBillPayload> resultado = await _billServiceMock.RegisterBillAsync(_input);
 
-            await _billServiceMock.RegisterBillAsync(_input);
+            if (resultado.IsFailed)
+            {
+                throw new Exception(string.Join("; ", resultado.Errors.Select(e => e.Message)));
+            }
 
             if (_registroGuardado?.ContractId != null)
             {
