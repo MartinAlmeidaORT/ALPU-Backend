@@ -74,6 +74,11 @@ public class AuthService(
             return UserErrors.DuplicatedEmail(input.Email);
         }
 
+        if (input.IdentityCard != null && unitOfWork.Users.GetAllUsers().Any(u => u.IdentityCard == input.IdentityCard))
+        {
+            return UserErrors.DuplicatedIdentityCard(input.IdentityCard);
+        }
+
         if (country is null) return CountryErrors.CountryNotFound(input.CountryCode);
         if (department is null) return DepartmentErrors.DepartmentNotFound(input.DepartmentId);
 
@@ -150,6 +155,11 @@ public class AuthService(
             return UserErrors.DuplicatedEmail(input.Email);
         }
 
+        if (input.IdentityCard != null && unitOfWork.Users.GetAllUsers().Any(u => u.IdentityCard == input.IdentityCard))
+        {
+            return UserErrors.DuplicatedIdentityCard(input.IdentityCard);
+        }
+
         Result<Broadcaster> result = Broadcaster.SignUpFromGoogle(input, country, department, category);
         if (result.IsFailed) return result.ToResult<AuthPayload>();
 
@@ -178,6 +188,11 @@ public class AuthService(
         if (await unitOfWork.Users.GetUserByEmailAsync(input.Email) != null)
         {
             return UserErrors.DuplicatedEmail(input.Email);
+        }
+
+        if (input.IdentityCard != null && unitOfWork.Users.GetAllUsers().Any(u => u.IdentityCard == input.IdentityCard))
+        {
+            return UserErrors.DuplicatedIdentityCard(input.IdentityCard);
         }
 
         Result<Client> result = Client.SignUpFromGoogle(input, country, department, agency);
