@@ -216,7 +216,9 @@ public class ContractService(
         if (alreadyReplaced) return Result.Fail(ContractErrors.ContractAlreadyReplaced(contractId));
 
         original.State = ContractState.Canceled;
-        await _amazonS3Service.MoveContractToCancelledAsync(original.ContractId);
+        original.PdfAmazonS3Key = await _amazonS3Service.MoveContractToCancelledAsync(original.ContractId);
+
+        await _unitOfWork.SaveChangesAsync();
 
         await _userService.AddNotificationAsync(original.Client, $"Contrato reemplazado: {original.ContractSerial}", "Se genero un nuevo contrato en su lugar.");
         await _userService.AddNotificationAsync(original.Broadcaster, $"Contrato reemplazado: {original.ContractSerial}", "Se genero un nuevo contrato en su lugar.");
